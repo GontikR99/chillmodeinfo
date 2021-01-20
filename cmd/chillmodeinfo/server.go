@@ -2,17 +2,20 @@ package main
 
 import (
 	"github.com/GontikR99/chillmodeinfo/web/static"
+	"github.com/NYTimes/gziphandler"
 	"log"
 	"net/http"
 )
 
 func main() {
-	mux := http.NewServeMux()
-	mux.Handle("/", http.FileServer(static.StaticFiles))
+	baseMux := http.NewServeMux()
+	baseMux.Handle("/", http.FileServer(static.StaticFiles))
+
+	muxWithGzip := gziphandler.GzipHandler(baseMux)
 
 	server := &http.Server{
 		Addr:    ":8123",
-		Handler: mux,
+		Handler: muxWithGzip,
 	}
 
 	log.Println("Server start")

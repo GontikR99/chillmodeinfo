@@ -1,3 +1,6 @@
+# github.com/NYTimes/gziphandler v1.1.1
+## explicit
+github.com/NYTimes/gziphandler
 # github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749
 ## explicit
 github.com/shurcooL/httpfs/vfsutil
@@ -15,8 +18,6 @@ github.com/vugu/vjson
 ## explicit
 github.com/vugu/vugu
 github.com/vugu/vugu/cmd/vugugen
-github.com/vugu/vugu/devutil
-github.com/vugu/vugu/distutil
 github.com/vugu/vugu/domrender
 github.com/vugu/vugu/gen
 github.com/vugu/vugu/js

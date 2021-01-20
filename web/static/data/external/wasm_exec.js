@@ -297,7 +297,7 @@
 							() => {
 								this._resume();
 								while (this._scheduledTimeouts.has(id)) {
-									// for some reason Go failed to register the timeout event, log and try again
+									// for some reason Go failed to register the timeout event, slog and try again
 									// (temporary workaround for https://github.com/golang/go/issues/28975)
 									console.warn("scheduleTimeoutEvent: missed timeout event");
 									this._resume();

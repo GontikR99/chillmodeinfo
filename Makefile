@@ -6,7 +6,7 @@ bin/chillmodeinfo: web/static/staticfiles_vfsdata.go $(shell find cmd/chillmodei
 	go build -o $@ ./cmd/chillmodeinfo
 
 web/static/data/chillmodeinfo.wasm: $(shell find web/app -type f)
-	go run -mod=vendor github.com/vugu/vugu/cmd/vugugen -s -skip-go-mod -skip-main web/app
+	go run -mod=vendor github.com/vugu/vugu/cmd/vugugen -s -r -skip-go-mod -skip-main web/app
 	#GOOS=js GOARCH=wasm tinygo build -o $@ ./web/app
 	GOOS=js GOARCH=wasm go build -o $@ ./web/app
 
@@ -17,5 +17,5 @@ clean:
 	rm -f bin/* \
 		web/static/staticfiles_vfsdata.go \
 		web/static/data/chillmodeinfo.wasm \
-		web/app/0_components_vgen.go 
+		$(shell find web/app -name 0_components_vgen.go)
 

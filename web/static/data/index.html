@@ -10,7 +10,7 @@
     <title>Chill Mode</title>
 </head>
 <body>
-<div id="vugu_mount_point">
+<div id="page_root">
     <img style="position: absolute; top: 50%; left: 50%;" src="https://cdnjs.cloudflare.com/ajax/libs/galleriffic/2.0.1/css/loader.gif">
 </div>
 
@@ -38,14 +38,14 @@
                 });
             } else {
                 res.text().then(function(txt) {
-                    var el = document.getElementById("vugu_mount_point");
+                    var el = document.getElementById("page_root");
                     el.style = 'font-family: monospace; background: black; color: red; padding: 10px';
                     el.innerText = txt;
                 })
             }
         })
     } else {
-        document.getElementById("vugu_mount_point").innerHTML = 'This application requires WebAssembly support.  Please upgrade your browser.';
+        document.getElementById("page_root").innerHTML = 'This application requires WebAssembly support.  Please upgrade your browser.';
     }
 </script>
 </body>

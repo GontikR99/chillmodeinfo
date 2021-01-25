@@ -3,3 +3,6 @@ bin
 web/static/staticfiles_vfsdata.go
 web/static/data/chillmodeinfo.wasm
 web/app**/0_components_vgen.go
+node_modules
+build
+out/

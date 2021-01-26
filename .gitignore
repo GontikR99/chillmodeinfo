@@ -3,6 +3,8 @@ bin
 web/static/staticfiles_vfsdata.go
 web/static/data/chillmodeinfo.wasm
 web/app**/0_components_vgen.go
-node_modules
-build
-out/
+electron/node_modules
+electron/.electron
+electron/src
+build/
+electron/out/

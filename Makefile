@@ -1,18 +1,27 @@
-.PHONY: all clean start
+.PHONY: all clean start package server
 
-$(shell mkdir -p bin build/electron >/dev/null 2>&1 || true)
+$(shell mkdir -p bin electron/src >/dev/null 2>&1 || true)
 
-all: bin/chillmodeinfo.exe ;
+all: server package;
 
-start: web/exe/main.js web/static/data/chillmodeinfo.wasm build/electron/main.wasm build/electron/main.wasm
-	cp web/exe/main.js build/electron
-	cp -r web/static/data/* build/electron
-	npm start
+server: bin/chillmodeinfo.exe
+
+start: electron/.electron
+	cd electron && npm start
+
+package: electron/.electron
+	cd electron && npm run make
+
+electron/.electron: web/exe/main.js web/static/data/chillmodeinfo.wasm bin/main.wasm
+	cp bin/main.wasm electron/src
+	cp web/exe/main.js electron/src
+	cp -r web/static/data/* electron/src
+	touch $@
 
 bin/chillmodeinfo.exe: web/static/staticfiles_vfsdata.go $(shell find cmd/chillmodeinfo -type f) $(shell find internal -type f)
 	go build -o $@ ./cmd/chillmodeinfo
 
-build/electron/main.wasm: $(shell find web/exe -name \*.go) $(shell find internal -type f)
+bin/main.wasm: $(shell find web/exe -name \*.go) $(shell find internal -type f)
 	GOOS=js GOARCH=wasm go build -o $@ ./web/exe
 
 web/static/data/chillmodeinfo.wasm: $(shell find web/app -type f) $(shell find internal -type f)
@@ -28,6 +37,8 @@ clean:
 		out \
 		bin/* \
 		build/* \
+		electron/.electron \
+		electron/src/* \
 		web/static/staticfiles_vfsdata.go \
 		web/static/data/chillmodeinfo.wasm \
 		web/exe/main.wasm \

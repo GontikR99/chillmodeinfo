@@ -5,69 +5,32 @@ package main
 import (
 	"context"
 	"fmt"
-	"syscall/js"
+	"github.com/GontikR99/chillmodeinfo/internal/electron/application"
+	"github.com/GontikR99/chillmodeinfo/internal/electron/browserwindow"
+	"github.com/GontikR99/chillmodeinfo/internal/nodejs"
 )
-
-func consoleLog(items ...interface{}) {
-	js.Global().Get("console").Call("log", items...)
-}
-
-func require(path string) js.Value {
-	return js.Global().Call("require", path)
-}
-
-var electron = require("electron")
-var browserWindow = electron.Get("BrowserWindow")
-var app = electron.Get("app")
-
-var nodePath = require("path")
-var nodeRoot = js.Global().Get("rootDir").String()
-
-func nodePathJoin(parts ...string) string {
-	var args []interface{}
-	for _, part := range parts {
-		args = append(args, part)
-	}
-	return nodePath.Call("join", args...).String()
-}
-
-func singleShot(fn func()) js.Func {
-	var fnwrap js.Func
-	fnwrap=js.FuncOf(func(_ js.Value, _ []js.Value)interface{} {
-		fnwrap.Release()
-		fn()
-		return nil
-	})
-	return fnwrap
-}
 
 func main() {
 	defer func(){
 		if err := recover(); err!=nil {
-			consoleLog(fmt.Sprint(err))
+			nodejs.ConsoleLog(fmt.Sprint(err))
 			panic(err)
 		}
 	}()
 
 	appCtx, exitApp := context.WithCancel(context.Background())
 
-	js.Global().Get("eventBarriers").Get("ready").Call("onSignal", singleShot(func() {
-		mainWindow := browserWindow.New(map[string]interface{}{
-			"width":  int(1024),
-			"height": int(600),
-			"show": false,
+	application.OnReady(func() {
+		mainWindow := browserwindow.New(browserwindow.NewConf().
+			WithWidth(1024).
+			WithHeight(600).
+			WithShow(false))
+		mainWindow.Once("ready-to-show", func() {
+			mainWindow.RemoveMenu()
+			mainWindow.Show()
 		})
-
-		mainWindow.Call("once", "ready-to-show", singleShot(func() {
-			mainWindow.Call("removeMenu")
-			mainWindow.Call("show")
-		}))
-
-		mainWindow.Call("on", "closed", singleShot(func() {
-			exitApp()
-		}))
-
-		mainWindow.Call("loadFile", nodePathJoin(nodeRoot, "index.html"))
+		mainWindow.Once("closed", exitApp)
+		mainWindow.LoadFile("index.html")
 
 		//overlayWindow := browserWindow.New(map[string]interface{} {
 		//	"width": int(400),
@@ -84,12 +47,12 @@ func main() {
 		//}))
 		//
 		//overlayWindow.Call("loadFile", nodePathJoin(nodeRoot, "overlay.html"))
-	}))
+	})
 
-	app.Call("on", "window-all-closed", singleShot(exitApp))
+	application.OnWindowAllClosed(exitApp)
 
 	<-appCtx.Done()
-	app.Call("quit")
+	application.Quit()
 
 	<-context.Background().Done()
 }

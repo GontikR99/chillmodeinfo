@@ -1,7 +1,7 @@
 bin
 .idea
 web/static/staticfiles_vfsdata.go
-web/static/data/chillmodeinfo.wasm
+web/static/data/app.wasm
 web/app**/0_components_vgen.go
 electron/node_modules
 electron/.electron

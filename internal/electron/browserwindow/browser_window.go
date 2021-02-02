@@ -5,8 +5,8 @@ package browserwindow
 import (
 	"encoding/json"
 	"github.com/GontikR99/chillmodeinfo/internal/electron"
-	"github.com/GontikR99/chillmodeinfo/internal/electron/ipc"
 	"github.com/GontikR99/chillmodeinfo/internal/electron/ipc/ipcmain"
+	"github.com/GontikR99/chillmodeinfo/internal/rpc"
 	"io"
 	"syscall/js"
 )
@@ -15,7 +15,7 @@ var browserWindow = electron.Get().Get("BrowserWindow")
 
 type BrowserWindow interface {
 	io.Closer
-	ipc.Endpoint
+	rpc.Endpoint
 
 	RemoveMenu()
 	Show()
@@ -144,9 +144,9 @@ func (bw *electronBrowserWindow) SetAlwaysOnTop(b bool) {
 }
 
 func (bw *electronBrowserWindow) Send(channelName string, content []byte) {
-	bw.webContents.Call("send", ipc.Prefix+channelName, string(content))
+	bw.webContents.Call("send", rpc.Prefix+channelName, string(content))
 }
 
-func (bw *electronBrowserWindow) Listen(channelName string) <-chan ipc.Message {
+func (bw *electronBrowserWindow) Listen(channelName string) <-chan rpc.Message {
 	return ipcmain.Listen(channelName)
 }

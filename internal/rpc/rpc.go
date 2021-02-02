@@ -1,6 +1,6 @@
-package ipc
+package rpc
 
-const Prefix ="golang-ipc-"
+const Prefix ="golang-rpc-"
 
 type Message interface {
 	Content() []byte

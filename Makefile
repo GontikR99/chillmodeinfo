@@ -12,9 +12,9 @@ start: electron/.electron
 package: electron/.electron
 	cd electron && npm run make
 
-electron/.electron: web/exe/main.js web/exe/preload.js web/static/data/app.wasm bin/main.wasm
-	cp bin/main.wasm electron/src
-	cp web/exe/main.js electron/src
+electron/.electron: web/exe/exe.js web/exe/preload.js web/static/data/app.wasm bin/exe.wasm
+	cp bin/exe.wasm electron/src
+	cp web/exe/exe.js electron/src
 	cp web/exe/preload.js electron/src
 	cp -r web/static/data/* electron/src
 	touch $@
@@ -22,7 +22,7 @@ electron/.electron: web/exe/main.js web/exe/preload.js web/static/data/app.wasm 
 bin/chillmodeinfo.exe: web/static/staticfiles_vfsdata.go $(shell find cmd/chillmodeinfo -type f) $(shell find internal -type f)
 	go build -o $@ ./cmd/chillmodeinfo
 
-bin/main.wasm: $(shell find web/exe -name \*.go) $(shell find internal -type f)
+bin/exe.wasm: $(shell find web/exe -name \*.go) $(shell find internal -type f)
 	GOOS=js GOARCH=wasm go build -o $@ ./web/exe
 
 web/static/data/app.wasm: $(shell find web/app -type f) $(shell find internal -type f)

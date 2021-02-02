@@ -8,11 +8,11 @@ import (
 type NavLink struct {
 	Icon        string
 	DisplayName string
-	Place string
+	Place       string
 }
 
 func (c *NavLink) classText() string {
-	if place.GetPlace()==c.Place {
+	if place.GetPlace() == c.Place {
 		return "nav-link active"
 	} else {
 		return "nav-link"

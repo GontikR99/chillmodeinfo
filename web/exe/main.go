@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"github.com/GontikR99/chillmodeinfo/internal/electron/application"
 	"github.com/GontikR99/chillmodeinfo/internal/electron/browserwindow"
+	"github.com/GontikR99/chillmodeinfo/internal/electron/ipc/ipcmain"
 	"github.com/GontikR99/chillmodeinfo/internal/nodejs"
+	"github.com/GontikR99/chillmodeinfo/internal/nodejs/path"
 )
 
 func main() {
@@ -20,17 +22,31 @@ func main() {
 
 	appCtx, exitApp := context.WithCancel(context.Background())
 
+	pingChan := ipcmain.Listen("pings")
+	go func() {
+		for {
+			msg := <- pingChan
+			nodejs.ConsoleLog(string(msg.Content()))
+		}
+	}()
+
 	application.OnReady(func() {
-		mainWindow := browserwindow.New(browserwindow.NewConf().
-			WithWidth(1024).
-			WithHeight(600).
-			WithShow(false))
+		mainWindow := browserwindow.New(browserwindow.Conf{
+			Width:  1024,
+			Height: 600,
+			Show:   false,
+			WebPreferences: &browserwindow.WebPreferences{
+				Preload: path.Join(application.GetAppPath(), "src/preload.js"),
+				NodeIntegration: false,
+				ContextIsolation: true,
+			},
+		})
 		mainWindow.Once("ready-to-show", func() {
 			mainWindow.RemoveMenu()
 			mainWindow.Show()
 		})
 		mainWindow.Once("closed", exitApp)
-		mainWindow.LoadFile("index.html")
+		mainWindow.LoadFile(path.Join(application.GetAppPath(), "src/index.html"))
 
 		//overlayWindow := browserWindow.New(map[string]interface{} {
 		//	"width": int(400),

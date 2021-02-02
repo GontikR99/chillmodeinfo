@@ -36,7 +36,6 @@
     async function run() {
         const go = new Go();
         const mod = await WebAssembly.compile(fs.readFileSync(path.join(__dirname, 'main.wasm')));
-        global.rootDir = __dirname;
         let inst = await WebAssembly.instantiate(mod, go.importObject);
         go.run(inst);
     }

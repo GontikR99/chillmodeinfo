@@ -12,9 +12,10 @@ start: electron/.electron
 package: electron/.electron
 	cd electron && npm run make
 
-electron/.electron: web/exe/main.js web/static/data/chillmodeinfo.wasm bin/main.wasm
+electron/.electron: web/exe/main.js web/exe/preload.js web/static/data/app.wasm bin/main.wasm
 	cp bin/main.wasm electron/src
 	cp web/exe/main.js electron/src
+	cp web/exe/preload.js electron/src
 	cp -r web/static/data/* electron/src
 	touch $@
 
@@ -24,11 +25,11 @@ bin/chillmodeinfo.exe: web/static/staticfiles_vfsdata.go $(shell find cmd/chillm
 bin/main.wasm: $(shell find web/exe -name \*.go) $(shell find internal -type f)
 	GOOS=js GOARCH=wasm go build -o $@ ./web/exe
 
-web/static/data/chillmodeinfo.wasm: $(shell find web/app -type f) $(shell find internal -type f)
+web/static/data/app.wasm: $(shell find web/app -type f) $(shell find internal -type f)
 	go run -mod=vendor github.com/vugu/vugu/cmd/vugugen -s -r -skip-go-mod -skip-main web/app
 	GOOS=js GOARCH=wasm go build -o $@ ./web/app
 
-web/static/staticfiles_vfsdata.go: $(shell find web/static/data -type f) web/static/data/chillmodeinfo.wasm
+web/static/staticfiles_vfsdata.go: $(shell find web/static/data -type f) web/static/data/app.wasm
 	go generate -tags=dev ./web/static
 
 clean:
@@ -40,7 +41,7 @@ clean:
 		electron/src/* \
 		electron/out \
 		web/static/staticfiles_vfsdata.go \
-		web/static/data/chillmodeinfo.wasm \
+		web/static/data/app.wasm \
 		web/exe/main.wasm \
 		$(shell find web/app -name 0_components_vgen.go)
 

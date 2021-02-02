@@ -13,22 +13,22 @@ import (
 
 type Root struct {
 	LastPlace string
-	Body vugu.Builder
+	Body      vugu.Builder
 }
 
 type routeEntry struct {
-	Place string
+	Place       string
 	DisplayName string
-	Icon string
-	BodyGen func()vugu.Builder
+	Icon        string
+	BodyGen     func() vugu.Builder
 }
 
-var routes =[]routeEntry{
-	{"", "", "", func()vugu.Builder{return &home.Home{}}},
-	{"login", "", "", func()vugu.Builder{return &login.Login{}}},
-	{"register", "", "", func()vugu.Builder{return &login.Register{}}},
-	{"leaderboard", "Leaderboard", "target", func()vugu.Builder{return &leaderboard.Leaderboard{}}},
-	{"admin", "Admin", "terminal", func()vugu.Builder{return &admin.Admin{}}},
+var routes = []routeEntry{
+	{"", "", "", func() vugu.Builder { return &home.Home{} }},
+	{"login", "", "", func() vugu.Builder { return &login.Login{} }},
+	{"register", "", "", func() vugu.Builder { return &login.Register{} }},
+	{"leaderboard", "Leaderboard", "target", func() vugu.Builder { return &leaderboard.Leaderboard{} }},
+	{"admin", "Admin", "terminal", func() vugu.Builder { return &admin.Admin{} }},
 }
 
 func (c *Root) Init(ctx vugu.InitCtx) {
@@ -37,11 +37,11 @@ func (c *Root) Init(ctx vugu.InitCtx) {
 
 func (c *Root) Compute(ctx vugu.ComputeCtx) {
 	curPlace := place.GetPlace()
-	if curPlace==c.LastPlace {
+	if curPlace == c.LastPlace {
 		return
 	}
 	for _, route := range routes {
-		if route.Place==curPlace {
+		if route.Place == curPlace {
 			c.Body = route.BodyGen()
 			c.LastPlace = curPlace
 			return

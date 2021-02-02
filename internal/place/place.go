@@ -3,6 +3,7 @@
 package place
 
 import (
+	"github.com/GontikR99/chillmodeinfo/internal/electron/ipc/ipcrenderer"
 	"github.com/vugu/vugu"
 	"github.com/vugu/vugu/js"
 	"log"
@@ -20,6 +21,8 @@ func GetPlace() string {
 }
 
 func NavigateTo(env vugu.EventEnv, place string) {
+	ipcrenderer.Send("pings", []byte("Going to "+place))
+
 	go func() {
 		env.Lock()
 		defer env.UnlockRender()

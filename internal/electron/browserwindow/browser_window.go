@@ -1,18 +1,22 @@
+// +build wasm
+
 package browserwindow
 
 import (
 	"encoding/json"
 	"github.com/GontikR99/chillmodeinfo/internal/electron"
-	"github.com/GontikR99/chillmodeinfo/internal/nodejs"
+	"github.com/GontikR99/chillmodeinfo/internal/electron/ipc"
+	"github.com/GontikR99/chillmodeinfo/internal/electron/ipc/ipcmain"
 	"io"
 	"syscall/js"
 )
 
 var browserWindow = electron.Get().Get("BrowserWindow")
-var nodePath = nodejs.Require("path")
 
 type BrowserWindow interface {
 	io.Closer
+	ipc.Endpoint
+
 	RemoveMenu()
 	Show()
 	LoadFile(path string)
@@ -23,73 +27,72 @@ type BrowserWindow interface {
 
 type electronBrowserWindow struct {
 	browserWindow js.Value
-	callbacks map[int]js.Func
-	nextCallback int
+	webContents js.Value
+
+	callbacks     map[int]js.Func
+	nextCallback  int
+}
+
+type WebPreferences struct {
+	Preload interface{} `json:"preload"`
+	ContextIsolation interface{} `json:"contextIsolation"`
+	NodeIntegration interface{} `json:"nodeIntegration"`
 }
 
 type Conf struct {
-	Width int `json:"width"`
-	Height int `json:"height"`
-	Show bool `json:"show"`
-	Transparent bool `json:"transparent"`
-	Frame bool `json:"frame"`
+	Width       interface{}  `json:"width"`
+	Height      interface{}  `json:"height"`
+	Show        interface{} `json:"show"`
+	Transparent interface{} `json:"transparent"`
+	Frame       interface{} `json:"frame"`
+	WebPreferences *WebPreferences `json:"webPreferences"`
 }
 
-func NewConf() *Conf {
-	return &Conf{
-		Width:       1024,
-		Height:      768,
-		Show:        true,
-		Transparent: false,
-		Frame:       true,
+func trimPrefs(prefMap *map[string]interface{}) {
+	var trimKeys []string
+	for k,v := range *prefMap {
+		if v==nil {
+			trimKeys = append(trimKeys, k)
+		}
+		if submap, ok :=v.(map[string]interface{}); ok {
+			trimPrefs(&submap)
+			(*prefMap)[k]=submap
+		}
+	}
+
+	for _, k := range trimKeys {
+		delete(*prefMap, k)
 	}
 }
 
-func (bwc *Conf) WithWidth(width int) *Conf {
-	bwc.Width=width
-	return bwc
-}
-
-func (bwc *Conf) WithHeight(height int) *Conf {
-	bwc.Height=height
-	return bwc
-}
-
-func (bwc *Conf) WithShow(show bool) *Conf {
-	bwc.Show=show
-	return bwc
-}
-
-func (bwc *Conf) WithTransparent(transparent bool) *Conf {
-	bwc.Transparent=transparent
-	return bwc
-}
-
-func (bwc *Conf) WithFrame(frame bool) *Conf {
-	bwc.Frame=frame
-	return bwc
-}
-
-func New(conf *Conf) BrowserWindow {
+func New(conf Conf) BrowserWindow {
 	data, err := json.Marshal(conf)
-	if err!=nil {
+	if err != nil {
 		panic(err)
 	}
-	jsv := js.Global().Get("JSON").Call("parse", string(data))
+	parsed:=make(map[string]interface{})
+	err = json.Unmarshal(data, &parsed)
+	if err != nil {
+		panic(err)
+	}
+	trimPrefs(&parsed)
+	browserWindowInstance :=browserWindow.New(parsed)
+
 	return &electronBrowserWindow{
-		browserWindow: browserWindow.New(jsv),
+		browserWindow: browserWindowInstance,
+		webContents: browserWindowInstance.Get("webContents"),
 		callbacks:     make(map[int]js.Func),
 		nextCallback:  0,
 	}
 }
 
 func (bw *electronBrowserWindow) registerCallback(callback func()) (int, js.Func) {
-	wrapped := js.FuncOf(func(this js.Value, args []js.Value)interface{} {
+	wrapped := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		callback()
 		return nil
 	})
 	bw.nextCallback++
-	bw.callbacks[bw.nextCallback]=wrapped
+	bw.callbacks[bw.nextCallback] = wrapped
 	return bw.nextCallback, wrapped
 }
 
@@ -103,7 +106,7 @@ func (bw *electronBrowserWindow) singleshotCallback(callback func()) js.Func {
 			delete(bw.callbacks, *cbLoc)
 		}
 	})
-	*cbLoc=cbId
+	*cbLoc = cbId
 	return wrapped
 }
 
@@ -111,7 +114,7 @@ func (bw *electronBrowserWindow) Close() error {
 	for _, w := range bw.callbacks {
 		w.Release()
 	}
-	bw.callbacks=make(map[int]js.Func)
+	bw.callbacks = make(map[int]js.Func)
 	return nil
 }
 
@@ -124,7 +127,7 @@ func (bw *electronBrowserWindow) Show() {
 }
 
 func (bw *electronBrowserWindow) LoadFile(path string) {
-	bw.browserWindow.Call("loadFile", nodePath.Call("join", electron.RootDirectory(), path))
+	bw.browserWindow.Call("loadFile", path)
 }
 
 func (bw *electronBrowserWindow) Once(eventName string, action func()) {
@@ -138,4 +141,12 @@ func (bw *electronBrowserWindow) On(eventName string, action func()) {
 
 func (bw *electronBrowserWindow) SetAlwaysOnTop(b bool) {
 	bw.browserWindow.Call("setAlwaysOnTop", b)
+}
+
+func (bw *electronBrowserWindow) Send(channelName string, content []byte) {
+	bw.webContents.Call("send", ipc.Prefix+channelName, string(content))
+}
+
+func (bw *electronBrowserWindow) Listen(channelName string) <-chan ipc.Message {
+	return ipcmain.Listen(channelName)
 }

@@ -13,6 +13,10 @@ func Quit() {
 	app.Call("quit")
 }
 
+func GetAppPath() string {
+	return app.Call("getAppPath").String()
+}
+
 func On(eventName string, handler func(event js.Value)) {
 	app.Call("on", eventName, js.FuncOf(func(_ js.Value, args []js.Value)interface{} {
 		handler(args[0])

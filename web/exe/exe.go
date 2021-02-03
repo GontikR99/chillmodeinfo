@@ -5,35 +5,27 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/GontikR99/chillmodeinfo/internal/console"
 	"github.com/GontikR99/chillmodeinfo/internal/electron/application"
 	"github.com/GontikR99/chillmodeinfo/internal/electron/browserwindow"
-	"github.com/GontikR99/chillmodeinfo/internal/electron/ipc/ipcmain"
-	"github.com/GontikR99/chillmodeinfo/internal/nodejs"
 	"github.com/GontikR99/chillmodeinfo/internal/nodejs/path"
+	"github.com/GontikR99/chillmodeinfo/web/exe/exerpcs"
 )
 
 func main() {
 	defer func(){
 		if err := recover(); err!=nil {
-			nodejs.ConsoleLog(fmt.Sprint(err))
+			console.Log(fmt.Sprint(err))
 			panic(err)
 		}
 	}()
 
 	appCtx, exitApp := context.WithCancel(context.Background())
 
-	pingChan := ipcmain.Listen("pings")
-	go func() {
-		for {
-			msg := <- pingChan
-			nodejs.ConsoleLog(string(msg.Content()))
-		}
-	}()
-
 	application.OnReady(func() {
 		mainWindow := browserwindow.New(browserwindow.Conf{
-			Width:  1024,
-			Height: 600,
+			Width:  1600,
+			Height: 800,
 			Show:   false,
 			WebPreferences: &browserwindow.WebPreferences{
 				Preload: path.Join(application.GetAppPath(), "src/preload.js"),
@@ -41,11 +33,13 @@ func main() {
 				ContextIsolation: true,
 			},
 		})
+		mainWindow.OnClosed(exitApp)
+		mainWindow.ServeRPC(exerpcs.NewServer())
+
 		mainWindow.Once("ready-to-show", func() {
-			mainWindow.RemoveMenu()
+			//mainWindow.RemoveMenu()
 			mainWindow.Show()
 		})
-		mainWindow.Once("closed", exitApp)
 		mainWindow.LoadFile(path.Join(application.GetAppPath(), "src/index.html"))
 
 		//overlayWindow := browserWindow.New(map[string]interface{} {

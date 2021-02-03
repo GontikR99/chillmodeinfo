@@ -1,4 +1,4 @@
-// +build wasm
+// +build wasm,electron
 
 package electron
 

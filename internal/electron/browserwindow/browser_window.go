@@ -1,13 +1,16 @@
-// +build wasm
+// +build wasm,electron
 
 package browserwindow
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"github.com/GontikR99/chillmodeinfo/internal/electron"
 	"github.com/GontikR99/chillmodeinfo/internal/electron/ipc/ipcmain"
-	"github.com/GontikR99/chillmodeinfo/internal/rpc"
+	"github.com/GontikR99/chillmodeinfo/internal/msgcomm"
 	"io"
+	"net/rpc"
+	"strconv"
 	"syscall/js"
 )
 
@@ -15,20 +18,30 @@ var browserWindow = electron.Get().Get("BrowserWindow")
 
 type BrowserWindow interface {
 	io.Closer
-	rpc.Endpoint
+	msgcomm.Endpoint
 
 	RemoveMenu()
 	Show()
 	LoadFile(path string)
+
+	Id() int
+
 	On(eventName string, action func())
 	Once(eventName string, action func())
+
 	SetAlwaysOnTop(bool)
+
+	// Additions
+	OnClosed(action func())
+	ServeRPC(server *rpc.Server)
+	JSValue() js.Value
 }
 
 type electronBrowserWindow struct {
 	browserWindow js.Value
 	webContents js.Value
 
+	closedCallbacks []func()
 	callbacks     map[int]js.Func
 	nextCallback  int
 }
@@ -76,14 +89,25 @@ func New(conf Conf) BrowserWindow {
 		panic(err)
 	}
 	trimPrefs(&parsed)
-	browserWindowInstance :=browserWindow.New(parsed)
+	browserWindowInternal :=browserWindow.New(parsed)
 
-	return &electronBrowserWindow{
-		browserWindow: browserWindowInstance,
-		webContents: browserWindowInstance.Get("webContents"),
+	browserWindowInstance := &electronBrowserWindow{
+		browserWindow: browserWindowInternal,
+		webContents:   browserWindowInternal.Get("webContents"),
 		callbacks:     make(map[int]js.Func),
 		nextCallback:  0,
 	}
+
+	var handleClosedFunc js.Func
+	handleClosedFuncAddr :=&handleClosedFunc
+	*handleClosedFuncAddr = js.FuncOf(func(_ js.Value, _ []js.Value)interface{} {
+		browserWindowInstance.handleClosed()
+		(*handleClosedFuncAddr).Release()
+		return nil
+	})
+	browserWindowInternal.Call("on", "closed", handleClosedFunc)
+
+	return browserWindowInstance
 }
 
 func (bw *electronBrowserWindow) registerCallback(callback func()) (int, js.Func) {
@@ -110,33 +134,60 @@ func (bw *electronBrowserWindow) singleshotCallback(callback func()) js.Func {
 	return wrapped
 }
 
-func (bw *electronBrowserWindow) Close() error {
+// On window closed, call all of our queued close callbacks, then release any outstanding callbacks
+func (bw *electronBrowserWindow) handleClosed() {
+	for i:=len(bw.closedCallbacks)-1; i>=0;i-- {
+		bw.closedCallbacks[i]()
+	}
 	for _, w := range bw.callbacks {
 		w.Release()
 	}
 	bw.callbacks = make(map[int]js.Func)
+}
+
+// Do something when the window is closed
+func (bw *electronBrowserWindow) OnClosed(callback func()) {
+	bw.closedCallbacks = append(bw.closedCallbacks, callback)
+}
+
+// Close the window, as if the user had clicked the close button.  May be intercepted/interrupted by code
+func (bw *electronBrowserWindow) Close() error {
+	bw.browserWindow.Call("close")
 	return nil
 }
 
+// Turn off the menu bar
 func (bw *electronBrowserWindow) RemoveMenu() {
 	bw.browserWindow.Call("removeMenu")
 }
 
+// Show the window
 func (bw *electronBrowserWindow) Show() {
 	bw.browserWindow.Call("show")
 }
 
+// Load content into the window
 func (bw *electronBrowserWindow) LoadFile(path string) {
 	bw.browserWindow.Call("loadFile", path)
 }
 
+// Register a callback to be called once
 func (bw *electronBrowserWindow) Once(eventName string, action func()) {
-	bw.browserWindow.Call("once", eventName, bw.singleshotCallback(action))
+	if eventName=="closed" {
+		bw.closedCallbacks=append(bw.closedCallbacks, action)
+	} else {
+		bw.browserWindow.Call("once", eventName, bw.singleshotCallback(action))
+	}
 }
 
+// Register a callback to be called repeatedly
 func (bw *electronBrowserWindow) On(eventName string, action func()) {
-	_, wrapped := bw.registerCallback(action)
-	bw.browserWindow.Call("on", eventName, wrapped)
+	if eventName=="closed" {
+		bw.closedCallbacks=append(bw.closedCallbacks, action)
+	} else {
+		_, wrapped := bw.registerCallback(action)
+		bw.browserWindow.Call("on", eventName, wrapped)
+	}
 }
 
 func (bw *electronBrowserWindow) SetAlwaysOnTop(b bool) {
@@ -144,9 +195,42 @@ func (bw *electronBrowserWindow) SetAlwaysOnTop(b bool) {
 }
 
 func (bw *electronBrowserWindow) Send(channelName string, content []byte) {
-	bw.webContents.Call("send", rpc.Prefix+channelName, string(content))
+	bw.webContents.Call("send", msgcomm.Prefix+channelName, hex.EncodeToString(content))
 }
 
-func (bw *electronBrowserWindow) Listen(channelName string) <-chan rpc.Message {
-	return ipcmain.Listen(channelName)
+func (bw *electronBrowserWindow) Id() int {
+	return bw.browserWindow.Get("id").Int()
+}
+
+func (bw *electronBrowserWindow) Listen(channelName string) (<-chan msgcomm.Message, func()) {
+	outChan := make(chan msgcomm.Message)
+	inChan, inDone := ipcmain.Listen(channelName)
+	go func() {
+		for {
+			select {
+			case inMsg := <- inChan:
+				if inMsg==nil {
+					return
+				}
+				if inMsg.Sender() == strconv.Itoa(bw.Id()) {
+					outChan <- inMsg
+				}
+			}
+		}
+	}()
+	return outChan, inDone
+}
+
+func (bw *electronBrowserWindow) ServeRPC(server *rpc.Server) {
+	endpointStream := msgcomm.EndpointAsStream("rpcMain", bw)
+	bw.OnClosed(func() {
+		endpointStream.Close()
+	})
+	go func() {
+		server.ServeConn(endpointStream)
+	}()
+}
+
+func (bw *electronBrowserWindow) JSValue() js.Value {
+	return bw.browserWindow
 }

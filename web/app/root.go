@@ -1,13 +1,15 @@
-// +build wasm
+// +build wasm,web
 
 package main
 
 import (
+	"github.com/GontikR99/chillmodeinfo/internal/electron"
 	"github.com/GontikR99/chillmodeinfo/internal/place"
 	"github.com/GontikR99/chillmodeinfo/web/app/admin"
 	"github.com/GontikR99/chillmodeinfo/web/app/home"
 	"github.com/GontikR99/chillmodeinfo/web/app/leaderboard"
 	"github.com/GontikR99/chillmodeinfo/web/app/login"
+	"github.com/GontikR99/chillmodeinfo/web/app/settings"
 	"github.com/vugu/vugu"
 )
 
@@ -29,6 +31,12 @@ var routes = []routeEntry{
 	{"register", "", "", func() vugu.Builder { return &login.Register{} }},
 	{"leaderboard", "Leaderboard", "target", func() vugu.Builder { return &leaderboard.Leaderboard{} }},
 	{"admin", "Admin", "terminal", func() vugu.Builder { return &admin.Admin{} }},
+}
+
+func init() {
+	if electron.IsPresent() {
+		routes=append(routes, routeEntry{"settings", "Settings", "settings", func() vugu.Builder {return &settings.Settings{}}})
+	}
 }
 
 func (c *Root) Init(ctx vugu.InitCtx) {

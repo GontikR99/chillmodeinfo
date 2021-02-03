@@ -23,11 +23,11 @@ bin/chillmodeinfo.exe: web/static/staticfiles_vfsdata.go $(shell find cmd/chillm
 	go build -o $@ ./cmd/chillmodeinfo
 
 bin/exe.wasm: $(shell find web/exe -name \*.go) $(shell find internal -type f)
-	GOOS=js GOARCH=wasm go build -o $@ ./web/exe
+	GOOS=js GOARCH=wasm go build -tags electron -o $@ ./web/exe
 
 web/static/data/app.wasm: $(shell find web/app -type f) $(shell find internal -type f)
 	go run -mod=vendor github.com/vugu/vugu/cmd/vugugen -s -r -skip-go-mod -skip-main web/app
-	GOOS=js GOARCH=wasm go build -o $@ ./web/app
+	GOOS=js GOARCH=wasm go build -tags web -o $@ ./web/app
 
 web/static/staticfiles_vfsdata.go: $(shell find web/static/data -type f) web/static/data/app.wasm
 	go generate -tags=dev ./web/static
@@ -42,6 +42,5 @@ clean:
 		electron/out \
 		web/static/staticfiles_vfsdata.go \
 		web/static/data/app.wasm \
-		web/exe/main.wasm \
 		$(shell find web/app -name 0_components_vgen.go)
 

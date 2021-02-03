@@ -1,0 +1,11 @@
+<form @submit="event.PreventDefault()">
+    <div class="form-group row">
+        <label for="settings-eqdir" class="col-form-label col-sm-2">EverQuest directory</label>
+        <div class="col-sm-8">
+            <input type="text" class="form-control" id="settings-eqdir" name="eqdir" @change="c.UpdateEqDir()">
+        </div>
+        <div class="col-sm-2">
+            <button type="button" class="btn btn-primary" id="settings-eqdir-browse" @click="c.BrowseEqDir(event)">Browse...</button>
+        </div>
+    </div>
+</form>

@@ -20,6 +20,3 @@ func Require(path string) js.Value {
 	}
 }
 
-func ConsoleLog(value interface{}) {
-	js.Global().Get("console").Call("log", value)
-}

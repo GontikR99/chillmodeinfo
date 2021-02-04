@@ -10,7 +10,7 @@ import (
 	"github.com/GontikR99/chillmodeinfo/internal/electron/application"
 	"github.com/GontikR99/chillmodeinfo/internal/electron/browserwindow"
 	"github.com/GontikR99/chillmodeinfo/internal/nodejs/path"
-	"github.com/GontikR99/chillmodeinfo/internal/nodejs/process"
+	"github.com/GontikR99/chillmodeinfo/internal/settings"
 )
 
 func main() {
@@ -21,8 +21,9 @@ func main() {
 		}
 	}()
 
+	settings.DefaultSetting(settings.EverQuestDirectory, "C:\\Users\\Public\\Daybreak Game Company\\Installed Games\\EverQuest")
+
 	appCtx, exitApp := context.WithCancel(context.Background())
-	console.Logf("%v", process.Getenv("LOCALAPPDATA"))
 
 	application.OnReady(func() {
 		mainWindow := browserwindow.New(&browserwindow.Conf{

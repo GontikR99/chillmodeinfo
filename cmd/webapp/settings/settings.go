@@ -6,36 +6,49 @@ import (
 	"github.com/GontikR99/chillmodeinfo/internal/console"
 	"github.com/GontikR99/chillmodeinfo/internal/electron/ipc/ipcrenderer"
 	"github.com/GontikR99/chillmodeinfo/internal/rpcidl"
+	"github.com/GontikR99/chillmodeinfo/internal/settings"
 	"github.com/vugu/vugu"
-	"syscall/js"
 )
 
 type Settings struct {
-	EqDir string
+	EqDir *EqDirValue
 }
 
-func (c *Settings) Rendered(_ vugu.RenderedCtx) {
-	eqDirValue := js.Global().Get("document").Call("getElementById", "settings-eqdir").Get("value").String()
-	if eqDirValue != c.EqDir {
-		js.Global().Get("document").Call("getElementById", "settings-eqdir").Set("value", c.EqDir)
-	}
-}
-
-func (c *Settings) UpdateEqDir() {
-	c.EqDir = js.Global().Get("document").Call("getElementById", "settings-eqdir").Get("value").String()
-	console.Log(c.EqDir)
+func (c *Settings) Init(ctx vugu.InitCtx) {
+	c.EqDir=&EqDirValue{}
+	go func() {
+		value, present, err := rpcidl.LookupSetting(ipcrenderer.Client, settings.EverQuestDirectory)
+		if err==nil && present {
+			ctx.EventEnv().Lock()
+			c.EqDir.Path=value
+			ctx.EventEnv().UnlockRender()
+		}
+	}()
 }
 
 func (c *Settings) BrowseEqDir(event vugu.DOMEvent) {
 	event.PreventDefault()
 	go func() {
-		newDir, err := rpcidl.DirectoryDialog(ipcrenderer.Client, c.EqDir)
+		newDir, err := rpcidl.DirectoryDialog(ipcrenderer.Client, c.EqDir.Path)
 		if err != nil {
 			console.Log(err.Error())
 			return
 		}
 		event.EventEnv().Lock()
-		c.EqDir = newDir
+		c.EqDir.SetStringValue(newDir)
 		event.EventEnv().UnlockRender()
 	}()
+}
+
+type EqDirValue struct {
+	Path string
+}
+
+func (e *EqDirValue) StringValue() string {
+	return e.Path
+}
+
+func (e *EqDirValue) SetStringValue(s string) {
+	e.Path=s
+	go rpcidl.SetSetting(ipcrenderer.Client, settings.EverQuestDirectory, s)
 }

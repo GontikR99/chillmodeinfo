@@ -21,7 +21,14 @@ github.com/vugu/vugu/cmd/vugugen
 github.com/vugu/vugu/domrender
 github.com/vugu/vugu/gen
 github.com/vugu/vugu/js
+github.com/vugu/vugu/vgform
 # github.com/vugu/xxhash v0.0.0-20191111030615-ed24d0179019
 github.com/vugu/xxhash
+# go.etcd.io/bbolt v1.3.5
+## explicit
+go.etcd.io/bbolt
+# golang.org/x/sys v0.0.0-20210119212857-b64e53b001e4
+golang.org/x/sys/internal/unsafeheader
+golang.org/x/sys/unix
 # golang.org/x/tools v0.1.0
 ## explicit

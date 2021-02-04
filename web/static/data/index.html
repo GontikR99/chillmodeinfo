@@ -30,7 +30,7 @@
                 return await WebAssembly.instantiate(source, importObject);
             };
         }
-        var mainWasmReq = fetch("app.wasm").then(function(res) {
+        var mainWasmReq = fetch("webapp.wasm").then(function(res) {
             if (res.ok) {
                 const go = new Go();
                 WebAssembly.instantiateStreaming(res, go.importObject).then((result) => {

@@ -4,8 +4,8 @@ package browserwindow
 
 import (
 	"encoding/hex"
-	"encoding/json"
 	"github.com/GontikR99/chillmodeinfo/internal/electron"
+	"github.com/GontikR99/chillmodeinfo/internal/electron/binding"
 	"github.com/GontikR99/chillmodeinfo/internal/electron/ipc/ipcmain"
 	"github.com/GontikR99/chillmodeinfo/internal/msgcomm"
 	"io"
@@ -14,7 +14,7 @@ import (
 	"syscall/js"
 )
 
-var browserWindow = electron.Get().Get("BrowserWindow")
+var browserWindow = electron.JSValue().Get("BrowserWindow")
 
 type BrowserWindow interface {
 	io.Closer
@@ -61,35 +61,8 @@ type Conf struct {
 	WebPreferences *WebPreferences `json:"webPreferences"`
 }
 
-func trimPrefs(prefMap *map[string]interface{}) {
-	var trimKeys []string
-	for k,v := range *prefMap {
-		if v==nil {
-			trimKeys = append(trimKeys, k)
-		}
-		if submap, ok :=v.(map[string]interface{}); ok {
-			trimPrefs(&submap)
-			(*prefMap)[k]=submap
-		}
-	}
-
-	for _, k := range trimKeys {
-		delete(*prefMap, k)
-	}
-}
-
-func New(conf Conf) BrowserWindow {
-	data, err := json.Marshal(conf)
-	if err != nil {
-		panic(err)
-	}
-	parsed:=make(map[string]interface{})
-	err = json.Unmarshal(data, &parsed)
-	if err != nil {
-		panic(err)
-	}
-	trimPrefs(&parsed)
-	browserWindowInternal :=browserWindow.New(parsed)
+func New(conf *Conf) BrowserWindow {
+	browserWindowInternal :=browserWindow.New(binding.JsonifyOptions(conf))
 
 	browserWindowInstance := &electronBrowserWindow{
 		browserWindow: browserWindowInternal,

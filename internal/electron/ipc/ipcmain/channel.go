@@ -10,7 +10,7 @@ import (
 	"syscall/js"
 )
 
-var ipcMain=electron.Get().Get("ipcMain")
+var ipcMain=electron.JSValue().Get("ipcMain")
 
 func Listen(channelName string) (<-chan msgcomm.Message, func()) {
 	resultChan := make(chan msgcomm.Message)

@@ -7,7 +7,11 @@ import (
 	"syscall/js"
 )
 
-var app=electron.Get().Get("app")
+var app=electron.JSValue().Get("app")
+
+func JSValue() js.Value {
+	return app
+}
 
 func Quit() {
 	app.Call("quit")

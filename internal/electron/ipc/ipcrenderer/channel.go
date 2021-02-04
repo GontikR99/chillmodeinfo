@@ -10,9 +10,9 @@ import (
 )
 
 var ipcRenderer = js.Global().Get("ipcRenderer")
-type ipcRendererEndpoint struct{}
+type Endpoint struct{}
 
-func (i ipcRendererEndpoint) Listen(channelName string) (<-chan msgcomm.Message, func()) {
+func (i Endpoint) Listen(channelName string) (<-chan msgcomm.Message, func()) {
 	resultChan := make(chan msgcomm.Message)
 	recvFunc := js.FuncOf(func(_ js.Value, args []js.Value) interface{} {
 		event := args[0]
@@ -31,7 +31,7 @@ func (i ipcRendererEndpoint) Listen(channelName string) (<-chan msgcomm.Message,
 	}
 }
 
-func (i ipcRendererEndpoint) Send(channelName string, content []byte) {
+func (i Endpoint) Send(channelName string, content []byte) {
 	ipcRenderer.Call("send", msgcomm.Prefix+channelName, hex.EncodeToString(content))
 }
 
@@ -57,6 +57,6 @@ var Client *rpc.Client
 
 func init() {
 	if !ipcRenderer.IsUndefined() {
-		Client = msgcomm.NewClient(msgcomm.RpcMainChannel, &ipcRendererEndpoint{})
+		Client = msgcomm.NewClient(msgcomm.RpcMainChannel, &Endpoint{})
 	}
 }

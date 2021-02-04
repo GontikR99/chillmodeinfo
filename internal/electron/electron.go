@@ -13,6 +13,6 @@ func init() {
 	electron = nodejs.Require("electron")
 }
 
-func Get() js.Value {
+func JSValue() js.Value {
 	return electron
 }

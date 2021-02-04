@@ -8,5 +8,6 @@ require (
 	github.com/shurcooL/vfsgen v0.0.0-20200824052919-0d455de96546
 	github.com/vugu/vjson v0.0.0-20200505061711-f9cbed27d3d9
 	github.com/vugu/vugu v0.3.3
+	go.etcd.io/bbolt v1.3.5
 	golang.org/x/tools v0.1.0 // indirect
 )

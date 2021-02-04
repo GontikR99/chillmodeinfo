@@ -2,7 +2,7 @@
   "name": "chillmodeinfo",
   "version": "0.0.1",
   "description": "Chill Mode guild's DKP tracker and status web site",
-  "main": "src/exe.js",
+  "main": "src/electronmain.js",
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",

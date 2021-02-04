@@ -18,18 +18,18 @@ type DirectoryDialogStub struct {
 
 func (d *DirectoryDialogStub) DirectoryDialog(req *DirectoryDialogRequest, res *DirectoryDialogResponse) error {
 	chosen, err := d.callback(req.InitialDirectory)
-	*res=DirectoryDialogResponse{chosen}
+	*res = DirectoryDialogResponse{chosen}
 	return err
 }
 
-func DirectoryDialog(client *rpc.Client, initial string) (string,error) {
+func DirectoryDialog(client *rpc.Client, initial string) (string, error) {
 	req := &DirectoryDialogRequest{initial}
 	res := &DirectoryDialogResponse{}
 	err := client.Call("DirectoryDialogStub.DirectoryDialog", req, res)
 	return res.ChosenDirectory, err
 }
 
-func HandleDirectoryDialog(callback func(string)(string, error)) func(*rpc.Server) {
+func HandleDirectoryDialog(callback func(string) (string, error)) func(*rpc.Server) {
 	dds := &DirectoryDialogStub{callback}
 	return func(server *rpc.Server) {
 		server.Register(dds)

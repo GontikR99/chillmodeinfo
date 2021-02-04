@@ -7,6 +7,6 @@ import (
 
 func init() {
 	register(rpcidl.PingHandler(func(message string) {
-		console.Log("Ping: "+message)
+		console.Log("Ping: " + message)
 	}))
 }

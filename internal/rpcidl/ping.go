@@ -18,7 +18,7 @@ func (ps *PingStub) Ping(req *PingRequest, resp *PingResponse) error {
 	return nil
 }
 
-func PingHandler(callback func(string))func(server *rpc.Server) {
+func PingHandler(callback func(string)) func(server *rpc.Server) {
 	ps := &PingStub{callback: callback}
 	return func(server *rpc.Server) {
 		server.Register(ps)

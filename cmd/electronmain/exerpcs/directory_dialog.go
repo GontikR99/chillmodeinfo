@@ -11,23 +11,23 @@ import (
 )
 
 func init() {
-	register(rpcidl.HandleDirectoryDialog(func(initial string)(string, error) {
+	register(rpcidl.HandleDirectoryDialog(func(initial string) (string, error) {
 		filePaths, err := dialog.ShowOpenDialog(&dialog.OpenOptions{
-			Title: "Select a directory",
+			Title:       "Select a directory",
 			DefaultPath: initial,
-			Properties: &[]string{dialog.OpenDirectory, dialog.DontAddToRecent},
+			Properties:  &[]string{dialog.OpenDirectory, dialog.DontAddToRecent},
 		})
 
-		if err!=nil {
+		if err != nil {
 			return "", err
 		}
-		if len(filePaths)!=1 {
+		if len(filePaths) != 1 {
 			return "", errors.New("Expected single path")
 		}
 		go func() {
 			dirents, err := fs.ReadDir(filePaths[0])
-			if err==nil {
-				for _, dirent:= range dirents {
+			if err == nil {
+				for _, dirent := range dirents {
 					console.Log(dirent.Name())
 				}
 			}

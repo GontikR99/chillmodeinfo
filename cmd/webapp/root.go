@@ -35,7 +35,7 @@ var routes = []routeEntry{
 
 func init() {
 	if electron.IsPresent() {
-		routes =append(routes, routeEntry{"settings", "Settings", "settings", func() vugu.Builder {return &settings.Settings{}}})
+		routes = append(routes, routeEntry{"settings", "Settings", "settings", func() vugu.Builder { return &settings.Settings{} }})
 	}
 }
 

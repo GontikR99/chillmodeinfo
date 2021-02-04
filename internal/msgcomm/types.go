@@ -1,6 +1,6 @@
 package msgcomm
 
-const Prefix ="golang-msgcomm-"
+const Prefix = "golang-msgcomm-"
 
 // A message passed between processes
 type Message interface {

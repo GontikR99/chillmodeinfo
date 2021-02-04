@@ -9,17 +9,16 @@ import (
 	"io"
 )
 
-
 type endpointWrapper struct {
-	endpoint Endpoint
-	channel string
-	recv <-chan Message
-	done func()
-	unread *bytes.Buffer
+	endpoint   Endpoint
+	channel    string
+	recv       <-chan Message
+	done       func()
+	unread     *bytes.Buffer
 	nextSeqOut int64
-	nextSeqIn int64
-	msgQueue []*SequencedMessage
-	closed bool
+	nextSeqIn  int64
+	msgQueue   []*SequencedMessage
+	closed     bool
 }
 
 func EndpointAsStream(channel string, endpoint Endpoint) io.ReadWriteCloser {
@@ -27,8 +26,8 @@ func EndpointAsStream(channel string, endpoint Endpoint) io.ReadWriteCloser {
 	bufferedListener := make(chan Message, 65536)
 	go func() {
 		for {
-			inMsg := <- listener
-			if inMsg==nil {
+			inMsg := <-listener
+			if inMsg == nil {
 				close(bufferedListener)
 				return
 			} else {
@@ -39,8 +38,8 @@ func EndpointAsStream(channel string, endpoint Endpoint) io.ReadWriteCloser {
 	ew := &endpointWrapper{
 		endpoint: endpoint,
 		channel:  channel,
-		recv: bufferedListener,
-		done: listenerDone,
+		recv:     bufferedListener,
+		done:     listenerDone,
 		unread:   new(bytes.Buffer),
 	}
 	return ew
@@ -51,11 +50,11 @@ func (ew *endpointWrapper) Write(p []byte) (int, error) {
 	encoder := gob.NewEncoder(outbuf)
 	seqMsg := &SequencedMessage{
 		SequenceNumber: ew.nextSeqOut,
-		Content: p,
+		Content:        p,
 	}
 	ew.nextSeqOut++
 	err := encoder.Encode(seqMsg)
-	if err!=nil {
+	if err != nil {
 		return 0, err
 	}
 	ew.endpoint.Send(ew.channel, outbuf.Bytes())
@@ -63,21 +62,21 @@ func (ew *endpointWrapper) Write(p []byte) (int, error) {
 }
 
 func (ew *endpointWrapper) Read(p []byte) (int, error) {
-	for ew.unread.Len()==0 {
-		inMsg := <- ew.recv
-		if inMsg==nil {
+	for ew.unread.Len() == 0 {
+		inMsg := <-ew.recv
+		if inMsg == nil {
 			return 0, io.EOF
 		}
 		decoder := gob.NewDecoder(bytes.NewReader(inMsg.Content()))
-		inSeqMsg:=new(SequencedMessage)
+		inSeqMsg := new(SequencedMessage)
 		err := decoder.Decode(inSeqMsg)
-		if err!=nil {
+		if err != nil {
 			return 0, err
 		}
 		heap.Push(ew, inSeqMsg)
-		for len(ew.msgQueue)>0 && ew.msgQueue[0].SequenceNumber <= ew.nextSeqIn {
+		for len(ew.msgQueue) > 0 && ew.msgQueue[0].SequenceNumber <= ew.nextSeqIn {
 			nextSeqMsg := heap.Pop(ew).(*SequencedMessage)
-			if nextSeqMsg.SequenceNumber==ew.nextSeqIn {
+			if nextSeqMsg.SequenceNumber == ew.nextSeqIn {
 				ew.nextSeqIn++
 				ew.unread.Write(nextSeqMsg.Content)
 			}
@@ -96,7 +95,7 @@ func (ew *endpointWrapper) Close() error {
 
 type SequencedMessage struct {
 	SequenceNumber int64
-	Content []byte
+	Content        []byte
 }
 
 func (ew *endpointWrapper) Len() int {
@@ -104,7 +103,7 @@ func (ew *endpointWrapper) Len() int {
 }
 
 func (ew *endpointWrapper) Less(i, j int) bool {
-	return ew.msgQueue[i].SequenceNumber<ew.msgQueue[j].SequenceNumber
+	return ew.msgQueue[i].SequenceNumber < ew.msgQueue[j].SequenceNumber
 }
 
 func (ew *endpointWrapper) Swap(i, j int) {

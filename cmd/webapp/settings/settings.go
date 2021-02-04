@@ -15,14 +15,14 @@ type Settings struct {
 }
 
 func (c *Settings) Rendered(_ vugu.RenderedCtx) {
-	eqDirValue := js.Global().Get("document").Call("getElementById","settings-eqdir").Get("value").String()
+	eqDirValue := js.Global().Get("document").Call("getElementById", "settings-eqdir").Get("value").String()
 	if eqDirValue != c.EqDir {
 		js.Global().Get("document").Call("getElementById", "settings-eqdir").Set("value", c.EqDir)
 	}
 }
 
 func (c *Settings) UpdateEqDir() {
-	c.EqDir = js.Global().Get("document").Call("getElementById","settings-eqdir").Get("value").String()
+	c.EqDir = js.Global().Get("document").Call("getElementById", "settings-eqdir").Get("value").String()
 	console.Log(c.EqDir)
 }
 
@@ -30,7 +30,7 @@ func (c *Settings) BrowseEqDir(event vugu.DOMEvent) {
 	event.PreventDefault()
 	go func() {
 		newDir, err := rpcidl.DirectoryDialog(ipcrenderer.Client, c.EqDir)
-		if err!=nil {
+		if err != nil {
 			console.Log(err.Error())
 			return
 		}

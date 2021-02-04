@@ -1,7 +1,8 @@
 bin
 .idea
 web/static/staticfiles_vfsdata.go
-web/static/data/app.wasm
+web/bin/binfiles_vfsdata.go
+**/*.wasm
 **/0_components_vgen.go
 electron/node_modules
 electron/.electron

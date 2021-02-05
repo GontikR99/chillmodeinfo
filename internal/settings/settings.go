@@ -4,9 +4,9 @@ package settings
 
 import (
 	"encoding/json"
-	"github.com/GontikR99/chillmodeinfo/internal/console"
-	"github.com/GontikR99/chillmodeinfo/internal/nodejs/path"
-	"github.com/GontikR99/chillmodeinfo/internal/nodejs/process"
+	"github.com/GontikR99/chillmodeinfo/pkg/console"
+	"github.com/GontikR99/chillmodeinfo/pkg/nodejs/path"
+	"github.com/GontikR99/chillmodeinfo/pkg/nodejs/process"
 	"io/ioutil"
 	"os"
 )
@@ -32,6 +32,17 @@ func LookupSetting(key string) (string, bool, error) {
 // Upsert a value into a setting
 func SetSetting(key string, value string) error {
 	memoizedSettings[key]=value
+	return sync()
+}
+
+// Remove a setting from the map
+func ClearSetting(key string) error {
+	delete(memoizedSettings, key)
+	return sync()
+}
+
+// Write the settings to disk
+func sync() error {
 	data, err := json.Marshal(&memoizedSettings)
 	if err!=nil {
 		return err

@@ -4,8 +4,8 @@ package exerpcs
 
 import (
 	"errors"
-	"github.com/GontikR99/chillmodeinfo/internal/electron/dialog"
 	"github.com/GontikR99/chillmodeinfo/internal/rpcidl"
+	"github.com/GontikR99/chillmodeinfo/pkg/electron/dialog"
 )
 
 func init() {

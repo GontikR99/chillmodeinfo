@@ -1,0 +1,20 @@
+<div>
+    <table class="table table-striped table-sm table-bordered table-dark">
+        <thead>
+        <tr>
+            <th scope="col" class="small">Who</th>
+            <th scope="col" class="small">Bid&nbsp;(Luck)</th>
+            <th scope="col" class="small">Tells</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr vg-for='_, bidVal := range c.ActiveBids'>
+            <th class="small" scope="row" vg-content="bidVal.Name"></th>
+            <td><span vg-content="bidVal.Value"></span>&nbsp;(<span class="small" vg-content="commonWords[bidVal.Tiebreaker]"></span>)</td>
+            <td style="width:100%;">
+                <div class="small text-nowrap" vg-for='_, line:=range bidVal.Texts' vg-content='line'></div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>

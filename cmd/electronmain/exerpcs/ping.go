@@ -1,8 +1,8 @@
 package exerpcs
 
 import (
-	"github.com/GontikR99/chillmodeinfo/internal/console"
 	"github.com/GontikR99/chillmodeinfo/internal/rpcidl"
+	"github.com/GontikR99/chillmodeinfo/pkg/console"
 )
 
 func init() {

@@ -5,6 +5,7 @@
   "main": "src/electronmain.js",
   "scripts": {
     "start": "electron-forge start",
+    "startTransparent": "electron-forge start -- --enable-transparent-visuals --disable-gpu",
     "package": "electron-forge package",
     "make": "electron-forge make"
   },

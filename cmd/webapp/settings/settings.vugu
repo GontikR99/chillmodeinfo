@@ -1,14 +1,46 @@
 <form @submit="event.PreventDefault()">
     <div class="form-group row">
-        <label for="settings-eqdir" class="col-form-label col-sm-2">EverQuest directory</label>
+        <label class="col-form-label col-sm-2">EverQuest directory</label>
         <div class="col-sm-8">
-            <vgform:Input type="text" class="form-control" id="settings-eqdir" name="eqdir"
-                          :Value="c.EqDir"/>
+            <vgform:Input type="text" class="form-control" :Value="c.EqDir"/>
         </div>
         <div class="col-sm-2">
-            <button type="button" class="btn btn-primary" id="settings-eqdir-browse" @click="c.BrowseEqDir(event)">Browse...</button>
+            <button type="button" class="btn btn-primary" @click="c.BrowseEqDir(event)"><span data-feather="folder"></span> Browse...</button>
         </div>
     </div>
+    <div class="form-group row">
+        <label class="col-form-label col-sm-2">Bid start trigger</label>
+        <div class="col-sm-10">
+            <vgform:Input type="text" class="form-control" :Value="c.BidStart"/>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-form-label col-sm-2">Bid end trigger</label>
+        <div class="col-sm-10">
+            <vgform:Input type="text" class="form-control" :Value="c.BidEnd"/>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-form-label col-sm-2">Bid reset trigger</label>
+        <div class="col-sm-10">
+            <vgform:Input type="text" class="form-control" :Value="c.BidClose"/>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-form-label col-sm-2">Bids Overlay:</label>
+        <div class="col-sm-3">
+            <button type="button" class="btn btn-primary" @click='c.PositionOverlay(event, "bid")'>Position</button>
+            <button type="button" class="btn btn-primary" @click='c.ResetOverlay(event, "bid")'>Reset</button>
+            <button type="button" class="btn btn-primary" @click='c.CloseOverlay(event, "bid")'>Close</button>
+        </div>
+        <label class="col-form-label col-sm-2">Raid dump overlay:</label>
+        <div class="col-sm-3">
+            <button type="button" class="btn btn-primary" @click='c.PositionOverlay(event, "raiddump")'>Position</button>
+            <button type="button" class="btn btn-primary" @click='c.ResetOverlay(event, "raiddump")'>Reset</button>
+            <button type="button" class="btn btn-primary" @click='c.CloseOverlay(event, "raiddump")'>Close</button>
+        </div>
+    </div>
+
 </form>
 
 <script type="application/x-go">

@@ -3,8 +3,8 @@
 package place
 
 import (
-	"github.com/GontikR99/chillmodeinfo/internal/electron/ipc/ipcrenderer"
 	"github.com/GontikR99/chillmodeinfo/internal/rpcidl"
+	"github.com/GontikR99/chillmodeinfo/pkg/electron/ipc/ipcrenderer"
 	"github.com/vugu/vugu"
 	"github.com/vugu/vugu/js"
 	"log"
@@ -22,7 +22,7 @@ func GetPlace() string {
 }
 
 func NavigateTo(env vugu.EventEnv, place string) {
-	if ipcrenderer.Client!=nil {
+	if ipcrenderer.Client !=nil {
 		go rpcidl.Ping(ipcrenderer.Client, "Visiting "+place)
 	}
 

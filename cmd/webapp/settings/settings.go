@@ -3,33 +3,39 @@
 package settings
 
 import (
-	"github.com/GontikR99/chillmodeinfo/internal/console"
-	"github.com/GontikR99/chillmodeinfo/internal/electron/ipc/ipcrenderer"
 	"github.com/GontikR99/chillmodeinfo/internal/rpcidl"
 	"github.com/GontikR99/chillmodeinfo/internal/settings"
+	"github.com/GontikR99/chillmodeinfo/pkg/console"
+	"github.com/GontikR99/chillmodeinfo/pkg/electron/ipc/ipcrenderer"
 	"github.com/vugu/vugu"
 )
 
 type Settings struct {
-	EqDir *EqDirValue
+	EqDir    *ConfiguredValue
+	BidStart *ConfiguredValue
+	BidEnd   *ConfiguredValue
+	BidClose *ConfiguredValue
 }
 
 func (c *Settings) Init(ctx vugu.InitCtx) {
-	c.EqDir=&EqDirValue{}
-	go func() {
-		value, present, err := rpcidl.LookupSetting(ipcrenderer.Client, settings.EverQuestDirectory)
-		if err==nil && present {
-			ctx.EventEnv().Lock()
-			c.EqDir.Path=value
-			ctx.EventEnv().UnlockRender()
-		}
-	}()
+	c.EqDir = &ConfiguredValue{
+		Key:      settings.EverQuestDirectory,
+		Callback: func(s string) { rpcidl.RestartScan(ipcrenderer.Client) },
+	}
+	c.BidStart = &ConfiguredValue{Key: settings.BidStartPattern}
+	c.BidEnd = &ConfiguredValue{Key: settings.BidEndPattern}
+	c.BidClose = &ConfiguredValue{Key: settings.BidClosePattern}
+
+	c.EqDir.Init(ctx)
+	c.BidStart.Init(ctx)
+	c.BidEnd.Init(ctx)
+	c.BidClose.Init(ctx)
 }
 
 func (c *Settings) BrowseEqDir(event vugu.DOMEvent) {
 	event.PreventDefault()
 	go func() {
-		newDir, err := rpcidl.DirectoryDialog(ipcrenderer.Client, c.EqDir.Path)
+		newDir, err := rpcidl.DirectoryDialog(ipcrenderer.Client, c.EqDir.Value)
 		if err != nil {
 			console.Log(err.Error())
 			return
@@ -40,15 +46,50 @@ func (c *Settings) BrowseEqDir(event vugu.DOMEvent) {
 	}()
 }
 
-type EqDirValue struct {
-	Path string
+type ConfiguredValue struct {
+	Key      string
+	Value    string
+	Callback func(value string)
 }
 
-func (e *EqDirValue) StringValue() string {
-	return e.Path
+func (cv *ConfiguredValue) Init(ctx vugu.InitCtx) {
+	go func() {
+		console.Log("Looking up ", cv.Key)
+		value, present, err := rpcidl.LookupSetting(ipcrenderer.Client, cv.Key)
+		console.Log("Got", value, present, err)
+		if err == nil && present {
+			ctx.EventEnv().Lock()
+			cv.Value = value
+			ctx.EventEnv().UnlockRender()
+		}
+	}()
 }
 
-func (e *EqDirValue) SetStringValue(s string) {
-	e.Path=s
-	go rpcidl.SetSetting(ipcrenderer.Client, settings.EverQuestDirectory, s)
+func (cv *ConfiguredValue) StringValue() string {
+	return cv.Value
+}
+
+func (cv *ConfiguredValue) SetStringValue(s string) {
+	cv.Value = s
+	go func() {
+		rpcidl.SetSetting(ipcrenderer.Client, cv.Key, s)
+		if cv.Callback != nil {
+			cv.Callback(s)
+		}
+	}()
+}
+
+func (c *Settings) PositionOverlay(event vugu.DOMEvent, name string) {
+	event.PreventDefault()
+	go rpcidl.PositionOverlay(ipcrenderer.Client, name)
+}
+
+func (c *Settings) ResetOverlay(event vugu.DOMEvent, name string) {
+	event.PreventDefault()
+	go rpcidl.ResetOverlay(ipcrenderer.Client, name)
+}
+
+func (c *Settings) CloseOverlay(event vugu.DOMEvent, name string) {
+	event.PreventDefault()
+	go rpcidl.CloseOverlay(ipcrenderer.Client, name)
 }

@@ -8,8 +8,8 @@ import (
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/leaderboard"
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/login"
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/settings"
-	"github.com/GontikR99/chillmodeinfo/internal/electron"
 	"github.com/GontikR99/chillmodeinfo/internal/place"
+	"github.com/GontikR99/chillmodeinfo/pkg/electron"
 	"github.com/vugu/vugu"
 )
 

@@ -1,0 +1,4 @@
+<div>
+    <div>Move and resize this window to the position you wish the overlay to occupy.  Then close the window to save the position.</div>
+    <div><button type="button" class="btn btn-primary" onclick="javascript:window.close()">Save</button></div>
+</div>

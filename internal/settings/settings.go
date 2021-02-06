@@ -5,14 +5,14 @@ package settings
 import (
 	"encoding/json"
 	"github.com/GontikR99/chillmodeinfo/pkg/console"
+	"github.com/GontikR99/chillmodeinfo/pkg/electron/application"
 	"github.com/GontikR99/chillmodeinfo/pkg/nodejs/path"
-	"github.com/GontikR99/chillmodeinfo/pkg/nodejs/process"
 	"io/ioutil"
 	"os"
 )
 
 var memoizedSettings map[string]string
-var dbDir = path.Join(process.Getenv("LOCALAPPDATA"), "chillmodeinfo")
+var dbDir = path.Join(application.GetPath("appData"), "chillmodeinfo")
 var dbFilename = path.Join(dbDir, "settings.json")
 
 // Set a setting value, but only if there's not one currently present

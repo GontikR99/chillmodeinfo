@@ -17,6 +17,10 @@ func Quit() {
 	app.Call("quit")
 }
 
+func GetPath(which string) string {
+	return app.Call("getPath", which).String()
+}
+
 func GetAppPath() string {
 	return app.Call("getAppPath").String()
 }

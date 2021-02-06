@@ -24,16 +24,18 @@ type ListenerHandle int
 
 var nextListenerHandler = ListenerHandle(1)
 var logListeners = make(map[ListenerHandle]func([]*LogEntry))
+var newListeners = make(map[ListenerHandle]func([]*LogEntry))
 
 func RegisterLogsListener(listener func([]*LogEntry)) ListenerHandle {
 	curId := nextListenerHandler
 	nextListenerHandler++
-	logListeners[curId] = listener
+	newListeners[curId] = listener
 	return curId
 }
 
 func (h ListenerHandle) Release() {
 	delete(logListeners, h)
+	delete(newListeners, h)
 }
 
 var cancelLogScans = func() {}
@@ -95,6 +97,10 @@ func tailLog(ctx context.Context, filename string, character string, server stri
 	}
 
 	for {
+		for k, v := range newListeners {
+			logListeners[k]=v
+			delete(newListeners, k)
+		}
 		var entries []*LogEntry
 		for ib := bytes.IndexByte(buffer.Bytes(), '\n'); ib >= 0; ib = bytes.IndexByte(buffer.Bytes(), '\n') {
 			line, _ := buffer.ReadString('\n')
@@ -121,7 +127,7 @@ func tailLog(ctx context.Context, filename string, character string, server stri
 			select {
 			case <-ctx.Done():
 				return
-			default:
+			case <-time.After(100*time.Millisecond):
 				continue
 			}
 		}

@@ -9,11 +9,11 @@
         </thead>
         <tbody>
         <tr vg-for='_, bidVal := range c.ActiveBids'>
-            <th class="small" scope="row" vg-content="bidVal.Name"></th>
+            <th scope="row" vg-content="bidVal.Name"></th>
             <td>
                 <span vg-if="bidVal.Value>0" vg-content="bidVal.Value"></span><span vg-if="bidVal.Value<=0">&#x1F4A9;</span>&nbsp;(<span class="small" vg-content="commonWords[bidVal.Tiebreaker]"></span>)</td>
             <td style="width:100%;">
-                <div class="small text-nowrap" vg-for='_, line:=range bidVal.Texts' vg-content='line'></div>
+                <div class="small text-nowrap text-monospace" vg-for='_, line:=range bidVal.Texts' vg-content='line'></div>
             </td>
         </tr>
         </tbody>

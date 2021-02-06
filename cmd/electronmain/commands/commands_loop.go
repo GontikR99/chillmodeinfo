@@ -10,8 +10,8 @@ import (
 )
 
 func init() {
-	settings.DefaultSetting(settings.BidStartPattern, "^You say to your guild, 'BIDS START")
-	settings.DefaultSetting(settings.BidEndPattern, "^You say to your guild, 'BIDS END")
+	settings.DefaultSetting(settings.BidStartPattern, "^{C} tells you, '!start")
+	settings.DefaultSetting(settings.BidEndPattern, "^{C} tells you, '!end")
 	settings.DefaultSetting(settings.BidClosePattern, "^{C} tells you, '!clear")
 }
 

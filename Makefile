@@ -11,6 +11,7 @@ start: electron/.electron
 
 package: electron/.electron
 	cd electron && npm run make
+	find electron/out/make -name \*.exe -exec cp \{\} bin \;
 
 WASMS=bin/webapp.wasm bin/overlay_position.wasm bin/overlay_bids.wasm
 

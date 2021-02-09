@@ -8,7 +8,8 @@ import (
 )
 
 func init() {
-	register(restidl.HandlePingV0(func(ping string)string {
+	register(restidl.HandlePingV0(func(ping string, req *restidl.Request)string {
+		log.Printf("%s/%v", req.UserId, req.IdentityError)
 		log.Println("Ping: "+ping)
 		return "Pong: "+ping
 	}))

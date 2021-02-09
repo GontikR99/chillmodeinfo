@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/GontikR99/chillmodeinfo/internal/signins"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -18,12 +19,23 @@ func serve(mux *http.ServeMux, path string, handler func(method string, request 
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		wrapper := &Request{}
-		err = json.Unmarshal(bodyText, wrapper)
+		packaged := &packagedRequest{}
+		err = json.Unmarshal(bodyText, packaged)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+		var userId string
+		var idErr error
+		if packaged.IdToken!="" {
+			userId, idErr = signins.ValidateToken(r.Context(), packaged.IdToken)
+		} else if packaged.ClientId!="" {
+			userId, idErr = signins.ValidateClientId(r.Context(), packaged.ClientId)
+		} else {
+			userId=""
+			idErr = NewError(http.StatusUnauthorized, "No identity provided")
+		}
+
 		result, err := func() (val interface{}, err error) {
 			defer func() {
 				if r := recover(); r != nil {
@@ -35,7 +47,11 @@ func serve(mux *http.ServeMux, path string, handler func(method string, request 
 					}
 				}
 			}()
-			val, err = handler(r.Method, wrapper)
+			val, err = handler(r.Method, &Request{
+				UserId:        userId,
+				IdentityError: idErr,
+				packaged:      packaged,
+			})
 			return
 		}()
 		if err != nil {

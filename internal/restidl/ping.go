@@ -16,7 +16,7 @@ type pingResponseV0 struct {
 	Text string
 }
 
-func HandlePingV0(handler func(text string) string) func(mux *http.ServeMux) {
+func HandlePingV0(handler func(text string, req *Request) string) func(mux *http.ServeMux) {
 	return func(mux *http.ServeMux) {
 		serve(mux, pathPingV0, func(method string, req *Request) (interface{}, error) {
 			if !strings.EqualFold(method, methodPingV0) {
@@ -24,7 +24,7 @@ func HandlePingV0(handler func(text string) string) func(mux *http.ServeMux) {
 			}
 			reqVal := &pingRequestV0{}
 			req.ReadTo(reqVal)
-			respText := handler(reqVal.Text)
+			respText := handler(reqVal.Text, req)
 			return &pingResponseV0{respText}, nil
 		})
 	}

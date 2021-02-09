@@ -8,6 +8,7 @@ import (
 	"github.com/GontikR99/chillmodeinfo/internal/rpcidl"
 	"github.com/GontikR99/chillmodeinfo/internal/settings"
 	"github.com/GontikR99/chillmodeinfo/internal/sitedef"
+	"github.com/GontikR99/chillmodeinfo/internal/toast"
 	"github.com/GontikR99/chillmodeinfo/pkg/electron"
 	"github.com/GontikR99/chillmodeinfo/pkg/electron/ipc/ipcrenderer"
 	"github.com/GontikR99/chillmodeinfo/pkg/jsbinding"
@@ -17,7 +18,7 @@ import (
 )
 
 func call(method string, path string, request interface{}, response interface{}) error {
-	requestWrapper := &Request{ReqMsg: request}
+	requestWrapper := &packagedRequest{ReqMsg: request}
 	if electron.IsPresent() {
 		clientId, present, err := rpcidl.LookupSetting(ipcrenderer.Client, settings.ClientId)
 		if err != nil {
@@ -60,14 +61,16 @@ func call(method string, path string, request interface{}, response interface{})
 	xhr.Call("setRequestHeader", "Accept", "application/json")
 	xhr.Call("send", jsbinding.MakeArrayBuffer(reqText))
 	<-doneChan
-	resCode := xhr.Get("status").Int()
-	if resCode == http.StatusForbidden {
-		signin.SignOut()
-		return errors.New("Unauthorized access")
-	}
 	resBody := jsbinding.ReadArrayBuffer(xhr.Get("response"))
 	if resBody == nil {
 		return errors.New("Failed to recover payload")
+	}
+	resCode := xhr.Get("status").Int()
+	if resCode == http.StatusForbidden {
+		signin.SignOut()
+		err = errors.New(string(resBody))
+		toast.Error("identity", err)
+		return err
 	}
 	if resCode >= 400 {
 		return errors.New(string(resBody))

@@ -4,9 +4,6 @@ package place
 
 import (
 	"github.com/GontikR99/chillmodeinfo/internal/restidl"
-	"github.com/GontikR99/chillmodeinfo/internal/rpcidl"
-	"github.com/GontikR99/chillmodeinfo/pkg/console"
-	"github.com/GontikR99/chillmodeinfo/pkg/electron/ipc/ipcrenderer"
 	"github.com/vugu/vugu"
 	"github.com/vugu/vugu/js"
 	"log"
@@ -24,14 +21,9 @@ func GetPlace() string {
 }
 
 func NavigateTo(env vugu.EventEnv, place string) {
-	if ipcrenderer.Client !=nil {
-		go rpcidl.Ping(ipcrenderer.Client, "Visiting "+place)
-	}
 	go func() {
-		val, err := restidl.PingV0("Visiting "+place)
-		console.Log("pong:", val, err)
+		restidl.PingV0(place)
 	}()
-
 	go func() {
 		env.Lock()
 		defer env.UnlockRender()

@@ -54,9 +54,7 @@ type ConfiguredValue struct {
 
 func (cv *ConfiguredValue) Init(ctx vugu.InitCtx) {
 	go func() {
-		console.Log("Looking up ", cv.Key)
 		value, present, err := rpcidl.LookupSetting(ipcrenderer.Client, cv.Key)
-		console.Log("Got", value, present, err)
 		if err == nil && present {
 			ctx.EventEnv().Lock()
 			cv.Value = value

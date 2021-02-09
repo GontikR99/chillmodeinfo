@@ -7,14 +7,20 @@ import (
 	"net/http"
 )
 
-type Request struct {
+type packagedRequest struct {
 	IdToken  string
 	ClientId string
 	ReqMsg   interface{}
 }
 
+type Request struct {
+	UserId	string
+	IdentityError error
+	packaged *packagedRequest
+}
+
 func (rr *Request) ReadTo(reqStruct interface{}) {
-	jsonText, err := json.Marshal(rr.ReqMsg)
+	jsonText, err := json.Marshal(rr.packaged.ReqMsg)
 	if err != nil {
 		panic(NewError(http.StatusInternalServerError, err))
 	}

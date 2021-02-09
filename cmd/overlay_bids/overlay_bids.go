@@ -3,10 +3,10 @@
 package main
 
 import (
-"github.com/GontikR99/chillmodeinfo/pkg/console"
-"github.com/vugu/vugu"
-"github.com/vugu/vugu/domrender"
-"github.com/vugu/vugu/js"
+	"github.com/GontikR99/chillmodeinfo/pkg/console"
+	"github.com/vugu/vugu"
+	"github.com/vugu/vugu/domrender"
+	"github.com/vugu/vugu/js"
 )
 
 func main() {
@@ -34,4 +34,3 @@ func main() {
 		}
 	}
 }
-

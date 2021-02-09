@@ -4,7 +4,7 @@ $(shell mkdir -p bin electron/src >/dev/null 2>&1 || true)
 
 all: server package;
 
-server: bin/chillmodeinfo.exe
+server: bin/chillmodeinfo.exe bin/chillmodeinfo.linux
 
 start: electron/.electron
 	cd electron && npm start
@@ -22,8 +22,11 @@ electron/.electron: $(WASMS) bin/electronmain.wasm cmd/electronmain/electronmain
 	cp $(WASMS) electron/src/bin
 	touch $@
 
+bin/chillmodeinfo.linux: web/static/staticfiles_vfsdata.go web/bin/binfiles_vfsdata.go $(shell find cmd/chillmodeinfo -type f) $(shell find internal -type f) $(shell find pkg -type f)
+	GOOS=linux GOARCH=amd64 go build -tags server -o $@ ./cmd/chillmodeinfo
+
 bin/chillmodeinfo.exe: web/static/staticfiles_vfsdata.go web/bin/binfiles_vfsdata.go $(shell find cmd/chillmodeinfo -type f) $(shell find internal -type f) $(shell find pkg -type f)
-	go build -o $@ ./cmd/chillmodeinfo
+	go build -tags server -o $@ ./cmd/chillmodeinfo
 
 bin/electronmain.wasm: $(shell find cmd/electronmain -name \*.go) $(shell find internal -type f) $(shell find pkg -type f)
 	GOOS=js GOARCH=wasm go build -tags electron -o $@ ./cmd/electronmain

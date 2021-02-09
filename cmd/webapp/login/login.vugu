@@ -1,3 +1,8 @@
-<div>
-    The login page
-</div>
+<span>
+    <vg-template vg-if="!c.SignedIn">
+        <div id="chillmode-signin2"></div>
+    </vg-template>
+    <vg-template vg-if="c.SignedIn">
+        <a class="nav-link" href="#" @click="c.SignOut(event)">Sign out</a>
+    </vg-template>
+</span>

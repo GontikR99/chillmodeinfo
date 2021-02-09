@@ -47,7 +47,12 @@ func sync() error {
 	if err!=nil {
 		return err
 	}
-	return ioutil.WriteFile(dbFilename, data, 0600)
+	err = ioutil.WriteFile(dbFilename+".tmp", data, 0600)
+	if err!=nil {
+		return err
+	}
+	err = os.Rename(dbFilename+".tmp", dbFilename)
+	return err
 }
 
 func init() {

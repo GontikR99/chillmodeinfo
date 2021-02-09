@@ -3,7 +3,7 @@
         <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#" @click='event.PreventDefault(); place.NavigateTo(event.EventEnv(), "")'>Chill Mode</a>
         <ul class="navbar-nav px-3">
             <li class="nav-item text-nowrap">
-                <a class="nav-link" href="#">Sign out</a>
+                <login:Login/>
             </li>
         </ul>
     </nav>
@@ -14,7 +14,7 @@
                 <div class="sidebar-sticky">
                     <ul class="nav flex-column">
                         <vg-template vg-for='_, route := range routes'>
-                            <vg-template vg-if='route.DisplayName!=""'>
+                            <vg-template vg-if='route.ShowInNav()'>
                                 <main:NavLink :Icon="route.Icon" :DisplayName="route.DisplayName" :Place="route.Place"/>
                             </vg-template>
                         </vg-template>
@@ -31,4 +31,5 @@
 
 <script type="application/x-go">
     import "github.com/GontikR99/chillmodeinfo/internal/place"
+    import "github.com/GontikR99/chillmodeinfo/cmd/webapp/login"
 </script>

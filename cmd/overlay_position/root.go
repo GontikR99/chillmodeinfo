@@ -2,4 +2,4 @@
 
 package main
 
-type Root struct {}
+type Root struct{}

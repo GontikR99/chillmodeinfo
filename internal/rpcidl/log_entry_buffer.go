@@ -14,18 +14,19 @@ type LogEntryBufferStub struct {
 	leb LogEntryBufferServer
 }
 
-type FetchBufferedMessagesRequest struct {}
+type FetchBufferedMessagesRequest struct{}
 type FetchBufferedMessagesResponse struct {
 	Messages []*eqfiles.LogEntry
 }
+
 func (s *LogEntryBufferStub) FetchBufferedMessages(req *FetchBufferedMessagesRequest, res *FetchBufferedMessagesResponse) error {
-	res.Messages=s.leb.FetchBufferedMessages()
+	res.Messages = s.leb.FetchBufferedMessages()
 	return nil
 }
 
 func FetchBufferedMessages(client *rpc.Client) ([]*eqfiles.LogEntry, error) {
-	req:=new(FetchBufferedMessagesRequest)
-	res:=new(FetchBufferedMessagesResponse)
+	req := new(FetchBufferedMessagesRequest)
+	res := new(FetchBufferedMessagesResponse)
 	err := client.Call("LogEntryBufferStub.FetchBufferedMessages", req, res)
 	return res.Messages, err
 }

@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"github.com/GontikR99/chillmodeinfo/internal/settings"
+	"github.com/GontikR99/chillmodeinfo/pkg/console"
 	"github.com/GontikR99/chillmodeinfo/pkg/nodejs/fs"
 	"github.com/GontikR99/chillmodeinfo/pkg/nodejs/path"
 	"io"
@@ -74,8 +75,10 @@ func readAllLogsLoop(ctx context.Context) {
 func tailLog(ctx context.Context, filename string, character string, server string) {
 	fd, err := os.OpenFile(filename, os.O_RDONLY, 0)
 	if err != nil {
-		panic(err)
+		console.Log("Failed to open file")
+		return
 	}
+	defer fd.Close()
 	fd.Seek(-1, io.SeekEnd)
 	rdbuf := make([]byte, 1024)
 	buffer := new(bytes.Buffer)
@@ -98,7 +101,7 @@ func tailLog(ctx context.Context, filename string, character string, server stri
 
 	for {
 		for k, v := range newListeners {
-			logListeners[k]=v
+			logListeners[k] = v
 			delete(newListeners, k)
 		}
 		var entries []*LogEntry
@@ -117,7 +120,7 @@ func tailLog(ctx context.Context, filename string, character string, server stri
 				entries = append(entries, entry)
 			}
 		}
-		if len(entries)!=0 {
+		if len(entries) != 0 {
 			for _, callback := range logListeners {
 				callback(entries)
 			}
@@ -127,7 +130,7 @@ func tailLog(ctx context.Context, filename string, character string, server stri
 			select {
 			case <-ctx.Done():
 				return
-			case <-time.After(100*time.Millisecond):
+			case <-time.After(100 * time.Millisecond):
 				continue
 			}
 		}

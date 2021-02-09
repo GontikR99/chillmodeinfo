@@ -4,6 +4,8 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"github.com/GontikR99/chillmodeinfo/cmd/electronmain/commands"
 	"github.com/GontikR99/chillmodeinfo/cmd/electronmain/exerpcs"
 	"github.com/GontikR99/chillmodeinfo/internal/eqfiles"
@@ -22,6 +24,12 @@ func main() {
 			panic(err)
 		}
 	}()
+
+	if _, present, err := settings.LookupSetting(settings.ClientId); err==nil && !present {
+		clientId := make([]byte, 32)
+		rand.Read(clientId)
+		settings.SetSetting(settings.ClientId, hex.EncodeToString(clientId))
+	}
 
 	settings.DefaultSetting(settings.EverQuestDirectory, "C:\\Users\\Public\\Daybreak Game Company\\Installed Games\\EverQuest")
 	eqfiles.RestartLogScans()
@@ -46,7 +54,7 @@ func main() {
 			mainWindow.ServeRPC(exerpcs.NewServer())
 
 			mainWindow.Once("ready-to-show", func() {
-				mainWindow.RemoveMenu()
+				//mainWindow.RemoveMenu()
 				mainWindow.Show()
 			})
 			mainWindow.LoadFile(path.Join(application.GetAppPath(), "src/index.html"))

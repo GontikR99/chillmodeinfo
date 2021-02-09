@@ -1,4 +1,4 @@
-// +build wasm,electron
+// +build wasm
 
 package nodejs
 

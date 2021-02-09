@@ -12,7 +12,7 @@ import (
 func SendLogsTo(entries []*LogEntry, bw browserwindow.BrowserWindow) {
 	buffer := new(bytes.Buffer)
 	err := gob.NewEncoder(buffer).Encode(entries)
-	if err!=nil {
+	if err != nil {
 		console.Log(err)
 		return
 	}

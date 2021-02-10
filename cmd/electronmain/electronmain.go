@@ -54,7 +54,7 @@ func main() {
 			mainWindow.ServeRPC(exerpcs.NewServer())
 
 			mainWindow.Once("ready-to-show", func() {
-				//mainWindow.RemoveMenu()
+				mainWindow.RemoveMenu()
 				mainWindow.Show()
 			})
 			mainWindow.LoadFile(path.Join(application.GetAppPath(), "src/index.html"))

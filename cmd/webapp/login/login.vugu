@@ -1,4 +1,4 @@
 <div>
-    <img class="btn" id="signin-button" height="48" :style='visStyle(!c.SignedIn)' src="external/btn_google_signin_dark_normal_web.png"/>
+    <img class="btn" id="signin-button" height="48" :style='visStyle(!c.SignedIn)' src="external/btn_google_signin_dark_normal_web.png" @click="c.SignIn(event)"/>
     <a class="nav-link" href="#" :style='visStyle(c.SignedIn)' @click="c.SignOut(event)">Sign out</a>
 </div>

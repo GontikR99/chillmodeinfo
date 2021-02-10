@@ -2,54 +2,35 @@ package restidl
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
+	"github.com/GontikR99/chillmodeinfo/internal/httputil"
 	"net/http"
 )
 
 type packagedRequest struct {
-	IdToken  string
-	ClientId string
-	ReqMsg   interface{}
+	IdToken string
+	ReqMsg  interface{}
 }
 
 type Request struct {
-	UserId	string
+	IdToken       string
+	UserId        string
 	IdentityError error
-	packaged *packagedRequest
+	packaged      *packagedRequest
 }
 
 func (rr *Request) ReadTo(reqStruct interface{}) {
 	jsonText, err := json.Marshal(rr.packaged.ReqMsg)
 	if err != nil {
-		panic(NewError(http.StatusInternalServerError, err))
+		panic(httputil.NewError(http.StatusInternalServerError, err))
 	}
 	err = json.Unmarshal(jsonText, reqStruct)
 	if err != nil {
-		panic(NewError(http.StatusBadRequest, err))
+		panic(httputil.NewError(http.StatusBadRequest, err))
 	}
 }
 
-type httpError struct {
-	StatusCode int
-	Wrapped    error
-}
-
-func (h *httpError) Error() string {
-	return h.Wrapped.Error()
-}
-
-func NewError(statusCode int, err interface{}) error {
-	var errVal error
-	if ev, ok := err.(error); ok {
-		errVal = ev
-	} else if sv, ok := err.(string); ok {
-		errVal = errors.New(sv)
-	} else {
-		errVal = errors.New(fmt.Sprint(err))
-	}
-	return &httpError{
-		StatusCode: statusCode,
-		Wrapped:    errVal,
-	}
+type packagedResponse struct {
+	HasError bool
+	Error    string
+	ResMsg   interface{}
 }

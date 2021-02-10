@@ -6,6 +6,7 @@ import "syscall/js"
 
 type Element interface {
 	js.Wrapper
+	AddEventListener(name string, jsFunc js.Func)
 	AppendChild(Element)
 	Remove()
 	SetAttribute(key string, value string)
@@ -17,6 +18,10 @@ type jsDOMElement struct {
 
 func (j *jsDOMElement) JSValue() js.Value {
 	return j.jsValue
+}
+
+func (j *jsDOMElement) AddEventListener(name string, jsFunc js.Func) {
+	j.jsValue.Call("addEventListener", name, jsFunc)
 }
 
 func (j *jsDOMElement) AppendChild(child Element) {

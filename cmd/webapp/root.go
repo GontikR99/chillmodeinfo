@@ -6,10 +6,11 @@ import (
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/admin"
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/home"
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/leaderboard"
+	"github.com/GontikR99/chillmodeinfo/cmd/webapp/login"
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/settings"
 	"github.com/GontikR99/chillmodeinfo/internal/place"
+	"github.com/GontikR99/chillmodeinfo/internal/signins"
 	"github.com/GontikR99/chillmodeinfo/pkg/electron"
-	"github.com/GontikR99/chillmodeinfo/pkg/signin"
 	"github.com/vugu/vugu"
 )
 
@@ -32,12 +33,13 @@ var alwaysShow = func() bool { return true }
 var routes = []routeEntry{
 	{"", "Home", "home", neverShow, func() vugu.Builder { return &home.Home{} }},
 	{"leaderboard", "Leaderboard", "target", alwaysShow, func() vugu.Builder { return &leaderboard.Leaderboard{} }},
-	{"admin", "Admin", "terminal", func() bool { return signin.SignedIn() }, func() vugu.Builder { return &admin.Admin{} }},
+	{"admin", "Admin", "terminal", func() bool { return signins.SignedIn() }, func() vugu.Builder { return &admin.Admin{} }},
 }
 
 func init() {
 	if electron.IsPresent() {
 		routes = append(routes, routeEntry{"settings", "Settings", "settings", alwaysShow, func() vugu.Builder { return &settings.Settings{} }})
+		routes = append(routes, routeEntry{login.PlaceExternalLogin, "", "", neverShow, func() vugu.Builder { return &login.Standalone{} }})
 	}
 }
 

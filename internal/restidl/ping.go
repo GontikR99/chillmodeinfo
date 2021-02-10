@@ -1,6 +1,7 @@
 package restidl
 
 import (
+	"github.com/GontikR99/chillmodeinfo/internal/httputil"
 	"net/http"
 	"strings"
 )
@@ -20,7 +21,7 @@ func HandlePingV0(handler func(text string, req *Request) string) func(mux *http
 	return func(mux *http.ServeMux) {
 		serve(mux, pathPingV0, func(method string, req *Request) (interface{}, error) {
 			if !strings.EqualFold(method, methodPingV0) {
-				return nil, NewError(http.StatusBadRequest, "Wrong method")
+				return nil, httputil.NewError(http.StatusBadRequest, "Wrong method")
 			}
 			reqVal := &pingRequestV0{}
 			req.ReadTo(reqVal)

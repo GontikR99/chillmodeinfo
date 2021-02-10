@@ -4,13 +4,14 @@ package signins
 
 import (
 	"context"
-	"errors"
+	"github.com/GontikR99/chillmodeinfo/internal/httputil"
 	"google.golang.org/api/oauth2/v2"
 	"google.golang.org/api/option"
 	"net/http"
+	"strings"
 )
 
-func ValidateToken(ctx context.Context, idToken string) (string, error) {
+func validateGoogleIdToken(ctx context.Context, idToken string) (string, error) {
 	oauth2Service, err := oauth2.NewService(ctx, option.WithHTTPClient(&http.Client{}))
 	tokenInfoCall := oauth2Service.Tokeninfo()
 	tokenInfoCall.IdToken(idToken)
@@ -18,9 +19,22 @@ func ValidateToken(ctx context.Context, idToken string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return tokenInfo.UserId, nil
+	return IdTypeGoogle + tokenInfo.UserId, nil
 }
 
-func ValidateClientId(ctx context.Context, clientId string) (string, error) {
-	return "", errors.New("this client hasn't signed in yet")
+func ValidateToken(ctx context.Context, idToken string) (string, error) {
+	if strings.HasPrefix(idToken, TokenGoogle) {
+		return validateGoogleIdToken(ctx, idToken[len(TokenGoogle):])
+	} else if strings.HasPrefix(idToken, TokenClientId) {
+		gId, present, err := LookupClientId(idToken[len(TokenClientId):])
+		if err != nil {
+			return "", err
+		} else if !present {
+			return "", httputil.NewError(http.StatusForbidden, "This client hasn't signed in yet")
+		} else {
+			return gId, nil
+		}
+	} else {
+		return "", httputil.NewError(http.StatusForbidden, "No identity provided, or unsupported token type")
+	}
 }

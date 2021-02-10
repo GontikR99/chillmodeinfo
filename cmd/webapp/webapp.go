@@ -3,6 +3,7 @@
 package main
 
 import (
+	"github.com/GontikR99/chillmodeinfo/internal/toast"
 	"github.com/vugu/vugu"
 	"github.com/vugu/vugu/domrender"
 	"github.com/vugu/vugu/js"
@@ -10,6 +11,8 @@ import (
 )
 
 func main() {
+	toast.ListenForToasts()
+
 	renderer, err := domrender.New("#page_root")
 	if err != nil {
 		panic(err)

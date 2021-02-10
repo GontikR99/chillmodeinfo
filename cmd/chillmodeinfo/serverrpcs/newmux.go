@@ -7,11 +7,11 @@ import "net/http"
 var installers []func(mux *http.ServeMux)
 
 func register(callback func(mux *http.ServeMux)) {
-	installers=append(installers, callback)
+	installers = append(installers, callback)
 }
 
 func NewMux() *http.ServeMux {
-	mux:=http.NewServeMux()
+	mux := http.NewServeMux()
 	for _, installer := range installers {
 		installer(mux)
 	}

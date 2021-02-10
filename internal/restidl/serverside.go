@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/GontikR99/chillmodeinfo/internal/httputil"
 	"github.com/GontikR99/chillmodeinfo/internal/signins"
 	"io/ioutil"
-	"log"
 	"net/http"
 )
 
@@ -25,51 +25,50 @@ func serve(mux *http.ServeMux, path string, handler func(method string, request 
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		var userId string
-		var idErr error
-		if packaged.IdToken!="" {
-			userId, idErr = signins.ValidateToken(r.Context(), packaged.IdToken)
-		} else if packaged.ClientId!="" {
-			userId, idErr = signins.ValidateClientId(r.Context(), packaged.ClientId)
-		} else {
-			userId=""
-			idErr = NewError(http.StatusUnauthorized, "No identity provided")
-		}
+		userId, idErr := signins.ValidateToken(r.Context(), packaged.IdToken)
 
 		result, err := func() (val interface{}, err error) {
 			defer func() {
 				if r := recover(); r != nil {
-					val = nil
 					if ev, ok := r.(error); ok {
+						val = ev.Error()
 						err = ev
 					} else {
+						val = fmt.Sprint(r)
 						err = errors.New(fmt.Sprint(r))
 					}
 				}
 			}()
 			val, err = handler(r.Method, &Request{
+				IdToken:       packaged.IdToken,
 				UserId:        userId,
 				IdentityError: idErr,
 				packaged:      packaged,
 			})
 			return
 		}()
-		if err != nil {
-			log.Println(err)
-			if he, ok := err.(*httpError); ok {
-				http.Error(w, he.Error(), he.StatusCode)
-			} else {
-				http.Error(w, he.Error(), http.StatusInternalServerError)
-			}
-			return
-		}
-		outbytes, err := json.Marshal(result)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
+		var response *packagedResponse
+		if err == nil {
+			response = &packagedResponse{
+				HasError: false,
+				Error:    "",
+			}
+			w.WriteHeader(http.StatusOK)
+		} else {
+			response = &packagedResponse{
+				HasError: true,
+				Error:    err.Error(),
+				ResMsg:   result,
+			}
+			if he, ok := err.(*httputil.HttpError); ok {
+				w.WriteHeader(he.StatusCode)
+			} else {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+		}
+		response.ResMsg = result
+		outbytes, _ := json.Marshal(response)
 		w.Write(outbytes)
 	})
 }

@@ -59,7 +59,7 @@ func init() {
 	memoizedSettings=make(map[string]string)
 	err := os.Mkdir(dbDir, 0700)
 	if err!=nil && !os.IsExist(err) {
-		console.Logf("%v", err)
+		console.Logf("Failed to create directory: %v", err)
 		return
 	}
 

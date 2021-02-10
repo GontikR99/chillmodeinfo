@@ -1,6 +1,6 @@
 // +build wasm,web
 
-package signin
+package signins
 
 import (
 	"github.com/GontikR99/chillmodeinfo/pkg/document"
@@ -15,12 +15,6 @@ var googleReady = &sync.WaitGroup{}
 func PrepareForSignin(clientId string) {
 	if !electron.IsPresent() {
 		googleReady.Add(1)
-
-		metaTag := document.CreateElement("meta")
-		metaTag.SetAttribute("name", "google-signin-client_id")
-		metaTag.SetAttribute("content", clientId)
-		head := document.GetElementsByTagName("head")[0]
-		head.AppendChild(metaTag)
 
 		loginReadyFunc := new(js.Func)
 		*loginReadyFunc = js.FuncOf(func(_ js.Value, _ []js.Value) interface{} {

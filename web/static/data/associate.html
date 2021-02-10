@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="external/bootstrap.min.css">
+    <link href="external/dashboard.css" rel="stylesheet">
+    <title>Chillmode.info login page</title>
+    <meta name="google-signin-client_id" content="465672423976-qn8u1junpmdanfnlbc2ne3dobfmf4nvp.apps.googleusercontent.com">
+</head>
+<body id="body" style="overflow: hidden; background-color: rgba(0,0,0,0);">
+<script src="external/pack.js"></script>
+<script src="https://apis.google.com/js/platform.js" async defer></script>
+<h1>Please sign in below:</h1>
+<div id="signin-button" class="g-signin2" data-onsuccess="onSignIn"></div>
+<script>
+    function onSignIn(googleUser) {
+        var xhr=new XMLHttpRequest()
+        xhr.open("PUT", "/rest/v0/associate")
+        xhr.setRequestHeader("Content-Type", "application/json")
+        xhr.addEventListener("load", () => {
+            var auth2=gapi.auth2.getAuthInstance();
+            auth2.signOut().then(() => {
+                document.getElementById("signin-button").remove()
+                document.getElementsByTagName("body")[0].appendChild(document.createTextNode("Thanks, you can close this tab now"))
+            })
+        })
+        var query=""
+        var i = location.href.indexOf('?')
+        if (i>=0) {
+            query=location.href.substr(i+1)
+        }
+        xhr.send(JSON.stringify({
+            "IdToken": "google_token:"+googleUser.getAuthResponse().id_token,
+            "ReqMsg": {
+                "ClientId": query
+            },
+        }))
+    }
+</script>
+</body>
+</html>

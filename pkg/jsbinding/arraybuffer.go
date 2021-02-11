@@ -8,11 +8,12 @@ import (
 )
 
 func MakeArrayBuffer(data []byte) js.Value {
-	view := js.Global().Get("Uint8Array").New(len(data))
+	buffer := js.Global().Get("ArrayBuffer").New(len(data))
+	view := js.Global().Get("Uint8Array").New(buffer)
 	for idx, val := range data {
 		view.SetIndex(idx, int(val))
 	}
-	return view
+	return buffer
 }
 
 func ReadArrayBuffer(buffer js.Value) (data []byte) {

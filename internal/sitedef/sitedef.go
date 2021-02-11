@@ -3,7 +3,7 @@ package sitedef
 import "strconv"
 
 const DNSName = "chillmode.info"
-const Port = 442
+const Port = 443
 
 var SiteURL = "https://" + DNSName + ":" + strconv.Itoa(Port)
 

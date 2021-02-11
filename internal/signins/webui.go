@@ -29,14 +29,17 @@ func init() {
 			})
 
 			auth2.Get("currentUser").Call("listen", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-				SetToken(TokenGoogle + args[0].Call("getAuthResponse").Get("id_token").String())
-				return nil
-			}))
-
-			auth2.Get("isSignedIn").Call("listen", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-				if !args[0].Bool() {
+				userProfile := args[0].Call("getBasicProfile")
+				if userProfile.IsUndefined() {
 					ClearToken()
+					return nil
 				}
+				authResponse := args[0].Call("getAuthResponse")
+				if authResponse.IsNull() || authResponse.IsUndefined() || authResponse.Get("id_token").IsUndefined() {
+					ClearToken()
+					return nil
+				}
+				SetToken(TokenGoogle + authResponse.Get("id_token").String())
 				return nil
 			}))
 

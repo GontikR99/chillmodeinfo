@@ -10,7 +10,7 @@ var nextToastId=0
 const toastHolderId="toast-holder"
 
 func Error(subsystem string, err error) {
-	PopupWithDuration("Error in "+subsystem, err.Error(), 8*time.Second)
+	PopupWithDuration("Error in "+subsystem, err.Error(), 90*time.Second)
 }
 
 func Popup(title string, messageText string) {

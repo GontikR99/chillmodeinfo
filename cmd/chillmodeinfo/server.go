@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"flag"
 	"github.com/GontikR99/chillmodeinfo/cmd/chillmodeinfo/serverrpcs"
+	"github.com/GontikR99/chillmodeinfo/internal/sitedef"
 	"github.com/GontikR99/chillmodeinfo/web/bin"
 	"github.com/GontikR99/chillmodeinfo/web/static"
 	"github.com/NYTimes/gziphandler"
@@ -17,7 +18,6 @@ import (
 func main() {
 	certPath := flag.String("cert", "", "Path to PEM format certificates")
 	keyPath := flag.String("key", "", "Path to PEM format private key")
-	port := flag.Int("port", 8443, "Port to serve")
 	flag.Parse()
 
 	baseMux := serverrpcs.NewMux()
@@ -38,7 +38,7 @@ func main() {
 		},
 	}
 	srv := &http.Server{
-		Addr:         ":"+strconv.Itoa(*port),
+		Addr:         ":"+strconv.Itoa(sitedef.Port),
 		Handler:      &handlerWrapper{muxWithGzip},
 		TLSConfig:    cfg,
 		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),

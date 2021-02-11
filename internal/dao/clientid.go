@@ -1,9 +1,9 @@
 // +build server
 
-package signins
+package dao
 
 import (
-	"github.com/GontikR99/chillmodeinfo/internal/db"
+	"github.com/GontikR99/chillmodeinfo/internal/dao/db"
 	"github.com/timshannon/bolthold"
 )
 

@@ -1,8 +1,11 @@
-// +build wasm
+// +build wasm, web
 
 package main
 
 import (
+	"errors"
+	"github.com/GontikR99/chillmodeinfo/internal/restidl"
+	"github.com/GontikR99/chillmodeinfo/internal/signins"
 	"github.com/GontikR99/chillmodeinfo/internal/toast"
 	"github.com/vugu/vugu"
 	"github.com/vugu/vugu/domrender"
@@ -12,7 +15,15 @@ import (
 
 func main() {
 	toast.ListenForToasts()
-
+	signins.OnStateChange(func() {
+		if signins.SignedIn() {
+			err := restidl.VerifyLogin()
+			if err != nil {
+				signins.SignOut()
+				toast.Error("accounts", errors.New("Unable to verify login: "+err.Error()))
+			}
+		}
+	})
 	renderer, err := domrender.New("#page_root")
 	if err != nil {
 		panic(err)

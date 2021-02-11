@@ -4,6 +4,7 @@ package signins
 
 import (
 	"context"
+	"github.com/GontikR99/chillmodeinfo/internal/dao"
 	"github.com/GontikR99/chillmodeinfo/internal/httputil"
 	"google.golang.org/api/oauth2/v2"
 	"google.golang.org/api/option"
@@ -19,14 +20,15 @@ func validateGoogleIdToken(ctx context.Context, idToken string) (string, error) 
 	if err != nil {
 		return "", err
 	}
-	return IdTypeGoogle + tokenInfo.UserId, nil
+	outToken := IdTypeGoogle + tokenInfo.UserId
+	return outToken, dao.RegisterUser(outToken, tokenInfo.Email)
 }
 
 func ValidateToken(ctx context.Context, idToken string) (string, error) {
 	if strings.HasPrefix(idToken, TokenGoogle) {
 		return validateGoogleIdToken(ctx, idToken[len(TokenGoogle):])
 	} else if strings.HasPrefix(idToken, TokenClientId) {
-		gId, present, err := LookupClientId(idToken[len(TokenClientId):])
+		gId, present, err := dao.LookupClientId(idToken[len(TokenClientId):])
 		if err != nil {
 			return "", err
 		} else if !present {

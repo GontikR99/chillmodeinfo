@@ -4,6 +4,7 @@ package serverrpcs
 
 import (
 	"errors"
+	"github.com/GontikR99/chillmodeinfo/internal/dao"
 	"github.com/GontikR99/chillmodeinfo/internal/httputil"
 	"github.com/GontikR99/chillmodeinfo/internal/restidl"
 	"github.com/GontikR99/chillmodeinfo/internal/signins"
@@ -14,7 +15,7 @@ import (
 type serverAssociateHandler struct{}
 
 func (s *serverAssociateHandler) AssertAssociatedClientId(clientId string) error {
-	_, present, err := signins.LookupClientId(clientId)
+	_, present, err := dao.LookupClientId(clientId)
 	if err != nil {
 		return err
 	} else if !present {
@@ -30,7 +31,7 @@ func (s *serverAssociateHandler) AssociateClientId(clientId string, req *restidl
 	} else if req.UserId == "" {
 		return errors.New("No userId to associate")
 	} else {
-		return signins.AssociateClientId(clientId, req.UserId)
+		return dao.AssociateClientId(clientId, req.UserId)
 	}
 }
 
@@ -40,7 +41,7 @@ func (s *serverAssociateHandler) DisassociateClientId(req *restidl.Request) erro
 	} else if !strings.HasPrefix(req.IdToken, signins.TokenClientId) {
 		return httputil.NewError(http.StatusBadRequest, "Can only disassociate clientIds")
 	} else {
-		return signins.DisassociateClientId(req.IdToken[len(signins.TokenClientId):])
+		return dao.DisassociateClientId(req.IdToken[len(signins.TokenClientId):])
 	}
 }
 

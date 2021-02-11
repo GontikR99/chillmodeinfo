@@ -29,6 +29,7 @@ func httpCall(method string, path string, reqText []byte) (resBody []byte, statC
 		xhr.Call("open", method, path, true)
 	}
 	xhr.Set("responseType", "arraybuffer")
+	xhr.Call("setRequestHeader", "Content-Type", "application/json")
 	xhr.Call("setRequestHeader", "Accept", "application/json")
 	xhr.Call("send", jsbinding.MakeArrayBuffer(reqText))
 	<-doneChan

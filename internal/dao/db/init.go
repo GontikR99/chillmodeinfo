@@ -8,7 +8,7 @@ var database *bolthold.Store
 
 func init() {
 	var err error
-	database, err = bolthold.Open("chillmodeinfo.db", 0600, nil)
+	database, err = bolthold.Open("chillmodeinfo.db", 0640, nil)
 	if err!=nil {
 		panic(err)
 	}

@@ -1,6 +1,7 @@
 package restidl
 
 import (
+	"context"
 	"github.com/GontikR99/chillmodeinfo/internal/httputil"
 	"net/http"
 	"strings"
@@ -46,7 +47,7 @@ func DisassociateClientId() error {
 
 func HandleAssociate(handler AssociationHandler) func(mux *http.ServeMux) {
 	return func(mux *http.ServeMux) {
-		serve(mux, pathAssociateV0, func(method string, request *Request) (interface{}, error) {
+		serve(mux, pathAssociateV0, func(ctx context.Context, method string, request *Request) (interface{}, error) {
 			if strings.EqualFold("GET", method) {
 				reqVal := new(assertAssociatedRequestV0)
 				request.ReadTo(reqVal)

@@ -14,16 +14,17 @@ import (
 var https = nodejs.Require("https")
 
 func httpCall(method string, path string, reqText []byte) (resBody []byte, statCode int, err error) {
+	headers := map[string]interface{}{
+		"Content-Type":   "application/json",
+		"Accept":         "application/json",
+		"Content-Length": len(reqText),
+	}
 	options := map[string]interface{}{
 		"hostname": sitedef.DNSName,
 		"port":     sitedef.Port,
 		"path":     path,
 		"method":   method,
-		"headers": map[string]interface{}{
-			"Content-Type":   "application/json",
-			"Accept":         "application/json",
-			"Content-Length": len(reqText),
-		},
+		"headers": headers,
 	}
 
 	doneChan := make(chan struct{})

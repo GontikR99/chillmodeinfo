@@ -20,8 +20,8 @@ func validateGoogleIdToken(ctx context.Context, idToken string) (string, error) 
 	if err != nil {
 		return "", err
 	}
-	outToken := IdTypeGoogle + tokenInfo.UserId
-	return outToken, dao.RegisterUser(outToken, tokenInfo.Email)
+	userId := IdTypeGoogle + tokenInfo.UserId
+	return userId, dao.RegisterUser(userId, tokenInfo.Email)
 }
 
 func ValidateToken(ctx context.Context, idToken string) (string, error) {

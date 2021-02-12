@@ -20,7 +20,9 @@ func main() {
 	keyPath := flag.String("key", "", "Path to PEM format private key")
 	flag.Parse()
 
-	baseMux := serverrpcs.NewMux()
+	baseMux := http.NewServeMux()
+	serverrpcs.HandleRest(baseMux)
+	handleAssociatePage(baseMux)
 	baseMux.Handle("/", http.FileServer(static.StaticFiles))
 	baseMux.Handle("/bin/", http.StripPrefix("/bin", http.FileServer(bin.BinFiles)))
 

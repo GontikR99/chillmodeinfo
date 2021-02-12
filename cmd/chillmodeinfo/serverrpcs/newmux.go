@@ -10,10 +10,8 @@ func register(callback func(mux *http.ServeMux)) {
 	installers = append(installers, callback)
 }
 
-func NewMux() *http.ServeMux {
-	mux := http.NewServeMux()
+func HandleRest(mux *http.ServeMux) {
 	for _, installer := range installers {
 		installer(mux)
 	}
-	return mux
 }

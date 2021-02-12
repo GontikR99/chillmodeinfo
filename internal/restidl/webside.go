@@ -3,6 +3,7 @@
 package restidl
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/GontikR99/chillmodeinfo/internal/httputil"
 	"github.com/GontikR99/chillmodeinfo/internal/signins"
@@ -44,7 +45,7 @@ func call(method string, path string, request interface{}, response interface{})
 		return wrapError(resCode, err)
 	}
 	err = json.Unmarshal(respMsgBytes, response)
-	if err != nil {
+	if err != nil && !responsePackage.HasError {
 		return wrapError(resCode, err)
 	}
 
@@ -60,5 +61,5 @@ func call(method string, path string, request interface{}, response interface{})
 }
 
 // Do nothing call so that IDL files can build client side
-func serve(mux *http.ServeMux, path string, handler func(method string, request *Request) (interface{}, error)) {
+func serve(mux *http.ServeMux, path string, handler func(ctx context.Context, method string, request *Request) (interface{}, error)) {
 }

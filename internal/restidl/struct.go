@@ -6,6 +6,8 @@ import (
 	"net/http"
 )
 
+const HeaderRequestPayload="Request-Payload"
+
 type packagedRequest struct {
 	IdToken string
 	ReqMsg  interface{}

@@ -6,10 +6,11 @@ import (
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/admin"
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/home"
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/leaderboard"
+	"github.com/GontikR99/chillmodeinfo/cmd/webapp/localprofile"
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/login"
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/settings"
 	"github.com/GontikR99/chillmodeinfo/internal/place"
-	"github.com/GontikR99/chillmodeinfo/internal/signins"
+	"github.com/GontikR99/chillmodeinfo/internal/profile"
 	"github.com/GontikR99/chillmodeinfo/pkg/electron"
 	"github.com/vugu/vugu"
 )
@@ -33,7 +34,18 @@ var alwaysShow = func() bool { return true }
 var routes = []routeEntry{
 	{"", "Home", "home", neverShow, func() vugu.Builder { return &home.Home{} }},
 	{"leaderboard", "Leaderboard", "target", alwaysShow, func() vugu.Builder { return &leaderboard.Leaderboard{} }},
-	{"admin", "Admin", "terminal", func() bool { return signins.SignedIn() }, func() vugu.Builder { return &admin.Admin{} }},
+	{"admin", "Admin", "terminal", func() bool {
+		if localprofile.GetProfile()==nil {
+			return false
+		} else {
+			switch localprofile.GetProfile().GetAdminState() {
+			case profile.StateAdminUnrequested: return true
+			case profile.StateAdminRequested: return true
+			case profile.StateAdminApproved: return true
+			default: return false
+			}
+		}
+	}, func() vugu.Builder { return &admin.Admin{} }},
 }
 
 func init() {

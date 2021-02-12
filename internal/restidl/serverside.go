@@ -3,16 +3,22 @@
 package restidl
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/GontikR99/chillmodeinfo/internal/httputil"
 	"github.com/GontikR99/chillmodeinfo/internal/signins"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"runtime"
+	"strings"
 )
 
-func serve(mux *http.ServeMux, path string, handler func(method string, request *Request) (interface{}, error)) {
+const TagRequest="tagRequest"
+
+func serve(mux *http.ServeMux, path string, handler func(ctx context.Context, method string, request *Request) (interface{}, error)) {
 	mux.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 		bodyText, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -20,6 +26,10 @@ func serve(mux *http.ServeMux, path string, handler func(method string, request 
 			return
 		}
 		packaged := &packagedRequest{}
+		headerBodyText := strings.Join(r.Header[HeaderRequestPayload], "")
+		if headerBodyText != "" {
+			bodyText=[]byte(headerBodyText)
+		}
 		err = json.Unmarshal(bodyText, packaged)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -30,6 +40,10 @@ func serve(mux *http.ServeMux, path string, handler func(method string, request 
 		result, err := func() (val interface{}, err error) {
 			defer func() {
 				if r := recover(); r != nil {
+					stb:=make([]byte, 65536)
+					stbLen:=runtime.Stack(stb, false)
+					log.Print(string(stb[:stbLen]))
+
 					if ev, ok := r.(error); ok {
 						val = ev.Error()
 						err = ev
@@ -39,12 +53,14 @@ func serve(mux *http.ServeMux, path string, handler func(method string, request 
 					}
 				}
 			}()
-			val, err = handler(r.Method, &Request{
+			wrappedRequest := &Request{
 				IdToken:       packaged.IdToken,
 				UserId:        userId,
 				IdentityError: idErr,
 				packaged:      packaged,
-			})
+			}
+			subCtx := context.WithValue(r.Context(), TagRequest, wrappedRequest)
+			val, err = handler(subCtx, r.Method, wrappedRequest)
 			return
 		}()
 		w.Header().Set("Content-Type", "application/json")

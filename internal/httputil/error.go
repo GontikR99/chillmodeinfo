@@ -3,6 +3,7 @@ package httputil
 import (
 	"errors"
 	"fmt"
+	"net/http"
 )
 
 type HttpError struct {
@@ -27,4 +28,8 @@ func NewError(statusCode int, err interface{}) error {
 		StatusCode: statusCode,
 		Wrapped:    errVal,
 	}
+}
+
+func UnsupportedMethod(method string) error {
+	return NewError(http.StatusBadRequest, "Unsupported method "+method)
 }

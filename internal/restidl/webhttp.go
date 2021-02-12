@@ -7,6 +7,8 @@ import (
 	"github.com/GontikR99/chillmodeinfo/internal/sitedef"
 	"github.com/GontikR99/chillmodeinfo/pkg/electron"
 	"github.com/GontikR99/chillmodeinfo/pkg/jsbinding"
+	"net/http"
+	"strings"
 	"syscall/js"
 )
 
@@ -31,7 +33,12 @@ func httpCall(method string, path string, reqText []byte) (resBody []byte, statC
 	xhr.Set("responseType", "arraybuffer")
 	xhr.Call("setRequestHeader", "Content-Type", "application/json")
 	xhr.Call("setRequestHeader", "Accept", "application/json")
-	xhr.Call("send", jsbinding.MakeArrayBuffer(reqText))
+	if strings.EqualFold(http.MethodGet, method) {
+		xhr.Call("setRequestHeader", HeaderRequestPayload, string(reqText))
+		xhr.Call("send")
+	} else {
+		xhr.Call("send", jsbinding.MakeArrayBuffer(reqText))
+	}
 	<-doneChan
 	resBody = jsbinding.ReadArrayBuffer(xhr.Get("response"))
 	if resBody == nil {

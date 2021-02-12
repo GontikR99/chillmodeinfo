@@ -41,3 +41,7 @@ func Find(result interface{}, query *bolthold.Query) error {
 func ForEach(query *bolthold.Query, callback interface{}) error {
 	return database.ForEach(query, callback)
 }
+
+func DeleteMatching(dataType interface{}, query *bolthold.Query) error {
+	return database.DeleteMatching(dataType, query)
+}

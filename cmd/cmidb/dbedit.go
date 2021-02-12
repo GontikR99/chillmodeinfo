@@ -21,7 +21,7 @@ func main() {
 			fmt.Println("DisplayName: ", v.GetDisplayName())
 			fmt.Println("Email: ", v.GetEmail())
 			fmt.Println("AdminState: ", v.GetAdminState())
-			fmt.Println("StartTime: ", v.GetAdminStartDate().Format(time.ANSIC))
+			fmt.Println("StartTime: ", v.GetStartDate().Format(time.ANSIC))
 			fmt.Println()
 		}
 	case "promote":

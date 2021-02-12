@@ -47,17 +47,19 @@ func UpdateProfileForAdmin(userId string, displayName string, adminState profile
 		Email:          oldEntry.GetEmail(),
 		DisplayName:    displayName,
 		AdminState:     adminState,
-		AdminStartDate: time.Time{},
+		AdminStartDate: startDate,
 	}
 	return db.Upsert(userId, &profileObj)
 }
 
 func ListAllProfiles() []profile.Entry {
-	entries:=new([]profile.Entry)
-	db.ForEach(bolthold.Where("UserId").Ne(""), func(entry *userProfileV1) {
-		*entries=append(*entries, entry)
-	})
-	return *entries
+	entries:=[]userProfileV1{}
+	db.Find(&entries, bolthold.Where("UserId").Ne(""))
+	retEntries:=[]profile.Entry{}
+	for i:=0;i<len(entries); i++ {
+		retEntries = append(retEntries, &entries[i])
+	}
+	return retEntries
 }
 
 type userProfileV1 struct {
@@ -72,7 +74,7 @@ func (u *userProfileV1) GetUserId() string {return u.UserId}
 func (u *userProfileV1) GetEmail() string {return u.Email}
 func (u *userProfileV1) GetDisplayName() string {return u.DisplayName}
 func (u *userProfileV1) GetAdminState() profile.AdminState {return u.AdminState}
-func (u *userProfileV1) GetAdminStartDate() time.Time {return u.AdminStartDate}
+func (u *userProfileV1) GetStartDate() time.Time           {return u.AdminStartDate}
 
 func init() {
 	db.ForEach(bolthold.Where("UserId").Ne(""), func(record *userProfileV0) {

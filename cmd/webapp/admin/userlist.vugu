@@ -1,0 +1,70 @@
+<div>
+    <h2>Admin requests</h2>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th scope="col" class="small">Who</th>
+            <th scope="col" class="small">Email</th>
+            <th scope="col"></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr vg-for="_, entry := range c.Requesters">
+            <th scope="row" vg-content="entry.GetDisplayName()"></th>
+            <td vg-content="entry.GetEmail()"></td>
+            <td>
+                <span>Pending: </span>
+                <button type="button" @click="c.ChangeState(event, entry.GetUserId(), profile.StateAdminApproved)" class="btn btn-primary">Approve</button>
+                <button type="button" @click="c.ChangeState(event, entry.GetUserId(), profile.StateAdminDenied)" class="btn btn-danger">Deny</button>
+            </td>
+        </tr>
+        <tr vg-for="_, entry := range c.Denied">
+            <th scope="row" vg-content="entry.GetDisplayName()"></th>
+            <td vg-content="entry.GetEmail()"></td>
+            <td>
+                <span>Denied:</span>
+                <button type="button" @click="c.ChangeState(event, entry.GetUserId(), profile.StateAdminApproved)" class="btn btn-danger">Approve</button>
+                <button type="button" @click="c.ChangeState(event, entry.GetUserId(), profile.StateAdminUnrequested)" class="btn btn-danger">Reset</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h2>Admins</h2>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th scope="col" class="small">Who</th>
+            <th scope="col" class="small">Since</th>
+            <th scope="col" class="small"></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr vg-for="_, entry := range c.Elders">
+            <th scope="row" vg-content="entry.GetDisplayName()"></th>
+            <td vg-content="entry.GetStartDate().Format(time.ANSIC)"></td>
+        </tr>
+        <tr>
+            <th scope="row" vg-content="c.Self.GetDisplayName()"></th>
+            <td vg-content="c.Self.GetStartDate().Format(time.ANSIC)"></td>
+            <td>
+                <button type="button" @click="c.ChangeState(event, c.Self.GetUserId(), profile.StateAdminUnrequested)" class="btn btn-danger">Step down</button>
+            </td>
+        </tr>
+        <tr vg-for="_, entry := range c.Subordinates">
+            <th scope="row" vg-content="entry.GetDisplayName()"></th>
+            <td vg-content="entry.GetStartDate().Format(time.ANSIC)"></td>
+            <td>
+                <button type="button" @click="c.ChangeState(event, entry.GetUserId(), profile.StateAdminUnrequested)" class="btn btn-danger">Boot</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+<script type="application/x-go">
+import (
+    "time"
+    "github.com/GontikR99/chillmodeinfo/internal/profile"
+)
+</script>

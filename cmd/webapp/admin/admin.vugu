@@ -13,13 +13,23 @@
             <li>and other such chores</li>
         </ul>
         <p>Does this sound like you?  If so, please provide us with some information:</p>
+        <form @submit="event.PreventDefault()">
+            <div class="form-group row">
+                <label class="col-form-label col-sm-2">Who are you?</label>
+                <div class="col-sm-10">
+                    <vgform:Input type="text" class="form-control" :Value="c.DisplayName"/>
+                </div>
+                <button type="button" class="btn btn-primary" @click="c.RequestAdmin(event)">Request Admin</button>
+            </div>
+        </form>
+
     </vg-template>
     <vg-template vg-if="localprofile.GetProfile()!=nil && localprofile.GetProfile().GetAdminState()==profile.StateAdminRequested">
         <h1>Become an admin</h1>
         <p>Your request to become a site admin has been submitted.  Please await approval by an existing site admin</p>
     </vg-template>
     <vg-template vg-if="localprofile.GetProfile()!=nil && localprofile.GetProfile().GetAdminState()==profile.StateAdminApproved">
-        <h1>Admin panel</h1>
+        <admin:Userlist />
     </vg-template>
     <vg-template vg-if="localprofile.GetProfile()!=nil && localprofile.GetProfile().GetAdminState()>=profile.StateAdminDenied">
         <h1>You heathen!</h1>
@@ -30,5 +40,6 @@
 import (
     "github.com/GontikR99/chillmodeinfo/cmd/webapp/localprofile"
     "github.com/GontikR99/chillmodeinfo/internal/profile"
+    "github.com/vugu/vugu/vgform"
 )
 </script>

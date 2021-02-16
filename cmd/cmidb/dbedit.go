@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/GontikR99/chillmodeinfo/internal/dao"
 	"github.com/GontikR99/chillmodeinfo/internal/profile"
+	"github.com/GontikR99/chillmodeinfo/internal/record"
 	"os"
 	"time"
 )
@@ -46,6 +47,15 @@ func main() {
 		} else {
 			fmt.Println("Updated %s", os.Args[2])
 		}
+	case "listmembers":
+		fmt.Println("Listing members.")
+		m, _ := dao.GetMembers()
+		for k, v:=range m {
+			fmt.Printf("%v = %v\n", k, *record.NewBasicMember(v))
+		}
+	case "wipemembers":
+		fmt.Println("Wiping members.")
+		dao.WipeMembers()
 	default:
 		fmt.Println("Unknown command ", os.Args[1])
 	}

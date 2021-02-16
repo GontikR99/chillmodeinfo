@@ -5,8 +5,8 @@ package restidl
 import (
 	"context"
 	"encoding/json"
-	"github.com/GontikR99/chillmodeinfo/internal/httputil"
-	"github.com/GontikR99/chillmodeinfo/internal/signins"
+	"github.com/GontikR99/chillmodeinfo/internal/profile/signins"
+	"github.com/GontikR99/chillmodeinfo/internal/comms/httputil"
 	"net/http"
 )
 

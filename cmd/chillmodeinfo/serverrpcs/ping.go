@@ -3,7 +3,7 @@
 package serverrpcs
 
 import (
-	"github.com/GontikR99/chillmodeinfo/internal/restidl"
+	"github.com/GontikR99/chillmodeinfo/internal/comms/restidl"
 	"log"
 )
 

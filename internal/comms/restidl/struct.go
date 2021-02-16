@@ -2,11 +2,11 @@ package restidl
 
 import (
 	"encoding/json"
-	"github.com/GontikR99/chillmodeinfo/internal/httputil"
+	"github.com/GontikR99/chillmodeinfo/internal/comms/httputil"
 	"net/http"
 )
 
-const HeaderRequestPayload="Request-Payload"
+const HeaderRequestPayload = "Request-Payload"
 
 type packagedRequest struct {
 	IdToken string

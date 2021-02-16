@@ -1,0 +1,77 @@
+<div>
+    <roster:DumpTarget @DumpPosted="go c.reloadMembers(event.Env)"></roster:DumpTarget>
+    <h2>Members</h2>
+    <table class="table">
+        <thead class="thead-dark">
+        <tr>
+            <th scope="col" >
+                <a href="#" @click="c.updateSort(event, sortByName)">
+                    Name
+                    <vg-template vg-if="c.sortOrder[0].index==sortByName">
+                        <span vg-if="c.sortOrder[0].direction==sortAscending">&#x25BC;</span>
+                        <span vg-if="c.sortOrder[0].direction==sortDescending">&#x25B2;</span>
+                    </vg-template>
+                </a>
+            </th>
+            <th scope="col" >
+                <a href="#" @click="c.updateSort(event, sortByLevel)">
+                    Level
+                    <vg-template vg-if="c.sortOrder[0].index==sortByLevel">
+                        <span vg-if="c.sortOrder[0].direction==sortAscending">&#x25BC;</span>
+                        <span vg-if="c.sortOrder[0].direction==sortDescending">&#x25B2;</span>
+                    </vg-template>
+                </a>
+            </th>
+            <th scope="col" >
+                <a href="#" @click="c.updateSort(event, sortByClass)">
+                    Class
+                    <vg-template vg-if="c.sortOrder[0].index==sortByClass">
+                        <span vg-if="c.sortOrder[0].direction==sortAscending">&#x25BC;</span>
+                        <span vg-if="c.sortOrder[0].direction==sortDescending">&#x25B2;</span>
+                    </vg-template>
+                </a>
+            </th>
+            <th scope="col" >
+                <a href="#" @click="c.updateSort(event, sortByAlt)">
+                    Alt?
+                    <vg-template vg-if="c.sortOrder[0].index==sortByAlt">
+                        <span vg-if="c.sortOrder[0].direction==sortAscending">&#x25BC;</span>
+                        <span vg-if="c.sortOrder[0].direction==sortDescending">&#x25B2;</span>
+                    </vg-template>
+                </a>
+            </th>
+            <th scope="col" >
+                <a href="#" @click="c.updateSort(event, sortByActive)">
+                    Last active
+                    <vg-template vg-if="c.sortOrder[0].index==sortByActive">
+                        <span vg-if="c.sortOrder[0].direction==sortAscending">&#x25BC;</span>
+                        <span vg-if="c.sortOrder[0].direction==sortDescending">&#x25B2;</span>
+                    </vg-template>
+                </a>
+            </th>
+            <th scope="col" >
+                <a href="#" @click="c.updateSort(event, sortByOwner)">
+                    Owner
+                    <vg-template vg-if="c.sortOrder[0].index==sortByOwner">
+                        <span vg-if="c.sortOrder[0].direction==sortAscending">&#x25BC;</span>
+                        <span vg-if="c.sortOrder[0].direction==sortDescending">&#x25B2;</span>
+                    </vg-template>
+                </a>
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+            <tr vg-for='_, member := range c.membership'>
+                <th scope="row" vg-content="member.GetName()"></th>
+                <td vg-content="fmt.Sprint(member.GetLevel())"></td>
+                <td vg-content="member.GetClass()"></td>
+                <td vg-content="fmt.Sprint(member.IsAlt())"></td>
+                <td vg-content="fmt.Sprint(member.GetLastActive())"></td>
+                <td vg-content="member.GetOwner()"></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<script type="application/x-go">
+import "fmt"
+</script>

@@ -4,9 +4,9 @@ package admin
 
 import (
 	"context"
-	"github.com/GontikR99/chillmodeinfo/cmd/webapp/localprofile"
-	"github.com/GontikR99/chillmodeinfo/internal/restidl"
-	"github.com/GontikR99/chillmodeinfo/internal/toast"
+	"github.com/GontikR99/chillmodeinfo/internal/comms/restidl"
+	"github.com/GontikR99/chillmodeinfo/internal/profile/localprofile"
+	"github.com/GontikR99/chillmodeinfo/pkg/toast"
 	"github.com/vugu/vugu"
 	"strings"
 	"time"
@@ -17,17 +17,17 @@ type Admin struct {
 }
 
 func (c *Admin) Init(ctx vugu.InitCtx) {
-	c.DisplayName=&FormTextInput{
+	c.DisplayName = &FormTextInput{
 		Env: ctx.EventEnv(),
 	}
 	self := localprofile.GetProfile()
-	if self!=nil {
-		c.DisplayName.Value=self.GetDisplayName()
+	if self != nil {
+		c.DisplayName.Value = self.GetDisplayName()
 	}
 }
 
 func (c *Admin) submittable() bool {
-	return c.DisplayName.Value!=""
+	return c.DisplayName.Value != ""
 }
 
 func (c *Admin) RequestAdmin(event vugu.DOMEvent) {
@@ -41,7 +41,7 @@ func (c *Admin) RequestAdmin(event vugu.DOMEvent) {
 
 type FormTextInput struct {
 	Value string
-	Env vugu.EventEnv
+	Env   vugu.EventEnv
 }
 
 func (f *FormTextInput) StringValue() string {
@@ -49,10 +49,9 @@ func (f *FormTextInput) StringValue() string {
 }
 
 func (f *FormTextInput) SetStringValue(s string) {
-	f.Value=strings.TrimSpace(s)
+	f.Value = strings.TrimSpace(s)
 	go func() {
 		f.Env.Lock()
 		f.Env.UnlockRender()
 	}()
 }
-

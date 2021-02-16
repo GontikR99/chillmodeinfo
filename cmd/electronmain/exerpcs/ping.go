@@ -1,9 +1,9 @@
 package exerpcs
 
 import (
-	"github.com/GontikR99/chillmodeinfo/internal/rpcidl"
-	"github.com/GontikR99/chillmodeinfo/internal/toast"
+	"github.com/GontikR99/chillmodeinfo/internal/comms/rpcidl"
 	"github.com/GontikR99/chillmodeinfo/pkg/console"
+	"github.com/GontikR99/chillmodeinfo/pkg/toast"
 	"time"
 )
 

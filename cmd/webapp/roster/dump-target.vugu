@@ -1,0 +1,23 @@
+<div class="container-fluid">
+    <vg-template vg-if="localprofile.IsAdmin()">
+        <div class="media">
+            <img class="mr-4" src="assets/guild_dump_drop.png" width="480" @dragover="dragOver(event)" @drop="c.dropFile(event)"/>
+            <div class="media-body">
+                <h5><u>Pending uploads</u></h5>
+                <div class="row" vg-for='idx, dump := range c.Dumps'>
+                    <div class="col col-2 small" vg-content='dump.Filename()'></div>
+                    <div class="col col-8" vg-content='dump.Message()'></div>
+                    <div class="col col-1" vg-if='dump.Valid()'>
+                        <button type="button" class="btn btn-primary btn-sm small" vg-attr="dumpAttrs{dump}" @click="c.Commit(event, dump)">Upload</button>
+                    </div>
+                    <div class="col col-1">
+                        <button type="button" class="btn btn-danger btn-sm small" @click="c.Abort(event, dump)">Abort</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </vg-template>
+</div>
+<script type="application/x-go">
+import "github.com/GontikR99/chillmodeinfo/internal/profile/localprofile"
+</script>

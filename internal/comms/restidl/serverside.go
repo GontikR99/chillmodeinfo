@@ -7,8 +7,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/GontikR99/chillmodeinfo/internal/httputil"
-	"github.com/GontikR99/chillmodeinfo/internal/signins"
+	"github.com/GontikR99/chillmodeinfo/internal/profile/signins"
+	"github.com/GontikR99/chillmodeinfo/internal/comms/httputil"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -16,7 +16,7 @@ import (
 	"strings"
 )
 
-const TagRequest="tagRequest"
+const TagRequest = "tagRequest"
 
 func serve(mux *http.ServeMux, path string, handler func(ctx context.Context, method string, request *Request) (interface{}, error)) {
 	mux.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
@@ -28,7 +28,7 @@ func serve(mux *http.ServeMux, path string, handler func(ctx context.Context, me
 		packaged := &packagedRequest{}
 		headerBodyText := strings.Join(r.Header[HeaderRequestPayload], "")
 		if headerBodyText != "" {
-			bodyText=[]byte(headerBodyText)
+			bodyText = []byte(headerBodyText)
 		}
 		err = json.Unmarshal(bodyText, packaged)
 		if err != nil {
@@ -40,8 +40,8 @@ func serve(mux *http.ServeMux, path string, handler func(ctx context.Context, me
 		result, err := func() (val interface{}, err error) {
 			defer func() {
 				if r := recover(); r != nil {
-					stb:=make([]byte, 65536)
-					stbLen:=runtime.Stack(stb, false)
+					stb := make([]byte, 65536)
+					stbLen := runtime.Stack(stb, false)
 					log.Print(string(stb[:stbLen]))
 
 					if ev, ok := r.(error); ok {

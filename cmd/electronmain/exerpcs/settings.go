@@ -3,7 +3,7 @@
 package exerpcs
 
 import (
-	"github.com/GontikR99/chillmodeinfo/internal/rpcidl"
+	"github.com/GontikR99/chillmodeinfo/internal/comms/rpcidl"
 	"github.com/GontikR99/chillmodeinfo/internal/settings"
 )
 

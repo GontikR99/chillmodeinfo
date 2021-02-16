@@ -3,9 +3,9 @@
 package signins
 
 import (
-	"github.com/GontikR99/chillmodeinfo/internal/rpcidl"
+	"github.com/GontikR99/chillmodeinfo/internal/comms/rpcidl"
 	"github.com/GontikR99/chillmodeinfo/internal/sitedef"
-	"github.com/GontikR99/chillmodeinfo/pkg/document"
+	"github.com/GontikR99/chillmodeinfo/pkg/dom/document"
 	"github.com/GontikR99/chillmodeinfo/pkg/electron"
 	"github.com/GontikR99/chillmodeinfo/pkg/electron/ipc/ipcrenderer"
 	"sync"
@@ -23,7 +23,7 @@ func init() {
 		auth2ReadyFunc := new(js.Func)
 		*auth2ReadyFunc = js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 			auth2ReadyFunc.Release()
-			auth2=gapi.Get("auth2").Call("init", map[string]interface{}{
+			auth2 = gapi.Get("auth2").Call("init", map[string]interface{}{
 				"client_id":    sitedef.GoogleSigninClientId,
 				"cookiepolicy": "single_host_origin",
 			})
@@ -53,8 +53,8 @@ func init() {
 		loginReadyFunc := new(js.Func)
 		*loginReadyFunc = js.FuncOf(func(_ js.Value, _ []js.Value) interface{} {
 			loginReadyFunc.Release()
-			gapi=js.Global().Get("gapi")
-			gapi.Call( "load", "auth2", auth2ReadyFunc)
+			gapi = js.Global().Get("gapi")
+			gapi.Call("load", "auth2", auth2ReadyFunc)
 
 			return nil
 		})

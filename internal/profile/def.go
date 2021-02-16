@@ -21,24 +21,40 @@ type Entry interface {
 }
 
 func Equal(oldValue, newValue Entry) bool {
-	if oldValue==nil {return newValue==nil}
-	if newValue==nil {return oldValue==nil}
-	return oldValue.GetUserId()==newValue.GetUserId() &&
-		oldValue.GetDisplayName()==newValue.GetDisplayName() &&
-		oldValue.GetAdminState()==newValue.GetAdminState()
+	if oldValue == nil {
+		return newValue == nil
+	}
+	if newValue == nil {
+		return oldValue == nil
+	}
+	return oldValue.GetUserId() == newValue.GetUserId() &&
+		oldValue.GetDisplayName() == newValue.GetDisplayName() &&
+		oldValue.GetAdminState() == newValue.GetAdminState()
 }
 
 type BasicProfile struct {
-	UserId string
-	Email string
+	UserId      string
+	Email       string
 	DisplayName string
-	AdminState AdminState
-	StartDate time.Time
+	AdminState  AdminState
+	StartDate   time.Time
 }
 
-func (b *BasicProfile) GetUserId() string {return b.UserId}
-func (b *BasicProfile) GetEmail() string {return b.Email}
-func (b *BasicProfile) GetDisplayName() string {return b.DisplayName}
-func (b *BasicProfile) GetAdminState() AdminState {return b.AdminState}
-func (b *BasicProfile) GetStartDate() time.Time {return b.StartDate}
+func NewBasicProfile(entry Entry) *BasicProfile {
+	if entry == nil {
+		return nil
+	}
+	return &BasicProfile{
+		UserId:      entry.GetUserId(),
+		Email:       entry.GetEmail(),
+		DisplayName: entry.GetDisplayName(),
+		AdminState:  entry.GetAdminState(),
+		StartDate:   entry.GetStartDate(),
+	}
+}
 
+func (b *BasicProfile) GetUserId() string         { return b.UserId }
+func (b *BasicProfile) GetEmail() string          { return b.Email }
+func (b *BasicProfile) GetDisplayName() string    { return b.DisplayName }
+func (b *BasicProfile) GetAdminState() AdminState { return b.AdminState }
+func (b *BasicProfile) GetStartDate() time.Time   { return b.StartDate }

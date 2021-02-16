@@ -7,7 +7,7 @@ import (
 	"github.com/GontikR99/chillmodeinfo/cmd/electronmain/overlaymap"
 	"github.com/GontikR99/chillmodeinfo/internal/eqfiles"
 	"github.com/GontikR99/chillmodeinfo/internal/overlay"
-	"github.com/GontikR99/chillmodeinfo/internal/rpcidl"
+	"github.com/GontikR99/chillmodeinfo/internal/comms/rpcidl"
 	"github.com/GontikR99/chillmodeinfo/pkg/electron/browserwindow"
 )
 

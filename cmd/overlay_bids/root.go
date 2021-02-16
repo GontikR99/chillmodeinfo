@@ -4,7 +4,7 @@ package main
 
 import (
 	"github.com/GontikR99/chillmodeinfo/internal/eqfiles"
-	"github.com/GontikR99/chillmodeinfo/internal/rpcidl"
+	"github.com/GontikR99/chillmodeinfo/internal/comms/rpcidl"
 	"github.com/GontikR99/chillmodeinfo/pkg/console"
 	"github.com/GontikR99/chillmodeinfo/pkg/electron/ipc/ipcrenderer"
 	"github.com/vugu/vugu"

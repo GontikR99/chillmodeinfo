@@ -4,10 +4,10 @@ package exerpcs
 
 import (
 	"errors"
-	"github.com/GontikR99/chillmodeinfo/internal/restidl"
-	"github.com/GontikR99/chillmodeinfo/internal/rpcidl"
+	"github.com/GontikR99/chillmodeinfo/internal/profile/signins"
+	"github.com/GontikR99/chillmodeinfo/internal/comms/restidl"
+	"github.com/GontikR99/chillmodeinfo/internal/comms/rpcidl"
 	"github.com/GontikR99/chillmodeinfo/internal/settings"
-	"github.com/GontikR99/chillmodeinfo/internal/signins"
 	"github.com/GontikR99/chillmodeinfo/internal/sitedef"
 	"github.com/GontikR99/chillmodeinfo/pkg/nodejs"
 )

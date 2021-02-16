@@ -5,7 +5,7 @@ package toast
 import (
 	"bytes"
 	"encoding/gob"
-	"github.com/GontikR99/chillmodeinfo/pkg/document"
+	"github.com/GontikR99/chillmodeinfo/pkg/dom/document"
 	"github.com/GontikR99/chillmodeinfo/pkg/electron"
 	"github.com/GontikR99/chillmodeinfo/pkg/electron/ipc/ipcrenderer"
 	"strconv"

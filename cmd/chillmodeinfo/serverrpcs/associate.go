@@ -5,9 +5,9 @@ package serverrpcs
 import (
 	"errors"
 	"github.com/GontikR99/chillmodeinfo/internal/dao"
-	"github.com/GontikR99/chillmodeinfo/internal/httputil"
-	"github.com/GontikR99/chillmodeinfo/internal/restidl"
-	"github.com/GontikR99/chillmodeinfo/internal/signins"
+	"github.com/GontikR99/chillmodeinfo/internal/profile/signins"
+	"github.com/GontikR99/chillmodeinfo/internal/comms/httputil"
+	"github.com/GontikR99/chillmodeinfo/internal/comms/restidl"
 	"net/http"
 	"strings"
 )

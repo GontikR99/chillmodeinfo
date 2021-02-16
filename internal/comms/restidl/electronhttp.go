@@ -24,7 +24,7 @@ func httpCall(method string, path string, reqText []byte) (resBody []byte, statC
 		"port":     sitedef.Port,
 		"path":     path,
 		"method":   method,
-		"headers": headers,
+		"headers":  headers,
 	}
 
 	doneChan := make(chan struct{})

@@ -38,7 +38,7 @@
 </div>
 <script type="application/x-go">
 import (
-    "github.com/GontikR99/chillmodeinfo/cmd/webapp/localprofile"
+    "github.com/GontikR99/chillmodeinfo/internal/profile/localprofile"
     "github.com/GontikR99/chillmodeinfo/internal/profile"
     "github.com/vugu/vugu/vgform"
 )

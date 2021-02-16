@@ -4,7 +4,7 @@ package login
 
 import (
 	"github.com/GontikR99/chillmodeinfo/internal/place"
-	"github.com/GontikR99/chillmodeinfo/internal/signins"
+	"github.com/GontikR99/chillmodeinfo/internal/profile/signins"
 	"github.com/GontikR99/chillmodeinfo/pkg/electron"
 	"github.com/vugu/vugu"
 )
@@ -22,7 +22,7 @@ func visStyle(value bool) string {
 }
 
 func (c *Login) Init(ctx vugu.InitCtx) {
-	c.SignedIn=signins.SignedIn()
+	c.SignedIn = signins.SignedIn()
 
 	signins.OnStateChange(func() {
 		ctx.EventEnv().Lock()

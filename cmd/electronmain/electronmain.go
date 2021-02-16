@@ -9,6 +9,7 @@ import (
 	"github.com/GontikR99/chillmodeinfo/cmd/electronmain/commands"
 	"github.com/GontikR99/chillmodeinfo/cmd/electronmain/exerpcs"
 	"github.com/GontikR99/chillmodeinfo/internal/eqfiles"
+	"github.com/GontikR99/chillmodeinfo/internal/profile/localprofile"
 	"github.com/GontikR99/chillmodeinfo/internal/settings"
 	"github.com/GontikR99/chillmodeinfo/pkg/console"
 	"github.com/GontikR99/chillmodeinfo/pkg/electron/application"
@@ -34,6 +35,7 @@ func main() {
 	settings.DefaultSetting(settings.EverQuestDirectory, "C:\\Users\\Public\\Daybreak Game Company\\Installed Games\\EverQuest")
 	eqfiles.RestartLogScans()
 	commands.WatchLogs()
+	localprofile.StartElectronPoll()
 
 	appCtx, exitApp := context.WithCancel(context.Background())
 

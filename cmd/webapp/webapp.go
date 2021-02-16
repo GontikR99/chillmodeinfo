@@ -3,8 +3,8 @@
 package main
 
 import (
-	"github.com/GontikR99/chillmodeinfo/cmd/webapp/localprofile"
-	"github.com/GontikR99/chillmodeinfo/internal/toast"
+	"github.com/GontikR99/chillmodeinfo/internal/profile/localprofile"
+	"github.com/GontikR99/chillmodeinfo/pkg/toast"
 	"github.com/vugu/vugu"
 	"github.com/vugu/vugu/domrender"
 	"github.com/vugu/vugu/js"
@@ -24,7 +24,7 @@ func main() {
 		panic(err)
 	}
 
-	localprofile.StartPoll(renderer.EventEnv())
+	localprofile.StartWebPoll(renderer.EventEnv())
 
 	root := &Root{}
 

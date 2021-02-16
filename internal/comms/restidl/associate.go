@@ -2,7 +2,7 @@ package restidl
 
 import (
 	"context"
-	"github.com/GontikR99/chillmodeinfo/internal/httputil"
+	"github.com/GontikR99/chillmodeinfo/internal/comms/httputil"
 	"net/http"
 	"strings"
 )

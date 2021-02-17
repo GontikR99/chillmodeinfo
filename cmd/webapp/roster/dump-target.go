@@ -3,22 +3,44 @@
 package roster
 
 import (
+	"github.com/GontikR99/chillmodeinfo/pkg/dom/document"
 	"github.com/GontikR99/chillmodeinfo/pkg/toast"
 	"github.com/vugu/vugu"
+	"syscall/js"
+	"time"
 )
 
 type DumpTarget struct {
 	DumpPosted DumpPostedHandler
 	Dumps []ParsedDump
+	dragOverFunc js.Func
+	dead bool
 }
 
 func (c *DumpTarget) Init(ctx vugu.InitCtx) {
+	c.dragOverFunc=js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		event := args[0]
+		event.Call("stopPropagation")
+		event.Call("preventDefault")
+		event.Get("dataTransfer").Set("dropEffect", "copy")
+		return nil
+	})
+	c.dead=false
+	go func() {
+		for !c.dead {
+			elt := document.GetElementById("guild-dump-drop")
+			if elt!=nil {
+				elt.AddEventListener("dragover", c.dragOverFunc)
+				return
+			}
+			<-time.After(10*time.Millisecond)
+		}
+	}()
 }
 
-func dragOver(event vugu.DOMEvent) {
-	event.StopPropagation()
-	event.PreventDefault()
-	event.JSEvent().Get("dataTransfer").Set("dropEffect", "copy")
+func (c *DumpTarget) Destroy(ctx vugu.DestroyCtx) {
+	c.dead = true
+	c.dragOverFunc.Release()
 }
 
 func (c *DumpTarget) addDump(env vugu.EventEnv, dump ParsedDump) {
@@ -45,7 +67,10 @@ func (c *DumpTarget) Commit(event vugu.DOMEvent, dump ParsedDump) {
 	event.PreventDefault()
 	dump.Commit(func(err error) {
 		if err==nil {
-			go c.removeDump(event.EventEnv(), dump)
+			go func() {
+				c.removeDump(event.EventEnv(), dump)
+				c.DumpPosted.DumpPostedHandle(DumpPostedEvent{Env: event.EventEnv()})
+			}()
 		} else {
 			toast.Error("uploads", err)
 		}

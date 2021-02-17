@@ -1,6 +1,9 @@
 package record
 
-import "time"
+import (
+	"github.com/GontikR99/chillmodeinfo/internal/sitedef"
+	"time"
+)
 
 type Member interface {
 	GetName() string
@@ -11,6 +14,10 @@ type Member interface {
 	GetDKP() float64
 	GetLastActive() time.Time
 	GetOwner() string
+}
+
+func IsActive(m Member) bool {
+	return !m.GetLastActive().Before(time.Now().Add(sitedef.InactiveDuration))
 }
 
 type BasicMember struct {

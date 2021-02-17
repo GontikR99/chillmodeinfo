@@ -10,6 +10,7 @@ import (
 	"github.com/GontikR99/chillmodeinfo/internal/comms/restidl"
 	"github.com/GontikR99/chillmodeinfo/internal/eqfiles"
 	"github.com/GontikR99/chillmodeinfo/internal/record"
+	"github.com/GontikR99/chillmodeinfo/pkg/console"
 	"github.com/GontikR99/chillmodeinfo/pkg/jsbinding"
 	"github.com/GontikR99/chillmodeinfo/pkg/toast"
 	"github.com/vugu/vugu"
@@ -21,12 +22,13 @@ import (
 func (c *DumpTarget) dropFile(event vugu.DOMEvent) {
 	event.StopPropagation()
 	event.PreventDefault()
+	console.Log("Dropped")
 	jsFiles := event.JSEvent().Get("dataTransfer").Get("files")
 	if jsFiles.IsUndefined() {
 		toast.Error("drop", errors.New("Whoa, was that a file you dropped?"))
 	}
 	for i:=0;i<jsFiles.Length();i++ {
-		go c.handleFile(event.EventEnv(), jsFiles.Index(i))
+		c.handleFile(event.EventEnv(), jsFiles.Index(i))
 	}
 }
 
@@ -54,17 +56,15 @@ func (c *DumpTarget) handleFile(env vugu.EventEnv, fileObj js.Value) {
 		data := jsbinding.ReadArrayBuffer(resArr)
 
 		members, err := eqfiles.ParseGuildDump(bytes.NewReader(data))
-		if err!=nil {
+		if err != nil {
 			go c.addDump(env, &uploadError{fileName, err.Error()})
 			return nil
 		}
-
 		go c.addDump(env, &uploadReady{
 			filename: fileName,
 			members:  members,
 			busy:     false,
 		})
-
 		return nil
 	}))
 

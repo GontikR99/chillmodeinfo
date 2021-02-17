@@ -45,6 +45,24 @@ func ParseGuildDump(re io.Reader) ([]record.Member, error) {
 		} else {
 			return nil, errors.New("Not a valid guild dump: Mangled alt flag")
 		}
+		lastOnlineParts := strings.Split(elements[5], "/")
+		if len(lastOnlineParts)!=3 {
+			return nil, errors.New("Not a valid guild dump: failed to parse last online date")
+		}
+		lastOnlineMonth, err := strconv.Atoi(lastOnlineParts[0])
+		if err!=nil || 0>=lastOnlineMonth || 12<lastOnlineMonth {
+			return nil, errors.New("Not a valid guild dump: failed to parse last online date")
+		}
+		lastOnlineDay, err := strconv.Atoi(lastOnlineParts[1])
+		if err!=nil || 0>=lastOnlineDay || 31<lastOnlineDay {
+			return nil, errors.New("Not a valid guild dump: failed to parse last online date")
+		}
+		lastOnlineYear, err := strconv.Atoi(lastOnlineParts[2])
+		if err!=nil || 0>lastOnlineYear || 99<lastOnlineYear {
+			return nil, errors.New("Not a valid guild dump: failed to parse last online date")
+		}
+		lastOnline := time.Date(2000+lastOnlineYear, time.Month(lastOnlineMonth), lastOnlineDay, 12, 0, 0, 0, time.UTC)
+
 		comment := elements[7]
 		records=append(records, &record.BasicMember{
 			Name:       name,
@@ -53,7 +71,7 @@ func ParseGuildDump(re io.Reader) ([]record.Member, error) {
 			Rank:       rank,
 			Alt:        altFlag,
 			DKP:        0,
-			LastActive: time.Time{},
+			LastActive: lastOnline,
 			Owner:      comment,
 		})
 	}

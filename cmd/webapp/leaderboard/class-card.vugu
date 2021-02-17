@@ -1,0 +1,23 @@
+<div class="card">
+    <div class="card-header" vg-content="c.Class"></div>
+    <div class="card-body">
+        <div class="row" vg-for="_, member := range c.filteredMembers()" vg-key="member.GetName()">
+            <div class="col col-8">
+                <b vg-content="member.GetName()"></b>
+            </div>
+            <ui:EditLabel
+                class="col col-4"
+                EditWidth="2rem"
+                :Value='fmt.Sprintf("%.1f", member.GetDKP())'
+                :Editable='localprofile.IsAdmin()'
+                @Submit='c.updateDKP(event, member)'/>
+        </div>
+    </div>
+</div>
+<script type="application/x-go">
+import (
+    "fmt"
+    "github.com/GontikR99/chillmodeinfo/internal/profile/localprofile"
+    "github.com/GontikR99/chillmodeinfo/cmd/webapp/ui"
+)
+</script>

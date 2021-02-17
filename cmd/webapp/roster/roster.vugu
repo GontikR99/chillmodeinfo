@@ -1,6 +1,16 @@
 <div>
     <roster:DumpTarget @DumpPosted="go c.reloadMembers(event.Env)"></roster:DumpTarget>
     <h2>Members</h2>
+    <div class="row">
+        <div class="col col-3">
+            <input type="checkbox" .checked="c.hideInactive" @change="c.hideInactiveChanged(event)" />
+            Hide inactive
+        </div>
+        <div class="col col-3">
+            <input type="checkbox" .checked="c.hideAlts" @change="c.hideAltsChanged(event)" />
+            Hide alts
+        </div>
+    </div>
     <table class="table">
         <thead class="thead-dark">
         <tr>
@@ -61,17 +71,20 @@
         </tr>
         </thead>
         <tbody>
-            <tr vg-for='_, member := range c.membership'>
+            <tr vg-for="_, member := range c.filteredMembers()">
                 <th scope="row" vg-content="member.GetName()"></th>
                 <td vg-content="fmt.Sprint(member.GetLevel())"></td>
                 <td vg-content="member.GetClass()"></td>
-                <td vg-content="fmt.Sprint(member.IsAlt())"></td>
-                <td vg-content="fmt.Sprint(member.GetLastActive())"></td>
+                <td vg-if="member.IsAlt()">&#x1F476;</td>
+                <td vg-if="!member.IsAlt()"></td>
+                <td vg-content='member.GetLastActive().Format("2006-01-02")'></td>
                 <td vg-content="member.GetOwner()"></td>
             </tr>
         </tbody>
     </table>
 </div>
 <script type="application/x-go">
-import "fmt"
+import (
+    "fmt"
+)
 </script>

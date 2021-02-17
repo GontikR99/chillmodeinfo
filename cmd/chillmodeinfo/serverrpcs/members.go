@@ -8,11 +8,11 @@ import (
 	"github.com/GontikR99/chillmodeinfo/internal/comms/restidl"
 	"github.com/GontikR99/chillmodeinfo/internal/dao"
 	"github.com/GontikR99/chillmodeinfo/internal/dao/db"
+	"github.com/GontikR99/chillmodeinfo/internal/eqfiles"
 	"github.com/GontikR99/chillmodeinfo/internal/record"
 	"github.com/timshannon/bolthold"
 	"go.etcd.io/bbolt"
 	"strings"
-	"time"
 )
 
 func initialCap(s string) string {
@@ -53,12 +53,9 @@ func (s serverMembersHandler) MergeMembers(ctx context.Context, members []record
 		return nil, err
 	}
 	err = db.MakeUpdate(func(tx *bbolt.Tx) error {
-		// merge mains first, to allow us to better pair alt-indicating comments
+		// Merge twice so we get owners better
 		for _, v := range members {
 			if v==nil {
-				continue
-			}
-			if v.IsAlt() {
 				continue
 			}
 			err := txMergeMember(tx, v)
@@ -67,12 +64,8 @@ func (s serverMembersHandler) MergeMembers(ctx context.Context, members []record
 			}
 		}
 
-		// then merge alts
 		for _, v := range members {
 			if v==nil {
-				continue
-			}
-			if !v.IsAlt() {
 				continue
 			}
 			err := txMergeMember(tx, v)
@@ -93,6 +86,9 @@ func txMergeMember(tx *bbolt.Tx, member record.Member) error {
 	if member.GetName()=="" {
 		return errors.New("Each member must have a non-empty name")
 	}
+	if _, ok := eqfiles.ClassMap[member.GetClass()]; !ok {
+		return errors.New("Unrecognized class "+member.GetClass())
+	}
 	realOwner:=""
 	_, err := dao.TxGetMember(tx, initialCap(member.GetOwner()))
 	if err==nil {
@@ -103,12 +99,12 @@ func txMergeMember(tx *bbolt.Tx, member record.Member) error {
 	if err==bolthold.ErrNotFound {
 		return dao.TxUpsertMember(tx, &record.BasicMember{
 			Name:       initialCap(member.GetName()),
-			Class:      initialCap(member.GetClass()),
+			Class:      member.GetClass(),
 			Level:      member.GetLevel(),
 			Rank: 		member.GetRank(),
 			Alt:        member.IsAlt(),
 			DKP:        0,
-			LastActive: time.Now(),
+			LastActive: member.GetLastActive(),
 			Owner:      realOwner,
 		})
 	} else if err!=nil {
@@ -119,7 +115,7 @@ func txMergeMember(tx *bbolt.Tx, member record.Member) error {
 		}
 		return dao.TxUpsertMember(tx, &record.BasicMember{
 			Name:       initialCap(member.GetName()),
-			Class:      initialCap(member.GetClass()),
+			Class:      member.GetClass(),
 			Level:      member.GetLevel(),
 			Rank:       member.GetRank(),
 			Alt:        member.IsAlt(),

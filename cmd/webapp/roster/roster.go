@@ -6,7 +6,6 @@ import (
 	"context"
 	"github.com/GontikR99/chillmodeinfo/internal/comms/restidl"
 	"github.com/GontikR99/chillmodeinfo/internal/record"
-	"github.com/GontikR99/chillmodeinfo/pkg/console"
 	"github.com/GontikR99/chillmodeinfo/pkg/toast"
 	"github.com/vugu/vugu"
 	"sort"
@@ -14,8 +13,40 @@ import (
 
 type Roster struct {
 	membership []record.Member
-	hideAlts bool
 	sortOrder []sortOrder
+
+	hideInactive bool
+	hideAlts bool
+}
+
+func (c *Roster) Init(ctx vugu.InitCtx) {
+	c.hideInactive = true
+	c.hideAlts = false
+	c.sortOrder=[]sortOrder{{sortByName, sortAscending}}
+	go c.reloadMembers(ctx.EventEnv())
+}
+
+func (c *Roster) hideInactiveChanged(event vugu.DOMEvent) {
+	c.hideInactive=event.JSEventTarget().Get("checked").Bool()
+}
+
+func (c *Roster) hideAltsChanged(event vugu.DOMEvent) {
+	c.hideAlts=event.JSEventTarget().Get("checked").Bool()
+}
+
+func (c *Roster) shouldShow(m record.Member) bool {
+	return (!c.hideInactive || record.IsActive(m)) &&
+		(!c.hideAlts || !m.IsAlt())
+}
+
+func (c *Roster) filteredMembers() []record.Member {
+	var res []record.Member
+	for _, v := range c.membership {
+		if c.shouldShow(v) {
+			res = append(res, v)
+		}
+	}
+	return res
 }
 
 func (c *Roster) reloadMembers(env vugu.EventEnv) {
@@ -77,13 +108,7 @@ func (c *Roster) updateSort(env vugu.DOMEvent, index sortIndex) {
 		}
 		c.sortOrder = newSortOrder
 	}
-	console.Log(c.sortOrder)
 	go c.resortMembers(env.EventEnv())
-}
-
-func (c *Roster) Init(ctx vugu.InitCtx) {
-	c.sortOrder=[]sortOrder{{sortByName, sortAscending}}
-	go c.reloadMembers(ctx.EventEnv())
 }
 
 type sortIndex int

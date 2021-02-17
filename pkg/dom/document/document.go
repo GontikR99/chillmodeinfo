@@ -11,7 +11,7 @@ var doc=js.Global().Get("document")
 
 func GetElementById(id string) dom.Element {
 	jsv := doc.Call("getElementById", id)
-	if jsv.IsNull() {
+	if jsv.IsNull() || jsv.IsUndefined() {
 		return nil
 	} else {
 		return dom.WrapElement(jsv)

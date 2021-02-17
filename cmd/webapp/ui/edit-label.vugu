@@ -1,0 +1,14 @@
+<span vg-attr="c.AttrMap">
+    <span vg-if="c.editState==editStateDisplay">
+        <span vg-content="c.Value"></span>
+        <a href="#" vg-if="c.Editable" @click="c.startEdit(event)">&#x270f;</a>
+    </span>
+    <span vg-if="c.editState==editStateEditing">
+        <input type="text" :value="c.editValue" @change="c.editChange(event)" :style='"width:"+c.EditWidth+";"'/>
+        <a href="#" @click="c.cancelEdit(event)">&#x274c;</a>
+        <a href="#" @click="c.acceptEdit(event)">&#x2714;</a>
+    </span>
+    <span vg-if="c.editState==editStateSubmitting">
+        <span vg-content="c.editValue" class="text-muted"></span>
+    </span>
+</span>

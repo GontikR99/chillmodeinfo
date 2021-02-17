@@ -1,3 +1,18 @@
 <div>
-    Leaderboard
+    <h5>Leaderboard</h5>
+    <div class="row">
+        <div class="col col-2">
+            <input type="checkbox" .checked="c.hideInactive" @change="c.hideInactiveChanged(event)" />
+            Hide inactive
+        </div>
+        <div class="col col-2">
+            <input type="checkbox" .checked="c.hideAlts" @change="c.hideAltsChanged(event)" />
+            Hide alts
+        </div>
+    </div>
+    <div class="card-columns">
+        <vg-template vg-for="_, card := range c.Cards">
+            <vg-comp expr="card"/>
+        </vg-template>
+    </div>
 </div>

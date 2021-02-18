@@ -16,7 +16,7 @@ func Listen(channelName string) (<-chan msgcomm.Message, func()) {
 	resultChan := make(chan msgcomm.Message)
 	recvFunc := js.FuncOf(func(_ js.Value, args []js.Value)interface{} {
 		event := args[0]
-		data, _ := ipc.Decode(args[1].String())
+		data, _ := ipc.Decode(args[1])
 		resultChan <- &electronMessage{
 			event: event,
 			content: []byte(data),

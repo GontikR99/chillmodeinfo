@@ -4,6 +4,8 @@ package login
 
 import (
 	"github.com/GontikR99/chillmodeinfo/internal/comms/rpcidl"
+	"github.com/GontikR99/chillmodeinfo/internal/place"
+	"github.com/GontikR99/chillmodeinfo/internal/profile/signins"
 	"github.com/GontikR99/chillmodeinfo/pkg/electron/ipc/ipcrenderer"
 	"github.com/vugu/vugu"
 	"time"
@@ -26,6 +28,9 @@ func (c *Standalone) Init(ctx vugu.InitCtx) {
 				return
 			case <-time.After(1 * time.Second):
 				signIns.PollSignIn()
+			}
+			if signins.SignedIn() {
+				place.NavigateTo(ctx.EventEnv(), "")
 			}
 		}
 	}()

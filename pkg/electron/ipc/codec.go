@@ -3,22 +3,14 @@
 package ipc
 
 import (
-	"encoding/hex"
+	"github.com/GontikR99/chillmodeinfo/pkg/jsbinding"
+	"syscall/js"
 )
 
-func Encode(data []byte) string {
-	//buffer := new(bytes.Buffer)
-	//base64.NewEncoder(base64.StdEncoding, buffer).Write(data)
-	//return string(buffer.Bytes())
-	return hex.EncodeToString(data)
+func Encode(data []byte) js.Value {
+	return jsbinding.MakeArrayBuffer(data)
 }
 
-func Decode(encoded string) ([]byte,error) {
-	//decoder := base64.NewDecoder(base64.StdEncoding, strings.NewReader(encoded))
-	//data, err := ioutil.ReadAll(decoder)
-	//if err!=nil {
-	//	console.Log("Failed to decode", err)
-	//}
-	//return data, err
-	return hex.DecodeString(encoded)
+func Decode(encoded js.Value) ([]byte,error) {
+	return jsbinding.ReadArrayBuffer(encoded), nil
 }

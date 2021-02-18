@@ -7,6 +7,10 @@ import "syscall/js"
 type Element interface {
 	js.Wrapper
 	AddEventListener(name string, jsFunc js.Func)
+
+	Focus()
+	Blur()
+
 	AppendChild(Element)
 	Remove()
 	SetAttribute(key string, value string)
@@ -36,6 +40,14 @@ func (j *jsDOMElement) Remove() {
 
 func (j *jsDOMElement) SetAttribute(key string, value string) {
 	j.jsValue.Call("setAttribute", key, value)
+}
+
+func (j *jsDOMElement) Focus() {
+	j.jsValue.Call("focus")
+}
+
+func (j *jsDOMElement) Blur() {
+	j.jsValue.Call("blur")
 }
 
 func WrapElement(value js.Value) Element {

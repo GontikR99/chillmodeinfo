@@ -3,15 +3,13 @@ package eqfiles
 import (
 	"bufio"
 	"errors"
-	"github.com/GontikR99/chillmodeinfo/internal/record"
 	"io"
 	"strconv"
 	"strings"
-	"time"
 )
 
-func ParseRaidDump(in io.Reader) ([]record.Member, error) {
-	var records []record.Member
+func ParseRaidDump(in io.Reader) ([]string, error) {
+	var attendees []string
 	scan := bufio.NewScanner(in)
 	for scan.Scan() {
 		line := scan.Text()
@@ -40,15 +38,7 @@ func ParseRaidDump(in io.Reader) ([]record.Member, error) {
 		if _, ok := ClassMap[class]; !ok {
 			return nil, errors.New("Not a valid raid dump: unrecognized class "+class)
 		}
-		records=append(records, &record.BasicMember{
-			Name:       name,
-			Class:      class,
-			Level:      int16(level),
-			Alt:        false,
-			DKP:        0,
-			LastActive: time.Time{},
-			Owner:      "",
-		})
+		attendees=append(attendees, name)
 	}
-	return records, nil
+	return attendees, nil
 }

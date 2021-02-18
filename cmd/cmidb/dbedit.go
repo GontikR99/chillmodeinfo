@@ -3,6 +3,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/GontikR99/chillmodeinfo/internal/dao"
 	"github.com/GontikR99/chillmodeinfo/internal/profile"
@@ -13,7 +14,7 @@ import (
 
 func main() {
 	if len(os.Args)<2 {
-		fmt.Println("What do you want me to do?  list/promote/demote")
+		fmt.Println("What do you want me to do?  list/promote/demote/listmembers/wipemembers/showlogs/showalllogs")
 	}
 	switch os.Args[1] {
 	case "list":
@@ -56,6 +57,35 @@ func main() {
 	case "wipemembers":
 		fmt.Println("Wiping members.")
 		dao.WipeMembers()
+
+	case "showlogs":
+		if len(os.Args)<3 {
+			fmt.Println("showlogs <id>")
+			return
+		}
+		fmt.Println("Listing logs for "+os.Args[3])
+		entries, err := dao.GetDKPChangesForTarget(os.Args[3])
+		if err!=nil {
+			panic(err)
+		}
+		for idx, entry:=range entries {
+			jj, _ := json.Marshal(record.NewBasicDKPChangeEntry(entry))
+			fmt.Printf("%d=%s\n", 1+idx, string(jj))
+		}
+		fmt.Println("done")
+
+	case "showalllogs":
+		fmt.Println("Listing all DKP logs")
+		entries, err := dao.GetDKPChanges()
+		if err!=nil {
+			panic(err)
+		}
+		for idx, entry:=range entries {
+			jj, _ := json.Marshal(record.NewBasicDKPChangeEntry(entry))
+			fmt.Printf("%d=%s\n", 1+idx, string(jj))
+		}
+		fmt.Println("done")
+
 	default:
 		fmt.Println("Unknown command ", os.Args[1])
 	}

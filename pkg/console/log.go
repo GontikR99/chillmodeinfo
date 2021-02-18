@@ -7,14 +7,14 @@ import (
 	"syscall/js"
 )
 
-func LogRaw(values ...interface{}) {
-	js.Global().Get("console").Call("log", values...)
+func LogRaw(value js.Value) {
+	js.Global().Get("console").Call("log", value)
 }
 
 func Log(values ...interface{}) {
-	LogRaw(fmt.Sprint(values...))
+	LogRaw(js.ValueOf(fmt.Sprint(values...)))
 }
 
 func Logf(format string, values ...interface{}) {
-	LogRaw(fmt.Sprintf(format, values...))
+	LogRaw(js.ValueOf(fmt.Sprintf(format, values...)))
 }

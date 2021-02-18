@@ -13,6 +13,7 @@ import (
 	"github.com/timshannon/bolthold"
 	"go.etcd.io/bbolt"
 	"strings"
+	"time"
 )
 
 func initialCap(s string) string {
@@ -104,7 +105,7 @@ func txMergeMember(tx *bbolt.Tx, member record.Member) error {
 			Rank: 		member.GetRank(),
 			Alt:        member.IsAlt(),
 			DKP:        0,
-			LastActive: member.GetLastActive(),
+			LastActive: time.Time{},
 			Owner:      realOwner,
 		})
 	} else if err!=nil {

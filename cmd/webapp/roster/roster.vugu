@@ -1,14 +1,16 @@
 <div>
     <roster:DumpTarget @DumpPosted="go c.reloadMembers(event.Env)"></roster:DumpTarget>
-    <h2>Members</h2>
     <div class="row">
-        <div class="col col-3">
-            <input type="checkbox" .checked="c.hideInactive" @change="c.hideInactiveChanged(event)" />
-            Hide inactive
-        </div>
-        <div class="col col-3">
-            <input type="checkbox" .checked="c.hideAlts" @change="c.hideAltsChanged(event)" />
-            Hide alts
+        <h5 class="col col-10">Leaderboard</h5>
+        <div class="col col-2">
+            <div class="text-right">
+                Hide inactive
+                <input type="checkbox" .checked="c.hideInactive" @change="c.hideInactiveChanged(event)" />
+            </div>
+            <div class="text-right">
+                Hide alts
+                <input type="checkbox" .checked="c.hideAlts" @change="c.hideAltsChanged(event)" />
+            </div>
         </div>
     </div>
     <table class="table">
@@ -71,14 +73,21 @@
         </tr>
         </thead>
         <tbody>
-            <tr vg-for="_, member := range c.filteredMembers()">
+            <tr vg-for="_, member := range c.filteredMembers()" vg-key="member.GetName()">
                 <th scope="row" vg-content="member.GetName()"></th>
                 <td vg-content="fmt.Sprint(member.GetLevel())"></td>
                 <td vg-content="member.GetClass()"></td>
                 <td vg-if="member.IsAlt()">&#x1F476;</td>
                 <td vg-if="!member.IsAlt()"></td>
                 <td vg-content='member.GetLastActive().Format("2006-01-02")'></td>
-                <td vg-content="member.GetOwner()"></td>
+                <td>
+                    <ui:EditLabel
+                            class="col col-4"
+                            EditWidth="8rem"
+                            :Value='member.GetOwner()'
+                            :Editable='localprofile.IsAdmin()'
+                            @Submit='c.changeOwner(event, member)'/>
+                </td>
             </tr>
         </tbody>
     </table>
@@ -86,5 +95,6 @@
 <script type="application/x-go">
 import (
     "fmt"
+    "github.com/GontikR99/chillmodeinfo/cmd/webapp/ui"
 )
 </script>

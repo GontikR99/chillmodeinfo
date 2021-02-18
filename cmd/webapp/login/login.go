@@ -28,9 +28,6 @@ func (c *Login) Init(ctx vugu.InitCtx) {
 		ctx.EventEnv().Lock()
 		c.SignedIn = signins.SignedIn()
 		ctx.EventEnv().UnlockRender()
-
-		// Return to the home page
-		place.NavigateTo(ctx.EventEnv(), "")
 	})
 }
 

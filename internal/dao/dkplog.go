@@ -30,6 +30,16 @@ func (d deltaByTimestamp) Len() int {return len(d)}
 func (d deltaByTimestamp) Less(i, j int) bool {return d[i].GetTimestamp().After(d[j].GetTimestamp())}
 func (d deltaByTimestamp) Swap(i, j int) {d[i],d[j] = d[j],d[i]}
 
+func TxRemoveDKPChange(tx *bbolt.Tx, entryId uint64) error {
+	return db.TxDelete(tx, entryId, &dkpChangeLogEntryV1{})
+}
+
+func TxGetDKPChange(tx *bbolt.Tx, entryId uint64) (record.DKPChangeEntry, error) {
+	var res dkpChangeLogEntryV1
+	err := db.TxGet(tx, entryId, &res)
+	return &res, err
+}
+
 func GetDKPChangesForTarget(target string) ([]record.DKPChangeEntry, error) {
 	records:=new([]record.DKPChangeEntry)
 	err := db.MakeView(func(tx *bbolt.Tx)error {

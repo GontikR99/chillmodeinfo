@@ -11,6 +11,7 @@ import (
 type DKPLogHandler interface {
 	Append(ctx context.Context, entry record.DKPChangeEntry) error
 	Retrieve(ctx context.Context, target string) ([]record.DKPChangeEntry, error)
+	Remove(ctx context.Context, entryId uint64) error
 }
 
 const endpointDKPLog="/rest/v0/dkp"
@@ -49,6 +50,17 @@ func (d *dkpLogHandlerClient) Retrieve(ctx context.Context, target string) ([]re
 	return result, nil
 }
 
+type dkpLogRemoveRequestV0 struct {
+	EntryId uint64
+}
+type dkpLogRemoveResponseV0 struct {}
+
+func (c *dkpLogHandlerClient) Remove(ctx context.Context, entryId uint64) error {
+	req:=&dkpLogRemoveRequestV0{entryId}
+	res:=new(dkpLogRemoveResponseV0)
+	return call(http.MethodDelete, endpointDKPLog, req, res)
+}
+
 var DKPLog=&dkpLogHandlerClient{}
 
 func HandleDKPLog(handler DKPLogHandler) func(mux *http.ServeMux) {
@@ -68,6 +80,12 @@ func HandleDKPLog(handler DKPLogHandler) func(mux *http.ServeMux) {
 				res:=new(dkpLogAppendResponseV0)
 				request.ReadTo(&req)
 				err := handler.Append(ctx, &req.Entry)
+				return res, err
+			} else if strings.EqualFold(http.MethodDelete, method) {
+				var req dkpLogRemoveRequestV0
+				res:=new(dkpLogRemoveResponseV0)
+				request.ReadTo(&req)
+				err := handler.Remove(ctx, req.EntryId)
 				return res, err
 			} else {
 				return nil, httputil.UnsupportedMethod(method)

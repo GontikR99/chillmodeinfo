@@ -20,6 +20,29 @@ type Member struct {
 	ctxDone context.CancelFunc
 }
 
+func (c *Member) cancelEntry(event vugu.DOMEvent, entry record.DKPChangeEntry) {
+	event.StopPropagation()
+	event.PreventDefault()
+	go func() {
+		err := restidl.DKPLog.Remove(c.ctx, entry.GetEntryId())
+		if err!=nil {
+			toast.Error("member page", err)
+		} else {
+			c.reloadLogs(event.EventEnv())
+		}
+	}()
+}
+
+func (c *Member) reloadLogs(env vugu.EventEnv) {
+	entries, err := restidl.DKPLog.Retrieve(c.ctx, c.Member.GetName())
+	if err!=nil {
+		toast.Error("member page", err)
+	} else {
+		env.Lock()
+		c.LogEntries=entries
+		env.UnlockRender()
+	}
+}
 
 func (c *Member) Init(vCtx vugu.InitCtx) {
 	placeParts := strings.Split(place.GetPlace(), ":")
@@ -48,14 +71,7 @@ func (c *Member) Init(vCtx vugu.InitCtx) {
 	}()
 	go func() {
 		for {
-			entries, err := restidl.DKPLog.Retrieve(c.ctx, c.Member.GetName())
-			if err!=nil {
-				toast.Error("member page", err)
-			} else {
-				vCtx.EventEnv().Lock()
-				c.LogEntries=entries
-				vCtx.EventEnv().UnlockRender()
-			}
+			c.reloadLogs(vCtx.EventEnv())
 			select {
 			case <-c.ctx.Done():
 				return

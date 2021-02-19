@@ -6,15 +6,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/GontikR99/chillmodeinfo/internal/dao"
+	"github.com/GontikR99/chillmodeinfo/internal/dao/db"
 	"github.com/GontikR99/chillmodeinfo/internal/profile"
 	"github.com/GontikR99/chillmodeinfo/internal/record"
+	"go.etcd.io/bbolt"
 	"os"
 	"time"
 )
 
 func main() {
 	if len(os.Args)<2 {
-		fmt.Println("What do you want me to do?  list/promote/demote/listmembers/wipemembers/showlogs/showalllogs")
+		fmt.Println("What do you want me to do?  list/promote/demote/listmembers/wipemembers/showlogs/showalllogs/zeromember")
 	}
 	switch os.Args[1] {
 	case "list":
@@ -57,7 +59,33 @@ func main() {
 	case "wipemembers":
 		fmt.Println("Wiping members.")
 		dao.WipeMembers()
+	case "zeromember":
+		if len(os.Args)<3 {
+			fmt.Println("zeromember <name>")
+		}
+		name:=os.Args[2]
+		err:=db.MakeUpdate(func(tx *bbolt.Tx) error {
+			member, err := dao.GetMember(name)
+			if err!=nil {
+				return err
+			}
+			newMember := record.NewBasicMember(member)
+			newMember.DKP=0
+			newMember.LastActive=time.Time{}
 
+			dkpEntries, err := dao.GetDKPChangesForTarget(name)
+			if err!=nil {
+				return err
+			}
+			for _, entry := range dkpEntries {
+				err = dao.TxRemoveDKPChange(tx, entry.GetEntryId())
+				if err!=nil {return err}
+			}
+			return dao.TxUpsertMember(tx, newMember)
+		})
+		if err!=nil {
+			panic(err)
+		}
 	case "showlogs":
 		if len(os.Args)<3 {
 			fmt.Println("showlogs <id>")

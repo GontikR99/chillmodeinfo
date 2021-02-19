@@ -14,6 +14,7 @@
             <th scope="col">Change</th>
             <th scope="col" style="width:100%;">Description</th>
             <th scope="col">Authority</th>
+            <th scope="col" vg-if="localprofile.IsAdmin()"></th>
         </tr>
         </thead>
         <tbody>
@@ -22,6 +23,9 @@
             <th scope="row" vg-content='fmt.Sprintf("%.1f", entry.GetDelta())'></th>
             <td vg-content="entry.GetDescription()"></td>
             <td vg-content="entry.GetAuthority()"></td>
+            <td vg-if="localprofile.IsAdmin() && entry.GetRaidId()==0">
+                <a href="#" title="Remove" @click="c.cancelEntry(event, entry)">&#x1F5D1;</a>
+            </td>
         </tr>
         </tbody>
     </table>
@@ -29,5 +33,6 @@
 <script type="application/x-go">
 import (
     "fmt"
+    "github.com/GontikR99/chillmodeinfo/internal/profile/localprofile"
 )
 </script>

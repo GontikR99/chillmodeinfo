@@ -10,6 +10,7 @@ import (
 	"github.com/GontikR99/chillmodeinfo/internal/dao/db"
 	"github.com/GontikR99/chillmodeinfo/internal/record"
 	"go.etcd.io/bbolt"
+	"log"
 	"time"
 )
 
@@ -30,6 +31,7 @@ func (s serverRaidStub) Fetch(ctx context.Context) ([]record.Raid, error) {
 
 
 func (s serverRaidStub) Add(ctx context.Context, raid record.Raid) error {
+	log.Println("Starting add")
 	selfProfile, err := requiresAdmin(ctx)
 	if err!=nil {return err}
 
@@ -44,8 +46,8 @@ func (s serverRaidStub) Add(ctx context.Context, raid record.Raid) error {
 		}
 
 		seenMembers := make(map[string]struct{})
-		for _, attendee := range raid.GetAttendees() {
-			attendee = initialCap(attendee)
+		for _, attendeeTmp := range raid.GetAttendees() {
+			attendee := initialCap(attendeeTmp)
 			if _, present := seenMembers[attendee]; present {
 				continue
 			}

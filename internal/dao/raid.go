@@ -14,7 +14,7 @@ func TxInsertRaid(tx *bbolt.Tx, raid record.Raid) (uint64, error) {
 	raidRec := newRaidV0(raid)
 	raidRec.RaidId=0
 
-	err := db.Insert(bolthold.NextSequence(), raidRec)
+	err := db.TxInsert(tx, bolthold.NextSequence(), raidRec)
 	return raidRec.RaidId, err
 }
 

@@ -4,20 +4,32 @@
             <img class="mr-4" src="assets/raid_dump_drop.png" id="raid-dump-drop" @drop="c.dropFile(event)"/>
             <div class="media-body">
                 <h5><u>Pending uploads</u></h5>
-                <div class="row" vg-for='idx, dump := range c.Dumps'>
-                    <div class="col col-4 small text-nowrap" vg-content='dump.Filename()'></div>
-                    <div class="col col-2" vg-content='dump.Message()'></div>
-                    <div class="col col-2" vg-if='dump.Valid()'>
-                        <button type="button" class="btn btn-primary btn-sm small" vg-attr="dumpAttrs{dump}" @click="c.Commit(event, dump)">Upload</button>
-                    </div>
-                    <div class="col col-2">
-                        <button type="button" class="btn btn-danger btn-sm small" @click="c.Abort(event, dump)">Abort</button>
-                    </div>
-                </div>
+                <table class="table table-striped" style="width:100%;">
+                    <thead class="thead-dark">
+                    <th role="row">Filename</th>
+                    <th role="row">Info</th>
+                    <th role="row" style="width:100%;">Description</th>
+                    <th role="row">Value</th>
+                    <th role="row"></th>
+                    </thead>
+                    <tbody>
+                    <tr vg-for='idx, dump := range c.Dumps' vg-key="dump.UniqueId()">
+                        <th role="col" class="text-nowrap" vg-content="dump.Filename()"></th>
+                        <td class="text-nowrap small" vg-content="dump.Message()"></td>
+                        <td><input type="text" :value="dump.Description()" @change="c.descriptionChange(event, dump)" @focus="c.textFocus(event)"/></td>
+                        <td><input type="text" :value='fmt.Sprintf("%.1f", dump.DKP())' @change="c.dkpChange(event, dump)" @focus="c.textFocus(event)"/></td>
+                        <td>
+                            <a href="#" vg-if="dump.Valid()" @click="c.Commit(event, dump)" title="Upload">&#x2714;</a>
+                            <a href="#" @click="c.Abort(event, dump)" title="Abort">&#x274c;</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </vg-template>
 </div>
 <script type="application/x-go">
+import "fmt"
 import "github.com/GontikR99/chillmodeinfo/internal/profile/localprofile"
 </script>

@@ -4,9 +4,14 @@ package raid
 
 import (
 	"bytes"
+	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/GontikR99/chillmodeinfo/internal/comms/restidl"
 	"github.com/GontikR99/chillmodeinfo/internal/eqspec"
+	"github.com/GontikR99/chillmodeinfo/internal/record"
 	"github.com/GontikR99/chillmodeinfo/pkg/console"
 	"github.com/GontikR99/chillmodeinfo/pkg/jsbinding"
 	"github.com/GontikR99/chillmodeinfo/pkg/toast"
@@ -40,7 +45,10 @@ func (c *DumpTarget) handleFile(env vugu.EventEnv, fileObj js.Value) {
 		fileSize = fileObj.Get("size").Int()
 	}
 	if fileSize>1024*1024 {
-		go c.addDump(env, &uploadError{fileName, fmt.Sprintf("File too large to parse (%2.2f MiB> 1MiB)", float32(fileSize)/(1024*1024))})
+		go c.addDump(env, &uploadError{
+			uid: newUID(),
+			filename: fileName,
+			message: fmt.Sprintf("File too large to parse (%2.2f MiB> 1MiB)", float32(fileSize)/(1024*1024))})
 		return
 	}
 
@@ -53,10 +61,14 @@ func (c *DumpTarget) handleFile(env vugu.EventEnv, fileObj js.Value) {
 
 		attendees, err := eqspec.ParseRaidDump(bytes.NewReader(data))
 		if err != nil {
-			go c.addDump(env, &uploadError{fileName, err.Error()})
+			go c.addDump(env, &uploadError{
+				uid: newUID(),
+				filename: fileName,
+				message: err.Error()})
 			return nil
 		}
 		go c.addDump(env, &uploadReady{
+			uid: newUID(),
 			filename: fileName,
 			attendees: attendees,
 			busy:     false,
@@ -67,35 +79,63 @@ func (c *DumpTarget) handleFile(env vugu.EventEnv, fileObj js.Value) {
 	fr.Call("readAsArrayBuffer", fileObj)
 }
 
+type raidInfoer struct {
+	description string
+	dkp float64
+}
+
+func (r *raidInfoer) Description() string {return r.description}
+func (r *raidInfoer) SetDescription(d string) {r.description=d}
+func (r *raidInfoer) DKP() float64 {return r.dkp}
+func (r *raidInfoer) SetDKP(d float64) {r.dkp=d}
+
 type uploadError struct {
+	raidInfoer
+	uid string
 	filename string
 	message string
 }
 
+func (u *uploadError) UniqueId() string {return u.uid}
 func (u *uploadError) Filename() string {return u.filename}
 func (u *uploadError) Message() string {return u.message}
 func (u *uploadError) Valid() bool {return false}
-func (u *uploadError) Commit(description string, value float64, f func(err error)) {}
+func (u *uploadError) Commit(f func(err error)) {}
 func (u *uploadError) Busy() bool {return true}
 
 type uploadReady struct {
+	raidInfoer
+	uid string
 	filename string
 	attendees []string
 	busy bool
 }
 
+func (c *uploadReady) UniqueId() string {return c.uid}
 func (c *uploadReady) Filename() string {return c.filename}
 
 func (c *uploadReady) Message() string {
 	return fmt.Sprintf("%d attendees", len(c.attendees))
 }
 
-func (c *uploadReady) Valid() bool {return true}
-func (c *uploadReady) Commit(description string, value float64, f func(err error)) {
+func (c *uploadReady) Valid() bool {
+	return c.description!="" && c.dkp>0
+}
+func (c *uploadReady) Commit(f func(err error)) {
 	c.busy=true
 	go func() {
-		f(nil)
+		err := restidl.Raid.Add(context.Background(), &record.BasicRaid{
+			Description: c.description,
+			Attendees:   c.attendees,
+			DKPValue: c.dkp,
+		})
+		f(err)
 	}()
 }
 func (c *uploadReady) Busy() bool {return c.busy}
 
+func newUID() string {
+	bb:=make([]byte,20)
+	rand.Read(bb)
+	return hex.EncodeToString(bb)
+}

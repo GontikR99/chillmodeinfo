@@ -8,7 +8,6 @@ import (
 	"github.com/GontikR99/chillmodeinfo/internal/comms/restidl"
 	"github.com/GontikR99/chillmodeinfo/internal/dao"
 	"github.com/GontikR99/chillmodeinfo/internal/dao/db"
-	"github.com/GontikR99/chillmodeinfo/internal/profile"
 	"github.com/GontikR99/chillmodeinfo/internal/record"
 	"go.etcd.io/bbolt"
 	"net/http"
@@ -18,17 +17,8 @@ import (
 type serverDKPLogHandler struct {}
 
 func (s serverDKPLogHandler) Append(ctx context.Context, delta record.DKPChangeEntry) error {
-	req := ctx.Value(restidl.TagRequest).(*restidl.Request)
-	if req.IdentityError != nil {
-		return req.IdentityError
-	}
-	selfProfile, err := dao.LookupProfile(req.UserId)
-	if err != nil {
-		return err
-	}
-	if selfProfile.GetAdminState()!=profile.StateAdminApproved {
-		return httputil.NewError(http.StatusForbidden, "Only admins may append log entries")
-	}
+	selfProfile, err := requiresAdmin(ctx)
+	if err!=nil {return err}
 
 	return db.MakeUpdate(func(tx *bbolt.Tx) error {
 		target:=initialCap(delta.GetTarget())
@@ -59,17 +49,8 @@ func (s serverDKPLogHandler) Retrieve(ctx context.Context, target string) ([]rec
 }
 
 func (s serverDKPLogHandler) Remove(ctx context.Context, entryId uint64) error {
-	req := ctx.Value(restidl.TagRequest).(*restidl.Request)
-	if req.IdentityError != nil {
-		return req.IdentityError
-	}
-	selfProfile, err := dao.LookupProfile(req.UserId)
-	if err != nil {
-		return err
-	}
-	if selfProfile.GetAdminState()!=profile.StateAdminApproved {
-		return httputil.NewError(http.StatusForbidden, "Only admins may append log entries")
-	}
+	_, err := requiresAdmin(ctx)
+	if err!=nil {return err}
 
 	return db.MakeUpdate(func(tx *bbolt.Tx) error {
 		dkpEntry, err := dao.TxGetDKPChange(tx, entryId)
@@ -95,17 +76,8 @@ func (s serverDKPLogHandler) Remove(ctx context.Context, entryId uint64) error {
 }
 
 func (s serverDKPLogHandler) Update(ctx context.Context, newEntry record.DKPChangeEntry) (record.DKPChangeEntry, error) {
-	req := ctx.Value(restidl.TagRequest).(*restidl.Request)
-	if req.IdentityError != nil {
-		return nil, req.IdentityError
-	}
-	selfProfile, err := dao.LookupProfile(req.UserId)
-	if err != nil {
-		return nil, err
-	}
-	if selfProfile.GetAdminState()!=profile.StateAdminApproved {
-		return nil, httputil.NewError(http.StatusForbidden, "Only admins may append log entries")
-	}
+	selfProfile, err := requiresAdmin(ctx)
+	if err!=nil {return nil, err}
 
 	resHolder:=new(record.DKPChangeEntry)
 	err = db.MakeUpdate(func(tx *bbolt.Tx) error {

@@ -11,17 +11,17 @@ import (
 	"net/http"
 )
 
-func requiresAdmin(ctx context.Context) error {
+func requiresAdmin(ctx context.Context) (profile.Entry, error) {
 	req := ctx.Value(restidl.TagRequest).(*restidl.Request)
 	if req.IdentityError != nil {
-		return req.IdentityError
+		return nil, req.IdentityError
 	}
 	selfProfile, err := dao.LookupProfile(req.UserId)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if selfProfile.GetAdminState() != profile.StateAdminApproved {
-		return httputil.NewError(http.StatusForbidden, "You are not an admin")
+		return nil, httputil.NewError(http.StatusForbidden, "You are not an admin")
 	}
-	return nil
+	return selfProfile, nil
 }

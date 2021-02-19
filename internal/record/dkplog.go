@@ -45,6 +45,9 @@ func (b *BasicDKPChangeEntry) GetAuthority() string {return b.Authority}
 func (b *BasicDKPChangeEntry) GetRaidId() uint64 {return b.RaidId}
 
 func NewBasicDKPChangeEntry(dce DKPChangeEntry) *BasicDKPChangeEntry {
+	if dce==nil {
+		return nil
+	}
 	return &BasicDKPChangeEntry{
 		EntryId: dce.GetEntryId(),
 		Timestamp:   dce.GetTimestamp(),

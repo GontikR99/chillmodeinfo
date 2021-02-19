@@ -29,6 +29,16 @@ func TxGetDKPChangesForTarget(tx *bbolt.Tx, target string) ([]record.DKPChangeEn
 	return *records, err
 }
 
+func TxGetDKPChangesForRaid(tx *bbolt.Tx, raidId uint64) ([]record.DKPChangeEntry, error) {
+	records:=new([]record.DKPChangeEntry)
+	err := db.TxForEach(tx, bolthold.Where("RaidId").Eq(raidId), func(entry *dkpChangeLogEntryV1)error {
+		*records=append(*records, entry)
+		return nil
+	})
+	sort.Sort(deltaByTimestamp(*records))
+	return *records, err
+}
+
 type deltaByTimestamp []record.DKPChangeEntry
 func (d deltaByTimestamp) Len() int {return len(d)}
 func (d deltaByTimestamp) Less(i, j int) bool {return d[i].GetTimestamp().After(d[j].GetTimestamp())}

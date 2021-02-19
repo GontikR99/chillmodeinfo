@@ -32,10 +32,11 @@ func (s serverMembersHandler) GetMembers(ctx context.Context) (map[string]record
 }
 
 func (s serverMembersHandler) MergeMember(ctx context.Context, member record.Member) (record.Member, error) {
-	err := requiresAdmin(ctx)
+	_, err := requiresAdmin(ctx)
 	if err!=nil {
 		return nil, err
 	}
+
 	if member==nil {
 		return nil, nil
 	}
@@ -49,10 +50,11 @@ func (s serverMembersHandler) MergeMember(ctx context.Context, member record.Mem
 }
 
 func (s serverMembersHandler) MergeMembers(ctx context.Context, members []record.Member) (map[string]record.Member, error) {
-	err := requiresAdmin(ctx)
+	_, err := requiresAdmin(ctx)
 	if err!=nil {
 		return nil, err
 	}
+
 	err = db.MakeUpdate(func(tx *bbolt.Tx) error {
 		// Merge twice so we get owners better
 		for _, v := range members {

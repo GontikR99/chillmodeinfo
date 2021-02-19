@@ -15,17 +15,9 @@ import (
 type serverProfileHandler struct{}
 
 func (s *serverProfileHandler) UpdateAdmin(ctx context.Context, userId string, state profile.AdminState) error {
-	req := ctx.Value(restidl.TagRequest).(*restidl.Request)
-	if req.IdentityError != nil {
-		return req.IdentityError
-	}
-	selfProfile, err := dao.LookupProfile(req.UserId)
-	if err != nil {
-		return err
-	}
-	if selfProfile.GetAdminState() != profile.StateAdminApproved {
-		return httputil.NewError(http.StatusForbidden, "You are not an admin")
-	}
+	selfProfile, err := requiresAdmin(ctx)
+	if err!=nil {return err}
+
 	userProfile, err := dao.LookupProfile(userId)
 	if err != nil {
 		return err
@@ -41,17 +33,8 @@ func (s *serverProfileHandler) UpdateAdmin(ctx context.Context, userId string, s
 }
 
 func (s *serverProfileHandler) ListAdmins(ctx context.Context) ([]profile.Entry, error) {
-	req := ctx.Value(restidl.TagRequest).(*restidl.Request)
-	if req.IdentityError != nil {
-		return nil, req.IdentityError
-	}
-	selfProfile, err := dao.LookupProfile(req.UserId)
-	if err != nil {
-		return nil, err
-	}
-	if selfProfile.GetAdminState() != profile.StateAdminApproved {
-		return nil, httputil.NewError(http.StatusForbidden, "You are not an admin")
-	}
+	_, err := requiresAdmin(ctx)
+	if err!=nil {return nil, err}
 
 	resultProfiles := []profile.Entry{}
 	allProfiles := dao.ListAllProfiles()

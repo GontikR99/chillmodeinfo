@@ -20,7 +20,7 @@ func (s serverDKPLogHandler) Append(ctx context.Context, delta record.DKPChangeE
 	selfProfile, err := requiresAdmin(ctx)
 	if err!=nil {return err}
 
-	return db.MakeUpdate(func(tx *bbolt.Tx) error {
+	return db.MakeUpdate([]db.TableName{dao.TableMembers, dao.TableDKPLog},func(tx *bbolt.Tx) error {
 		target:=initialCap(delta.GetTarget())
 		targetMemberRecord, err := dao.GetMember(target)
 		if err!=nil {
@@ -52,7 +52,7 @@ func (s serverDKPLogHandler) Remove(ctx context.Context, entryId uint64) error {
 	_, err := requiresAdmin(ctx)
 	if err!=nil {return err}
 
-	return db.MakeUpdate(func(tx *bbolt.Tx) error {
+	return db.MakeUpdate([]db.TableName{dao.TableMembers, dao.TableDKPLog},func(tx *bbolt.Tx) error {
 		dkpEntry, err := dao.TxGetDKPChange(tx, entryId)
 		if err!=nil {
 			return err
@@ -80,7 +80,7 @@ func (s serverDKPLogHandler) Update(ctx context.Context, newEntry record.DKPChan
 	if err!=nil {return nil, err}
 
 	resHolder:=new(record.DKPChangeEntry)
-	err = db.MakeUpdate(func(tx *bbolt.Tx) error {
+	err = db.MakeUpdate([]db.TableName{dao.TableMembers, dao.TableDKPLog},func(tx *bbolt.Tx) error {
 		oldEntry, err := dao.TxGetDKPChange(tx, newEntry.GetEntryId())
 		if err!=nil {
 			return err

@@ -64,7 +64,7 @@ func main() {
 			fmt.Println("zeromember <name>")
 		}
 		name:=os.Args[2]
-		err:=db.MakeUpdate(func(tx *bbolt.Tx) error {
+		err:=db.MakeUpdate([]db.TableName{dao.TableMembers, dao.TableDKPLog},func(tx *bbolt.Tx) error {
 			member, err := dao.GetMember(name)
 			if err!=nil {
 				return err

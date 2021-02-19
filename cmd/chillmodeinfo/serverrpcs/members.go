@@ -24,11 +24,55 @@ func initialCap(s string) string {
 type serverMembersHandler struct {}
 
 func (s serverMembersHandler) GetMember(ctx context.Context, name string) (record.Member, error) {
-	return dao.GetMember(initialCap(name))
+	res:=new(record.Member)
+	err:=db.MakeView([]db.TableName{dao.TableMembers, dao.TableDKPLog}, func(tx *bbolt.Tx) error {
+		logs, err := dao.TxGetDKPChangesForTarget(tx, initialCap(name))
+		if err!=nil {
+			return err
+		}
+		sum:=float64(0)
+		for _, log := range logs {
+			sum+=log.GetDelta()
+		}
+		member, err := dao.TxGetMember(tx, initialCap(name))
+		if err!=nil {
+			return err
+		}
+		newMember := record.NewBasicMember(member)
+		newMember.DKP=sum
+		*res=newMember
+		return nil
+	})
+	return *res, err
 }
 
 func (s serverMembersHandler) GetMembers(ctx context.Context) (map[string]record.Member, error) {
-	return dao.GetMembers()
+	res := new(map[string]record.Member)
+	err := db.MakeView([]db.TableName{dao.TableMembers, dao.TableDKPLog}, func(tx *bbolt.Tx) error {
+		logs, err := dao.TxGetDKPChanges(tx)
+		if err!=nil {return err}
+		totals:=make(map[string]float64)
+		for _, delta := range logs {
+			if _, ok := totals[delta.GetTarget()]; !ok {
+				totals[delta.GetTarget()]=0.0
+			}
+			totals[delta.GetTarget()] += delta.GetDelta()
+		}
+
+		*res, err = dao.TxGetMembers(tx)
+		if err!=nil {return err}
+		for k, v := range *res {
+			newMember := record.NewBasicMember(v)
+			if total, ok := totals[k]; ok {
+				newMember.DKP=total
+			} else {
+				newMember.DKP=0
+			}
+			(*res)[k]=newMember
+		}
+		return nil
+	})
+	return *res, err
 }
 
 func (s serverMembersHandler) MergeMember(ctx context.Context, member record.Member) (record.Member, error) {
@@ -40,7 +84,7 @@ func (s serverMembersHandler) MergeMember(ctx context.Context, member record.Mem
 	if member==nil {
 		return nil, nil
 	}
-	err = db.MakeUpdate(func(tx *bbolt.Tx) error {
+	err = db.MakeUpdate([]db.TableName{dao.TableMembers}, func(tx *bbolt.Tx) error {
 		return txMergeMember(tx, member)
 	})
 	if err!=nil {
@@ -55,7 +99,7 @@ func (s serverMembersHandler) MergeMembers(ctx context.Context, members []record
 		return nil, err
 	}
 
-	err = db.MakeUpdate(func(tx *bbolt.Tx) error {
+	err = db.MakeUpdate([]db.TableName{dao.TableMembers}, func(tx *bbolt.Tx) error {
 		// Merge twice so we get owners better
 		for _, v := range members {
 			if v==nil {

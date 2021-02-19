@@ -7,8 +7,11 @@ import (
 	"github.com/GontikR99/chillmodeinfo/internal/record"
 	"github.com/timshannon/bolthold"
 	"go.etcd.io/bbolt"
+	"sort"
 	"time"
 )
+
+const TableRaid=db.TableName("Raid")
 
 func TxInsertRaid(tx *bbolt.Tx, raid record.Raid) (uint64, error) {
 	raidRec := newRaidV0(raid)
@@ -24,8 +27,15 @@ func TxGetRaids(tx *bbolt.Tx) ([]record.Raid, error) {
 		*raidResult=append(*raidResult, raid)
 		return nil
 	})
+	sort.Stable(byTimestampDesc(*raidResult))
 	return *raidResult, err
 }
+
+type byTimestampDesc []record.Raid
+
+func (b byTimestampDesc) Len() int {return len(b)}
+func (b byTimestampDesc) Less(i, j int) bool {return b[j].GetTimestamp().Before(b[i].GetTimestamp())}
+func (b byTimestampDesc) Swap(i, j int) {b[i],b[j] = b[j], b[i]}
 
 func TxGetRaid(tx *bbolt.Tx, raidId uint64) (record.Raid, error) {
 	var raid raidV0
@@ -35,6 +45,10 @@ func TxGetRaid(tx *bbolt.Tx, raidId uint64) (record.Raid, error) {
 
 func TxDeleteRaid(tx *bbolt.Tx, raidId uint64) error {
 	return db.TxDelete(tx, raidId, &raidV0{})
+}
+
+func TxUpsertRaid(tx *bbolt.Tx, raid record.Raid) error {
+	return db.TxUpsert(tx, raid.GetRaidId(), newRaidV0(raid))
 }
 
 type raidV0 struct {

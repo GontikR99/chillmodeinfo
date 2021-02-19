@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+const TableDKPLog=db.TableName("DKPLog")
+
 func TxAppendDKPChange(tx *bbolt.Tx, dcle record.DKPChangeEntry) error {
 	return db.TxInsert(tx, bolthold.NextSequence(), newDkpChangeLogEntryV1(dcle))
 }
@@ -56,7 +58,7 @@ func TxGetDKPChange(tx *bbolt.Tx, entryId uint64) (record.DKPChangeEntry, error)
 
 func GetDKPChangesForTarget(target string) ([]record.DKPChangeEntry, error) {
 	records:=new([]record.DKPChangeEntry)
-	err := db.MakeView(func(tx *bbolt.Tx)error {
+	err := db.MakeView([]db.TableName{TableDKPLog}, func(tx *bbolt.Tx)error {
 		var err error
 		*records, err = TxGetDKPChangesForTarget(tx, target)
 		return err
@@ -64,11 +66,23 @@ func GetDKPChangesForTarget(target string) ([]record.DKPChangeEntry, error) {
 	return *records, err
 }
 
+func TxGetDKPChanges(tx *bbolt.Tx) ([]record.DKPChangeEntry, error) {
+	records:=new([]record.DKPChangeEntry)
+	err := db.TxForEach(tx, &bolthold.Query{}, func (entry *dkpChangeLogEntryV1)error {
+		*records = append(*records, entry)
+		return nil
+	})
+	sort.Sort(deltaByTimestamp(*records))
+	return *records, err
+}
+
 func GetDKPChanges() ([]record.DKPChangeEntry, error) {
 	records:=new([]record.DKPChangeEntry)
-	err := db.ForEach(&bolthold.Query{}, func (entry *dkpChangeLogEntryV1)error {
-		*records=append(*records, entry)
-		return nil
+	err := db.MakeView([]db.TableName{TableDKPLog}, func(tx *bbolt.Tx) error {
+		return db.TxForEach(tx, &bolthold.Query{}, func (entry *dkpChangeLogEntryV1)error {
+			*records=append(*records, entry)
+			return nil
+		})
 	})
 	sort.Sort(deltaByTimestamp(*records))
 	return *records, err

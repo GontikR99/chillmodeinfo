@@ -1,3 +1,44 @@
 <div>
-    <raid:DumpTarget @DumpPosted="go c.refreshRaids(event)"></raid:DumpTarget>
+    <raid:DumpTarget @DumpPosted="go c.refreshRaids(event.Env)"></raid:DumpTarget>
+    <h5>Raids</h5>
+    <table class="table table-striped">
+        <thead class="thead-dark">
+        <th role="row">Date</th>
+        <th role="row">Size</th>
+        <th role="row" style="width:100%;">Description</th>
+        <th role="row">Value</th>
+        <th role="row" vg-if="localprofile.IsAdmin()"></th>
+        </thead>
+        <tbody>
+        <tr vg-for='_, raid := range c.Raids' vg-key='raid.GetRaidId()'>
+            <td class="text-nowrap" vg-content='fmt.Sprint(raid.GetTimestamp())'></td>
+            <td vg-content='fmt.Sprint(len(raid.GetAttendees()))'></td>
+            <th role="col" class="text-nowrap">
+                <ui:EditLabel
+                        :Value='raid.GetDescription()'
+                        :Editable="localprofile.IsAdmin()"
+                        @Submit="c.updateDescription(event, raid)"
+                />
+            </th>
+            <td class="text-nowrap">
+                <ui:EditLabel
+                        :Value='fmt.Sprintf("%.1f", raid.GetDKPValue())'
+                        :Editable="localprofile.IsAdmin()"
+                        EditWidth="4rem"
+                        @Submit="c.updateDKP(event, raid)"
+                />
+            </td>
+            <td class="text-nowrap" vg-if="localprofile.IsAdmin()">
+                <a href="#" title="Remove" @click="c.deleteRaid(event, raid)">&#x1F5D1;</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
 </div>
+<script type="application/x-go">
+import (
+    "fmt"
+    "github.com/GontikR99/chillmodeinfo/cmd/webapp/ui"
+    "github.com/GontikR99/chillmodeinfo/internal/profile/localprofile"
+)
+</script>

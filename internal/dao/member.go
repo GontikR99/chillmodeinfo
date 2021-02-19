@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+const TableMembers=db.TableName("Members")
+
 type memberV0 struct {
 	Name string `boltholdKey:"Name"`
 	Class string
@@ -54,7 +56,7 @@ func TxGetMembers(tx *bbolt.Tx) (map[string]record.Member, error) {
 
 func GetMembers() (map[string]record.Member, error) {
 	result:=new(map[string]record.Member)
-	err := db.MakeView(func(tx *bbolt.Tx) error {
+	err := db.MakeView([]db.TableName{TableMembers}, func(tx *bbolt.Tx) error {
 		var err error
 		*result, err = TxGetMembers(tx)
 		return err
@@ -70,7 +72,7 @@ func TxGetMember(tx *bbolt.Tx, name string) (record.Member, error) {
 
 func GetMember(name string) (record.Member, error) {
 	m:=new(record.Member)
-	err := db.MakeView(func(tx *bbolt.Tx) error {
+	err := db.MakeView([]db.TableName{TableMembers}, func(tx *bbolt.Tx) error {
 		var err error
 		*m, err = TxGetMember(tx, name)
 		return err
@@ -83,11 +85,13 @@ func TxUpsertMember(tx *bbolt.Tx, m record.Member) error {
 }
 
 func UpsertMember(m record.Member) error {
-	return db.MakeUpdate(func(tx *bbolt.Tx) error {
+	return db.MakeUpdate([]db.TableName{TableMembers}, func(tx *bbolt.Tx) error {
 		return TxUpsertMember(tx, m)
 	})
 }
 
 func WipeMembers() error {
-	return db.DeleteMatching(&memberV0{}, bolthold.Where("Name").Ne(""))
+	return db.MakeUpdate([]db.TableName{TableMembers}, func(tx *bbolt.Tx) error {
+		return db.TxDeleteMatching(tx, &memberV0{}, bolthold.Where("Name").Ne(""))
+	})
 }

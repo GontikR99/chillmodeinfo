@@ -1,4 +1,4 @@
-.PHONY: all clean start package server
+.PHONY: all clean start package server reparse_items deploy
 
 $(shell mkdir -p bin electron/src >/dev/null 2>&1 || true)
 
@@ -13,6 +13,13 @@ package: electron/.electron
 	cd electron && npm run make
 	find electron/out/make -name \*.exe -exec cp \{\} bin \;
 
+reparse_items: bin/itemscvt.exe data/items.txt.gz
+	bin/itemscvt.exe listing data/items.txt.gz >internal/eqspec/parsed_items.go
+
+deploy: bin/chillmodeinfo.linux bin/cmidb.linux
+	rsync -vh bin/chillmodeinfo.linux bin/cmidb.linux sawalk4@chillmode.info:.
+	ssh sawalk4@chillmode.info
+
 WASMS=bin/webapp.wasm bin/overlay_position.wasm bin/overlay_bids.wasm
 
 electron/.electron: $(WASMS) bin/electronmain.wasm cmd/electronmain/electronmain.js cmd/electronmain/preload.js $(shell find web/static/data -type f)
@@ -21,6 +28,9 @@ electron/.electron: $(WASMS) bin/electronmain.wasm cmd/electronmain/electronmain
 	mkdir -p electron/src/bin
 	cp $(WASMS) electron/src/bin
 	touch $@
+
+bin/itemscvt.exe: $(shell find cmd/itemscvt -type f) $(shell find internal -type f) $(shell find pkg -type f)
+	go build -o $@ ./cmd/itemscvt
 
 bin/chillmodeinfo.linux: web/static/staticfiles_vfsdata.go web/bin/binfiles_vfsdata.go $(shell find cmd/chillmodeinfo -type f) $(shell find internal -type f) $(shell find pkg -type f)
 	GOOS=linux GOARCH=amd64 go build -tags server -o $@ ./cmd/chillmodeinfo

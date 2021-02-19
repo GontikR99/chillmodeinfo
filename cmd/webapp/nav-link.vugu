@@ -1,6 +1,6 @@
 <li class="nav-item">
     <a :class='c.classText()' @click='c.follow(event)' :href='"#"+c.Place'>
-        <span :data-feather='c.Icon'></span>
+        <span vg-content='c.Icon'></span>
         <span vg-content='c.DisplayName'></span>
     </a>
 </li>

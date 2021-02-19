@@ -5,7 +5,7 @@ package leaderboard
 import (
 	"context"
 	"github.com/GontikR99/chillmodeinfo/internal/comms/restidl"
-	"github.com/GontikR99/chillmodeinfo/internal/eqfiles"
+	"github.com/GontikR99/chillmodeinfo/internal/eqspec"
 	"github.com/GontikR99/chillmodeinfo/internal/record"
 	"github.com/GontikR99/chillmodeinfo/pkg/toast"
 	"github.com/vugu/vugu"
@@ -30,7 +30,7 @@ func (c *Leaderboard) Init(vCtx vugu.InitCtx) {
 	c.hideInactive=true
 	c.hideAlts=true
 
-	for k, _ := range eqfiles.ClassMap {
+	for k, _ := range eqspec.ClassMap {
 		c.Cards=append(c.Cards, &ClassCard{
 			Class:   k,
 			Board: c,

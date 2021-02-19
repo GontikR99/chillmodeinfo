@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/GontikR99/chillmodeinfo/internal/comms/restidl"
-	"github.com/GontikR99/chillmodeinfo/internal/eqfiles"
+	"github.com/GontikR99/chillmodeinfo/internal/eqspec"
 	"github.com/GontikR99/chillmodeinfo/internal/record"
 	"github.com/GontikR99/chillmodeinfo/pkg/console"
 	"github.com/GontikR99/chillmodeinfo/pkg/jsbinding"
@@ -55,7 +55,7 @@ func (c *DumpTarget) handleFile(env vugu.EventEnv, fileObj js.Value) {
 		resArr := target.Get("result")
 		data := jsbinding.ReadArrayBuffer(resArr)
 
-		members, err := eqfiles.ParseGuildDump(bytes.NewReader(data))
+		members, err := eqspec.ParseGuildDump(bytes.NewReader(data))
 		if err != nil {
 			go c.addDump(env, &uploadError{fileName, err.Error()})
 			return nil

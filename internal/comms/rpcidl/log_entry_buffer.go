@@ -1,13 +1,13 @@
 package rpcidl
 
 import (
-	"github.com/GontikR99/chillmodeinfo/internal/eqfiles"
+	"github.com/GontikR99/chillmodeinfo/internal/eqspec"
 	"net/rpc"
 )
 
 type LogEntryBufferServer interface {
 	// Retrieve all buffered messages, and stop buffering
-	FetchBufferedMessages() []*eqfiles.LogEntry
+	FetchBufferedMessages() []*eqspec.LogEntry
 }
 
 type LogEntryBufferStub struct {
@@ -16,7 +16,7 @@ type LogEntryBufferStub struct {
 
 type FetchBufferedMessagesRequest struct{}
 type FetchBufferedMessagesResponse struct {
-	Messages []*eqfiles.LogEntry
+	Messages []*eqspec.LogEntry
 }
 
 func (s *LogEntryBufferStub) FetchBufferedMessages(req *FetchBufferedMessagesRequest, res *FetchBufferedMessagesResponse) error {
@@ -24,7 +24,7 @@ func (s *LogEntryBufferStub) FetchBufferedMessages(req *FetchBufferedMessagesReq
 	return nil
 }
 
-func FetchBufferedMessages(client *rpc.Client) ([]*eqfiles.LogEntry, error) {
+func FetchBufferedMessages(client *rpc.Client) ([]*eqspec.LogEntry, error) {
 	req := new(FetchBufferedMessagesRequest)
 	res := new(FetchBufferedMessagesResponse)
 	err := client.Call("LogEntryBufferStub.FetchBufferedMessages", req, res)

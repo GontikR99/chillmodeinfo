@@ -8,7 +8,7 @@ import (
 	"github.com/GontikR99/chillmodeinfo/internal/comms/restidl"
 	"github.com/GontikR99/chillmodeinfo/internal/dao"
 	"github.com/GontikR99/chillmodeinfo/internal/dao/db"
-	"github.com/GontikR99/chillmodeinfo/internal/eqfiles"
+	"github.com/GontikR99/chillmodeinfo/internal/eqspec"
 	"github.com/GontikR99/chillmodeinfo/internal/record"
 	"github.com/timshannon/bolthold"
 	"go.etcd.io/bbolt"
@@ -87,7 +87,7 @@ func txMergeMember(tx *bbolt.Tx, member record.Member) error {
 	if member.GetName()=="" {
 		return errors.New("Each member must have a non-empty name")
 	}
-	if _, ok := eqfiles.ClassMap[member.GetClass()]; !ok {
+	if _, ok := eqspec.ClassMap[member.GetClass()]; !ok {
 		return errors.New("Unrecognized class "+member.GetClass())
 	}
 	realOwner:=""

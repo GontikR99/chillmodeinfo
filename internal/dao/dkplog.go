@@ -15,6 +15,10 @@ func TxAppendDKPChange(tx *bbolt.Tx, dcle record.DKPChangeEntry) error {
 	return db.TxInsert(tx, bolthold.NextSequence(), newDkpChangeLogEntryV1(dcle))
 }
 
+func TxUpsertDKPChange(tx *bbolt.Tx, dcle record.DKPChangeEntry) error {
+	return db.TxUpsert(tx, dcle.GetEntryId(), newDkpChangeLogEntryV1(dcle))
+}
+
 func TxGetDKPChangesForTarget(tx *bbolt.Tx, target string) ([]record.DKPChangeEntry, error) {
 	records:=new([]record.DKPChangeEntry)
 	err := db.TxForEach(tx, bolthold.Where("Target").Eq(target), func(entry *dkpChangeLogEntryV1)error {

@@ -5,19 +5,19 @@ package commands
 import (
 	"github.com/GontikR99/chillmodeinfo/cmd/electronmain/exerpcs"
 	"github.com/GontikR99/chillmodeinfo/cmd/electronmain/overlaymap"
-	"github.com/GontikR99/chillmodeinfo/internal/eqfiles"
+	"github.com/GontikR99/chillmodeinfo/internal/eqspec"
 	"github.com/GontikR99/chillmodeinfo/internal/overlay"
 	"github.com/GontikR99/chillmodeinfo/internal/comms/rpcidl"
 	"github.com/GontikR99/chillmodeinfo/pkg/electron/browserwindow"
 )
 
 type BufferedLogEntries struct {
-	buffer    []*eqfiles.LogEntry
+	buffer    []*eqspec.LogEntry
 	bw        browserwindow.BrowserWindow
 	retreived bool
 }
 
-func (b *BufferedLogEntries) FetchBufferedMessages() []*eqfiles.LogEntry {
+func (b *BufferedLogEntries) FetchBufferedMessages() []*eqspec.LogEntry {
 	if b.retreived {
 		return nil
 	} else {
@@ -26,21 +26,21 @@ func (b *BufferedLogEntries) FetchBufferedMessages() []*eqfiles.LogEntry {
 	}
 }
 
-func (b *BufferedLogEntries) DispatchMessages(entries []*eqfiles.LogEntry) {
+func (b *BufferedLogEntries) DispatchMessages(entries []*eqspec.LogEntry) {
 	if b.retreived {
-		eqfiles.SendLogsTo(entries, b.bw)
+		eqspec.SendLogsTo(entries, b.bw)
 	} else {
 		b.buffer = append(b.buffer, entries...)
 	}
 }
 
-var lastListener eqfiles.ListenerHandle
+var lastListener eqspec.ListenerHandle
 
-func OpenBids(initialBuffer []*eqfiles.LogEntry) {
+func OpenBids(initialBuffer []*eqspec.LogEntry) {
 	logBuffer := &BufferedLogEntries{
 		buffer: initialBuffer,
 	}
-	listenerHandle := eqfiles.RegisterLogsListener(func(newEntries []*eqfiles.LogEntry) {
+	listenerHandle := eqspec.RegisterLogsListener(func(newEntries []*eqspec.LogEntry) {
 		logBuffer.DispatchMessages(newEntries)
 	})
 	lastListener = listenerHandle

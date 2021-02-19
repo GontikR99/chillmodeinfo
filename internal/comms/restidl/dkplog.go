@@ -11,6 +11,7 @@ import (
 type DKPLogHandler interface {
 	Append(ctx context.Context, entry record.DKPChangeEntry) error
 	Retrieve(ctx context.Context, target string) ([]record.DKPChangeEntry, error)
+	Update(ctx context.Context, entry record.DKPChangeEntry) (record.DKPChangeEntry, error)
 	Remove(ctx context.Context, entryId uint64) error
 }
 
@@ -61,6 +62,23 @@ func (c *dkpLogHandlerClient) Remove(ctx context.Context, entryId uint64) error 
 	return call(http.MethodDelete, endpointDKPLog, req, res)
 }
 
+type dkpLogUpdateRequestV0 struct {
+	NewEntry record.BasicDKPChangeEntry
+}
+type dkpLogUpdateResponseV0 struct {
+	UpdatedEntry record.BasicDKPChangeEntry
+}
+func (c *dkpLogHandlerClient) Update(ctx context.Context, newEntry record.DKPChangeEntry) (record.DKPChangeEntry, error) {
+	req := &dkpLogUpdateRequestV0{*record.NewBasicDKPChangeEntry(newEntry)}
+	res := new(dkpLogUpdateResponseV0)
+	err := call(http.MethodPatch, endpointDKPLog, req, res)
+	if err!=nil {
+		return nil, err
+	} else {
+		return &res.UpdatedEntry, nil
+	}
+}
+
 var DKPLog=&dkpLogHandlerClient{}
 
 func HandleDKPLog(handler DKPLogHandler) func(mux *http.ServeMux) {
@@ -86,6 +104,13 @@ func HandleDKPLog(handler DKPLogHandler) func(mux *http.ServeMux) {
 				res:=new(dkpLogRemoveResponseV0)
 				request.ReadTo(&req)
 				err := handler.Remove(ctx, req.EntryId)
+				return res, err
+			} else if strings.EqualFold(http.MethodPatch, method) {
+				var req dkpLogUpdateRequestV0
+				res := new(dkpLogUpdateResponseV0)
+				request.ReadTo(&req)
+				update, err := handler.Update(ctx, &req.NewEntry)
+				res.UpdatedEntry=*record.NewBasicDKPChangeEntry(update)
 				return res, err
 			} else {
 				return nil, httputil.UnsupportedMethod(method)

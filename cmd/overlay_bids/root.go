@@ -3,7 +3,7 @@
 package main
 
 import (
-	"github.com/GontikR99/chillmodeinfo/internal/eqfiles"
+	"github.com/GontikR99/chillmodeinfo/internal/eqspec"
 	"github.com/GontikR99/chillmodeinfo/internal/comms/rpcidl"
 	"github.com/GontikR99/chillmodeinfo/pkg/console"
 	"github.com/GontikR99/chillmodeinfo/pkg/electron/ipc/ipcrenderer"
@@ -33,7 +33,7 @@ func (c *Root) Init(ctx vugu.InitCtx) {
 	rand.Seed(time.Now().UnixNano())
 	c.RandBag = make(map[int]struct{})
 	go func() {
-		logEntriesIn, _ := eqfiles.ListenForLogs()
+		logEntriesIn, _ := eqspec.ListenForLogs()
 		go func() {
 			for {
 				logEntries := <-logEntriesIn
@@ -88,7 +88,7 @@ func (c *Root) randomTiebreaker() int {
 
 var tellRE = regexp.MustCompile("^([A-Za-z]+) (?:tells|told) you, '(.*)'$")
 
-func (c *Root) parseForBid(env vugu.EventEnv, entry *eqfiles.LogEntry) {
+func (c *Root) parseForBid(env vugu.EventEnv, entry *eqspec.LogEntry) {
 	tellMatch := tellRE.FindStringSubmatch(entry.Message)
 	if tellMatch == nil {
 		return

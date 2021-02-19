@@ -3,7 +3,7 @@
 package commands
 
 import (
-	"github.com/GontikR99/chillmodeinfo/internal/eqfiles"
+	"github.com/GontikR99/chillmodeinfo/internal/eqspec"
 	"github.com/GontikR99/chillmodeinfo/internal/settings"
 	"regexp"
 	"strings"
@@ -15,7 +15,7 @@ func init() {
 	settings.DefaultSetting(settings.BidClosePattern, "^{C} tells you, '!clear")
 }
 
-func matchesSetting(entry *eqfiles.LogEntry, settingKey string) bool {
+func matchesSetting(entry *eqspec.LogEntry, settingKey string) bool {
 	pattern, present, err := settings.LookupSetting(settingKey)
 	if err!=nil || !present {
 		return false
@@ -30,7 +30,7 @@ func matchesSetting(entry *eqfiles.LogEntry, settingKey string) bool {
 }
 
 func WatchLogs() {
-	eqfiles.RegisterLogsListener(func(entries []*eqfiles.LogEntry) {
+	eqspec.RegisterLogsListener(func(entries []*eqspec.LogEntry) {
 		for i:=0;i<len(entries);i++ {
 			entry := entries[i]
 			if matchesSetting(entry, settings.BidStartPattern) {

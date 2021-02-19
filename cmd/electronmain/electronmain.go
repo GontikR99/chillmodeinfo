@@ -8,14 +8,13 @@ import (
 	"encoding/hex"
 	"github.com/GontikR99/chillmodeinfo/cmd/electronmain/commands"
 	"github.com/GontikR99/chillmodeinfo/cmd/electronmain/exerpcs"
-	"github.com/GontikR99/chillmodeinfo/internal/eqfiles"
+	"github.com/GontikR99/chillmodeinfo/internal/eqspec"
 	"github.com/GontikR99/chillmodeinfo/internal/profile/localprofile"
 	"github.com/GontikR99/chillmodeinfo/internal/settings"
 	"github.com/GontikR99/chillmodeinfo/pkg/console"
 	"github.com/GontikR99/chillmodeinfo/pkg/electron/application"
 	"github.com/GontikR99/chillmodeinfo/pkg/electron/browserwindow"
 	"github.com/GontikR99/chillmodeinfo/pkg/nodejs/path"
-	"time"
 )
 
 func main() {
@@ -33,7 +32,7 @@ func main() {
 	}
 
 	settings.DefaultSetting(settings.EverQuestDirectory, "C:\\Users\\Public\\Daybreak Game Company\\Installed Games\\EverQuest")
-	eqfiles.RestartLogScans()
+	eqspec.RestartLogScans()
 	commands.WatchLogs()
 	localprofile.StartElectronPoll()
 
@@ -41,7 +40,6 @@ func main() {
 
 	application.OnReady(func() {
 		go func() {
-			<- time.After(1000*time.Millisecond)
 			mainWindow := browserwindow.New(&browserwindow.Conf{
 				Width:  1600,
 				Height: 800,
@@ -58,6 +56,7 @@ func main() {
 			mainWindow.Once("ready-to-show", func() {
 				//mainWindow.RemoveMenu()
 				mainWindow.Show()
+//				go eqspec.BuildTrie()
 			})
 			mainWindow.LoadFile(path.Join(application.GetAppPath(), "src/index.html"))
 		}()

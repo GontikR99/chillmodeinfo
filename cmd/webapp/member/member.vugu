@@ -20,8 +20,20 @@
         <tbody>
         <tr vg-for="_, entry:=range c.LogEntries" vg-key="entry.GetEntryId()">
             <td class="text-nowrap" vg-content="fmt.Sprint(entry.GetTimestamp())"></td>
-            <th scope="row" vg-content='fmt.Sprintf("%.1f", entry.GetDelta())'></th>
-            <td vg-content="entry.GetDescription()"></td>
+            <th scope="row" class="text-nowrap">
+                <ui:EditLabel
+                        :Value='fmt.Sprintf("%.1f", entry.GetDelta())'
+                        :Editable="localprofile.IsAdmin() && entry.GetRaidId()==0"
+                        EditWidth="4rem"
+                        @Submit="c.updateDelta(event, entry)"
+                />
+            </th>
+            <td>
+                <ui:EditLabel
+                        :Value="entry.GetDescription()"
+                        :Editable="localprofile.IsAdmin() && entry.GetRaidId()==0"
+                        @Submit="c.updateDescription(event, entry)"/>
+            </td>
             <td vg-content="entry.GetAuthority()"></td>
             <td vg-if="localprofile.IsAdmin() && entry.GetRaidId()==0">
                 <a href="#" title="Remove" @click="c.cancelEntry(event, entry)">&#x1F5D1;</a>
@@ -34,5 +46,6 @@
 import (
     "fmt"
     "github.com/GontikR99/chillmodeinfo/internal/profile/localprofile"
+    "github.com/GontikR99/chillmodeinfo/cmd/webapp/ui"
 )
 </script>

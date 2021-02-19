@@ -8,6 +8,7 @@ import (
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/leaderboard"
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/login"
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/member"
+	"github.com/GontikR99/chillmodeinfo/cmd/webapp/raid"
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/roster"
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/settings"
 	"github.com/GontikR99/chillmodeinfo/internal/place"
@@ -37,10 +38,11 @@ var alwaysShow = func() bool { return true }
 
 var routes = []routeEntry{
 	{"", "Home", "home", neverShow, func() vugu.Builder { return &home.Home{} }},
-	{"leaderboard", "Leaderboard", "target", alwaysShow, func() vugu.Builder { return &leaderboard.Leaderboard{} }},
-	{"roster", "Members", "list", alwaysShow, func() vugu.Builder { return &roster.Roster{}}},
+	{"leaderboard", "Leaderboard", "\U0001f3c5", alwaysShow, func() vugu.Builder { return &leaderboard.Leaderboard{} }},
+	{"raid", "Raids", "\u2694", alwaysShow, func()vugu.Builder{return &raid.Raid{}}},
+	{"roster", "Members", "\U0001F4D6", alwaysShow, func() vugu.Builder { return &roster.Roster{}}},
 	{"member", "Member page", "", neverShow, func() vugu.Builder { return &member.Member{}}},
-	{"admin", "Admin", "terminal", func() bool {
+	{"admin", "Admin", "\U0001F6E0", func() bool {
 		if localprofile.GetProfile() == nil {
 			return false
 		} else {
@@ -60,7 +62,7 @@ var routes = []routeEntry{
 
 func init() {
 	if electron.IsPresent() {
-		routes = append(routes, routeEntry{"settings", "Settings", "settings", alwaysShow, func() vugu.Builder { return &settings.Settings{} }})
+		routes = append(routes, routeEntry{"settings", "Settings", "\u2699", alwaysShow, func() vugu.Builder { return &settings.Settings{} }})
 		routes = append(routes, routeEntry{login.PlaceExternalLogin, "", "", neverShow, func() vugu.Builder { return &login.Standalone{} }})
 	}
 }

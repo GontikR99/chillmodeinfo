@@ -3,6 +3,9 @@ package record
 import "time"
 
 type DKPChangeEntry interface {
+	// A unique identifier for this entry
+	GetEntryId() uint64
+
 	// When did this change occur
 	GetTimestamp() time.Time
 
@@ -23,6 +26,7 @@ type DKPChangeEntry interface {
 }
 
 type BasicDKPChangeEntry struct {
+	EntryId uint64
 	Timestamp time.Time
 	Target string
 	Delta float64
@@ -32,6 +36,7 @@ type BasicDKPChangeEntry struct {
 	Authority string
 }
 
+func (b *BasicDKPChangeEntry) GetEntryId() uint64 {return b.EntryId}
 func (b *BasicDKPChangeEntry) GetTimestamp() time.Time {return b.Timestamp}
 func (b *BasicDKPChangeEntry) GetTarget() string {return b.Target}
 func (b *BasicDKPChangeEntry) GetDelta() float64 {return b.Delta}
@@ -41,6 +46,7 @@ func (b *BasicDKPChangeEntry) GetRaidId() uint64 {return b.RaidId}
 
 func NewBasicDKPChangeEntry(dce DKPChangeEntry) *BasicDKPChangeEntry {
 	return &BasicDKPChangeEntry{
+		EntryId: dce.GetEntryId(),
 		Timestamp:   dce.GetTimestamp(),
 		Target:      dce.GetTarget(),
 		Delta:       dce.GetDelta(),

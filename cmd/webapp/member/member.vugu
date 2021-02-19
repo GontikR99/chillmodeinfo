@@ -1,0 +1,33 @@
+<div>
+    <h5 vg-content="c.Member.GetName()"></h5>
+    <h6>
+        <span vg-content="fmt.Sprint(c.Member.GetLevel())"></span>
+        <span vg-content="c.Member.GetClass()"></span>
+    </h6>
+    <div>DKP total: <span vg-content='fmt.Sprintf("%.1f", c.Member.GetDKP())'></span></div>
+    <hr/>
+    <h5>Change history</h5>
+    <table class="table table-striped">
+        <thead class="thead-dark">
+        <tr>
+            <th scope="col">Date</th>
+            <th scope="col">Change</th>
+            <th scope="col" style="width:100%;">Description</th>
+            <th scope="col">Authority</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr vg-for="_, entry:=range c.LogEntries" vg-key="entry.GetEntryId()">
+            <td class="text-nowrap" vg-content="fmt.Sprint(entry.GetTimestamp())"></td>
+            <th scope="row" vg-content='fmt.Sprintf("%.1f", entry.GetDelta())'></th>
+            <td vg-content="entry.GetDescription()"></td>
+            <td vg-content="entry.GetAuthority()"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<script type="application/x-go">
+import (
+    "fmt"
+)
+</script>

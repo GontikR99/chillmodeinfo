@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/ui"
 	"github.com/GontikR99/chillmodeinfo/internal/comms/restidl"
+	"github.com/GontikR99/chillmodeinfo/internal/place"
 	"github.com/GontikR99/chillmodeinfo/internal/record"
+	"github.com/vugu/vugu"
 	"sort"
 	"strconv"
 )
@@ -39,6 +41,13 @@ func (b byDKPthenName) Less(i, j int) bool {
 		return b[i].GetName() < b[j].GetName()
 	}
 }
+
+func (c *ClassCard) jumpToMember(event vugu.DOMEvent, member record.Member) {
+	event.PreventDefault()
+	event.StopPropagation()
+	place.NavigateTo(event.EventEnv(), "member:"+member.GetName())
+}
+
 
 func (c *ClassCard) updateDKP(event ui.SubmitEvent, member record.Member) {
 	go func() {

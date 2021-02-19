@@ -7,6 +7,7 @@ import (
 	"errors"
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/ui"
 	"github.com/GontikR99/chillmodeinfo/internal/comms/restidl"
+	"github.com/GontikR99/chillmodeinfo/internal/place"
 	"github.com/GontikR99/chillmodeinfo/internal/record"
 	"github.com/GontikR99/chillmodeinfo/pkg/toast"
 	"github.com/vugu/vugu"
@@ -35,6 +36,12 @@ func (c *Roster) Init(vCtx vugu.InitCtx) {
 
 func (c *Roster) Destroy(vCtx vugu.DestroyCtx) {
 	c.ctxDone()
+}
+
+func (c *Roster) jumpToMember(event vugu.DOMEvent, member record.Member) {
+	event.PreventDefault()
+	event.StopPropagation()
+	place.NavigateTo(event.EventEnv(), "member:"+member.GetName())
 }
 
 func (c *Roster) hideInactiveChanged(event vugu.DOMEvent) {

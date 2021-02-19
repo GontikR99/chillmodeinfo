@@ -3,7 +3,7 @@
     <div class="card-body">
         <div class="row" vg-for="_, member := range c.filteredMembers()" vg-key="member.GetName()">
             <div class="col col-6">
-                <b vg-content="member.GetName()"></b>
+                <b><a href="#"  vg-content="member.GetName()" @click="c.jumpToMember(event, member)"></a></b>
             </div>
             <ui:EditLabel
                 class="col col-6 text-right"

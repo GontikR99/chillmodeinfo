@@ -74,7 +74,7 @@
         </thead>
         <tbody>
             <tr vg-for="_, member := range c.filteredMembers()" vg-key="member.GetName()">
-                <th scope="row" vg-content="member.GetName()"></th>
+                <th scope="row"><a href="#" @click="c.jumpToMember(event, member)" vg-content="member.GetName()"></a></th>
                 <td vg-content="fmt.Sprint(member.GetLevel())"></td>
                 <td vg-content="member.GetClass()"></td>
                 <td vg-if="member.IsAlt()">&#x1F476;</td>

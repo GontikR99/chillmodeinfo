@@ -12,12 +12,12 @@ import (
 )
 
 func TxAppendDKPChange(tx *bbolt.Tx, dcle record.DKPChangeEntry) error {
-	return db.TxInsert(tx, bolthold.NextSequence(), newDkpChangeLogEntryV0(dcle))
+	return db.TxInsert(tx, bolthold.NextSequence(), newDkpChangeLogEntryV1(dcle))
 }
 
 func TxGetDKPChangesForTarget(tx *bbolt.Tx, target string) ([]record.DKPChangeEntry, error) {
 	records:=new([]record.DKPChangeEntry)
-	err := db.TxForEach(tx, bolthold.Where("Target").Eq(target), func(entry *dkpChangeLogEntryV0)error {
+	err := db.TxForEach(tx, bolthold.Where("Target").Eq(target), func(entry *dkpChangeLogEntryV1)error {
 		*records=append(*records, entry)
 		return nil
 	})
@@ -42,7 +42,7 @@ func GetDKPChangesForTarget(target string) ([]record.DKPChangeEntry, error) {
 
 func GetDKPChanges() ([]record.DKPChangeEntry, error) {
 	records:=new([]record.DKPChangeEntry)
-	err := db.ForEach(bolthold.Where("Target").Ne(""), func (entry *dkpChangeLogEntryV0)error {
+	err := db.ForEach(&bolthold.Query{}, func (entry *dkpChangeLogEntryV1)error {
 		*records=append(*records, entry)
 		return nil
 	})
@@ -50,7 +50,8 @@ func GetDKPChanges() ([]record.DKPChangeEntry, error) {
 	return *records, err
 }
 
-type dkpChangeLogEntryV0 struct {
+type dkpChangeLogEntryV1 struct {
+	EntryId uint64 `boltholdKey:"EntryId"`
 	Timestamp time.Time
 	Target string
 	Delta float64
@@ -60,15 +61,16 @@ type dkpChangeLogEntryV0 struct {
 	Authority string
 }
 
-func (dcle *dkpChangeLogEntryV0) GetTimestamp() time.Time {return dcle.Timestamp}
-func (dcle *dkpChangeLogEntryV0) GetTarget() string {return dcle.Target}
-func (dcle *dkpChangeLogEntryV0) GetDelta() float64 {return dcle.Delta}
-func (dcle *dkpChangeLogEntryV0) GetDescription() string {return dcle.Description}
-func (dcle *dkpChangeLogEntryV0) GetAuthority() string {return dcle.Authority}
-func (dcle *dkpChangeLogEntryV0) GetRaidId() uint64    {return dcle.RaidId }
+func (d *dkpChangeLogEntryV1) GetEntryId() uint64 {return d.EntryId}
+func (d *dkpChangeLogEntryV1) GetTimestamp() time.Time {return d.Timestamp}
+func (d *dkpChangeLogEntryV1) GetTarget() string {return d.Target}
+func (d *dkpChangeLogEntryV1) GetDelta() float64 {return d.Delta}
+func (d *dkpChangeLogEntryV1) GetDescription() string {return d.Description}
+func (d *dkpChangeLogEntryV1) GetAuthority() string {return d.Authority}
+func (d *dkpChangeLogEntryV1) GetRaidId() uint64 {return d.RaidId}
 
-func newDkpChangeLogEntryV0(dce record.DKPChangeEntry) *dkpChangeLogEntryV0 {
-	return &dkpChangeLogEntryV0{
+func newDkpChangeLogEntryV1(dce record.DKPChangeEntry) *dkpChangeLogEntryV1 {
+	return &dkpChangeLogEntryV1{
 		Timestamp:   dce.GetTimestamp(),
 		Target:      dce.GetTarget(),
 		Delta:       dce.GetDelta(),

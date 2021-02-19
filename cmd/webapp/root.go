@@ -7,6 +7,7 @@ import (
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/home"
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/leaderboard"
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/login"
+	"github.com/GontikR99/chillmodeinfo/cmd/webapp/member"
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/roster"
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/settings"
 	"github.com/GontikR99/chillmodeinfo/internal/place"
@@ -14,6 +15,8 @@ import (
 	"github.com/GontikR99/chillmodeinfo/internal/profile/localprofile"
 	"github.com/GontikR99/chillmodeinfo/pkg/electron"
 	"github.com/vugu/vugu"
+	"strings"
+	"time"
 )
 
 type Root struct {
@@ -36,6 +39,7 @@ var routes = []routeEntry{
 	{"", "Home", "home", neverShow, func() vugu.Builder { return &home.Home{} }},
 	{"leaderboard", "Leaderboard", "target", alwaysShow, func() vugu.Builder { return &leaderboard.Leaderboard{} }},
 	{"roster", "Members", "list", alwaysShow, func() vugu.Builder { return &roster.Roster{}}},
+	{"member", "Member page", "", neverShow, func() vugu.Builder { return &member.Member{}}},
 	{"admin", "Admin", "terminal", func() bool {
 		if localprofile.GetProfile() == nil {
 			return false
@@ -63,10 +67,23 @@ func init() {
 
 func (c *Root) Init(ctx vugu.InitCtx) {
 	c.Body = &home.Home{}
+	go func() {
+		lastPlace := place.GetPlace()
+		for {
+			<-time.After(10*time.Millisecond)
+			curPlace := place.GetPlace()
+			if lastPlace!=curPlace {
+				ctx.EventEnv().Lock()
+				lastPlace=curPlace
+				ctx.EventEnv().UnlockRender()
+			}
+		}
+	}()
 }
 
 func (c *Root) Compute(ctx vugu.ComputeCtx) {
-	curPlace := place.GetPlace()
+	fullPlace := place.GetPlace()
+	curPlace := strings.Split(fullPlace, ":")[0]
 	if curPlace == c.LastPlace {
 		return
 	}

@@ -63,8 +63,8 @@ func main() {
 			fmt.Println("showlogs <id>")
 			return
 		}
-		fmt.Println("Listing logs for "+os.Args[3])
-		entries, err := dao.GetDKPChangesForTarget(os.Args[3])
+		fmt.Println("Listing logs for "+os.Args[2])
+		entries, err := dao.GetDKPChangesForTarget(os.Args[2])
 		if err!=nil {
 			panic(err)
 		}

@@ -13,7 +13,7 @@ import (
 
 func main() {
 	if len(os.Args)!=3 {
-		fmt.Fprintf(os.Stderr, "Usage: %s <listing> <filename>\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Usage: %s <trie/listing> <filename>\n", os.Args[0])
 	}
 	dbFile, err := os.Open(os.Args[2])
 	if err!=nil {
@@ -48,7 +48,46 @@ func main() {
 			fmt.Println("    "+string(v)+",")
 		}
 		fmt.Println("}")
+	case "trie":
+		itemTrie := eqspec.NewItemTrie()
+		for lineScanner.Scan() {
+			line := lineScanner.Text()
+			fields := strings.Split(line,"|")
+			if len(fields)<2 {
+				continue
+			}
+			itemName:=fields[1]
+			itemTrie = itemTrie.With(itemName)
+		}
+		cTrie := itemTrie.Compress()
 
+		fmt.Println("// +build wasm, electron")
+		fmt.Println()
+		fmt.Println("package eqspec")
+		fmt.Println("var BuiltTrie=CompressedItemTrie{")
+		fmt.Print("    Transitions: CompressedItemTrieTransitions{")
+		outIdx := 0
+		for _, val := range cTrie.Transitions {
+			if outIdx%8==0 {
+				fmt.Println()
+				fmt.Print("        ")
+			}
+			outIdx++
+			fmt.Printf("0x%x, ", uint64(val))
+		}
+		fmt.Println("    },")
+		fmt.Print("    Accepts: []int{")
+		outIdx=0
+		for _, val := range cTrie.Accepts {
+			if outIdx%8==0 {
+				fmt.Println()
+				fmt.Print("        ")
+			}
+			outIdx++
+			fmt.Printf("0x%x, ", val)
+		}
+		fmt.Println("    },")
+		fmt.Println("}")
 	default:
 		fmt.Fprintln(os.Stderr, "Unknown subcommand "+os.Args[1])
 	}

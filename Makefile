@@ -15,6 +15,7 @@ package: electron/.electron
 
 reparse_items: bin/itemscvt.exe data/items.txt.gz
 	bin/itemscvt.exe listing data/items.txt.gz >internal/eqspec/parsed_items.go
+	bin/itemscvt.exe trie data/items.txt.gz >internal/eqspec/parsed_trie.go
 
 deploy: bin/chillmodeinfo.linux bin/cmidb.linux
 	rsync -vh bin/chillmodeinfo.linux bin/cmidb.linux sawalk4@chillmode.info:.

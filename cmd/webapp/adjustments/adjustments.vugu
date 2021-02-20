@@ -1,0 +1,30 @@
+<div>
+    <h5>Adjustments</h5>
+    <table class="table table-striped">
+        <thead class="thead-dark">
+        <th scope="col">Date</th>
+        <th scope="col">Character</th>
+        <th scope="col">Change</th>
+        <th scope="col" style="width:100%;">Description</th>
+        <th scope="col">Authority</th>
+        <th scope="col" vg-if="localprofile.IsAdmin()"></th>
+        </thead>
+        <tbody>
+        <tr vg-for="_, entry := range c.Logs" vg-key="entry.GetEntryId()">
+            <td class="text-nowrap" vg-content="util.FormatTimestamp(entry.GetTimestamp())"></td>
+            <td><a :href='"#member:"+entry.GetTarget()' vg-content="entry.GetTarget()"></a></td>
+            <td class="text-right" vg-content='fmt.Sprintf("%.1f", entry.GetDelta())'></td>
+            <td vg-content="entry.GetDescription()"></td>
+            <td vg-content="entry.GetAuthority()"></td>
+            <td vg-if="localprofile.IsAdmin()"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<script type="application/x-go">
+import (
+    "fmt"
+    "github.com/GontikR99/chillmodeinfo/internal/profile/localprofile"
+    "github.com/GontikR99/chillmodeinfo/internal/util"
+)
+</script>

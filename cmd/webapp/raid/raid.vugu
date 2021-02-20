@@ -3,24 +3,24 @@
     <h5>Raids</h5>
     <table class="table table-striped">
         <thead class="thead-dark">
-        <th role="row">Date</th>
-        <th role="row">Size</th>
-        <th role="row" style="width:100%;">Description</th>
-        <th role="row">Value</th>
-        <th role="row" vg-if="localprofile.IsAdmin()"></th>
+        <th scope="row">Date</th>
+        <th scope="row">Size</th>
+        <th scope="row" style="width:100%;">Description</th>
+        <th scope="row">Value</th>
+        <th scope="row" vg-if="localprofile.IsAdmin()"></th>
         </thead>
         <tbody>
         <tr vg-for='_, raid := range c.Raids' vg-key='raid.GetRaidId()'>
-            <td class="text-nowrap" vg-content='fmt.Sprint(raid.GetTimestamp())'></td>
+            <td class="text-nowrap" vg-content='util.FormatTimestamp(raid.GetTimestamp())'></td>
             <td vg-content='fmt.Sprint(len(raid.GetAttendees()))'></td>
-            <th role="col" class="text-nowrap">
+            <td class="text-nowrap">
                 <ui:EditLabel
                         :Value='raid.GetDescription()'
                         :Editable="localprofile.IsAdmin()"
                         @Submit="c.updateDescription(event, raid)"
                 />
-            </th>
-            <td class="text-nowrap">
+            </td>
+            <td class="text-nowrap text-right">
                 <ui:EditLabel
                         :Value='fmt.Sprintf("%.1f", raid.GetDKPValue())'
                         :Editable="localprofile.IsAdmin()"
@@ -40,5 +40,6 @@ import (
     "fmt"
     "github.com/GontikR99/chillmodeinfo/cmd/webapp/ui"
     "github.com/GontikR99/chillmodeinfo/internal/profile/localprofile"
+    "github.com/GontikR99/chillmodeinfo/internal/util"
 )
 </script>

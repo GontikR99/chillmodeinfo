@@ -45,7 +45,21 @@ func (s serverDKPLogHandler) Append(ctx context.Context, delta record.DKPChangeE
 }
 
 func (s serverDKPLogHandler) Retrieve(ctx context.Context, target string) ([]record.DKPChangeEntry, error) {
-	return dao.GetDKPChangesForTarget(target)
+	if target!="" {
+		return dao.GetDKPChangesForTarget(target)
+	} else {
+		all, err := dao.GetDKPChanges()
+		if err!=nil {
+			return nil, err
+		}
+		var filtered []record.DKPChangeEntry
+		for _, v := range all {
+			if v.GetRaidId()==0 {
+				filtered=append(filtered, v)
+			}
+		}
+		return filtered, nil
+	}
 }
 
 func (s serverDKPLogHandler) Remove(ctx context.Context, entryId uint64) error {

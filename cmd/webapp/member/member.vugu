@@ -19,15 +19,15 @@
         </thead>
         <tbody>
         <tr vg-for="_, entry:=range c.LogEntries" vg-key="entry.GetEntryId()">
-            <td class="text-nowrap" vg-content="fmt.Sprint(entry.GetTimestamp())"></td>
-            <th scope="row" class="text-nowrap">
+            <td class="text-nowrap" vg-content="util.FormatTimestamp(entry.GetTimestamp())"></td>
+            <td class="text-nowrap text-right">
                 <ui:EditLabel
                         :Value='fmt.Sprintf("%.1f", entry.GetDelta())'
                         :Editable="localprofile.IsAdmin() && entry.GetRaidId()==0"
                         EditWidth="4rem"
                         @Submit="c.updateDelta(event, entry)"
                 />
-            </th>
+            </td>
             <td>
                 <ui:EditLabel
                         :Value="entry.GetDescription()"
@@ -47,5 +47,6 @@ import (
     "fmt"
     "github.com/GontikR99/chillmodeinfo/internal/profile/localprofile"
     "github.com/GontikR99/chillmodeinfo/cmd/webapp/ui"
+    "github.com/GontikR99/chillmodeinfo/internal/util"
 )
 </script>

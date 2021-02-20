@@ -79,7 +79,7 @@
                 <td vg-content="member.GetClass()"></td>
                 <td vg-if="member.IsAlt()">&#x1F476;</td>
                 <td vg-if="!member.IsAlt()"></td>
-                <td vg-content='member.GetLastActive().Format("2006-01-02")'></td>
+                <td vg-content='util.FormatTimestamp(member.GetLastActive())'></td>
                 <td>
                     <ui:EditLabel
                             class="col col-4"
@@ -96,5 +96,6 @@
 import (
     "fmt"
     "github.com/GontikR99/chillmodeinfo/cmd/webapp/ui"
+    "github.com/GontikR99/chillmodeinfo/internal/util"
 )
 </script>

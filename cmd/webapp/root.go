@@ -3,6 +3,7 @@
 package main
 
 import (
+	"github.com/GontikR99/chillmodeinfo/cmd/webapp/adjustments"
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/admin"
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/home"
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/leaderboard"
@@ -40,6 +41,7 @@ var routes = []routeEntry{
 	{"", "Home", "home", neverShow, func() vugu.Builder { return &home.Home{} }},
 	{"leaderboard", "Leaderboard", "\U0001f3c5", alwaysShow, func() vugu.Builder { return &leaderboard.Leaderboard{} }},
 	{"raid", "Raids", "\u2694", alwaysShow, func()vugu.Builder{return &raid.Raid{}}},
+	{"log", "Loot and Adjustments", "\U0001F4B0", alwaysShow, func()vugu.Builder{return &adjustments.Adjustments{}}},
 	{"roster", "Members", "\U0001F4D6", alwaysShow, func() vugu.Builder { return &roster.Roster{}}},
 	{"member", "Member page", "", neverShow, func() vugu.Builder { return &member.Member{}}},
 	{"admin", "Admin", "\U0001F6E0", func() bool {

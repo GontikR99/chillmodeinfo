@@ -16,6 +16,7 @@
                 </div>
             </div>
         </div>
+        <hr/>
     </vg-template>
 </div>
 <script type="application/x-go">

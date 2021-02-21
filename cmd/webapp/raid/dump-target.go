@@ -6,11 +6,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/GontikR99/chillmodeinfo/cmd/webapp/ui"
+	"github.com/GontikR99/chillmodeinfo/internal/record"
 	"github.com/GontikR99/chillmodeinfo/pkg/dom/document"
 	"github.com/GontikR99/chillmodeinfo/pkg/toast"
 	"github.com/vugu/vugu"
 	"sort"
 	"strconv"
+	"strings"
 	"syscall/js"
 	"time"
 )
@@ -18,6 +21,7 @@ import (
 type DumpTarget struct {
 	DumpPosted DumpPostedHandler
 	Dumps []ParsedDump
+	Raids []record.Raid
 	dragOverFunc js.Func
 
 	ctx context.Context
@@ -118,10 +122,37 @@ func (c *DumpTarget) textFocus(event vugu.DOMEvent) {
 	event.JSEventTarget().Call("select")
 }
 
-func (c *DumpTarget) descriptionChange(event vugu.DOMEvent, dump ParsedDump) {
-	event.PreventDefault()
-	dump.SetDescription(event.JSEventTarget().Get("value").String())
+func (c *DumpTarget) descriptionChange(event ui.ChangeEvent, dump ParsedDump) {
+	go func() {
+		event.Env().Lock()
+		dump.SetDescription(event.Value())
+		event.Env().UnlockRender()
+	}()
 }
+
+func (c *DumpTarget) suggest(suggest ui.SuggestionEvent) {
+	suggestSet := make(map[string]string)
+	for _, raid := range c.Raids {
+		if raid.GetDescription()=="" {
+			continue
+		}
+		suggestSet[strings.ToUpper(raid.GetDescription())]=raid.GetDescription()
+	}
+
+	var suggestList []string
+	for k, v := range suggestSet {
+		if strings.HasPrefix(k, strings.ToUpper(suggest.Value())) {
+			suggestList=append(suggestList, v)
+		}
+	}
+	sort.Sort(byValue(suggestList))
+	go suggest.Propose(suggestList)
+}
+
+type byValue []string
+func (b byValue) Len() int {return len(b)}
+func (b byValue) Less(i, j int) bool {return b[i]<b[j]}
+func (b byValue) Swap(i, j int) {b[i], b[j] = b[j], b[i]}
 
 func (c *DumpTarget) dkpChange(event vugu.DOMEvent, dump ParsedDump) {
 	event.PreventDefault()

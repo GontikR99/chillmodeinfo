@@ -13,7 +13,9 @@ type Element interface {
 
 	AppendChild(Element)
 	Remove()
+
 	SetAttribute(key string, value string)
+	RemoveAttribute(key string)
 }
 
 type jsDOMElement struct {
@@ -40,6 +42,10 @@ func (j *jsDOMElement) Remove() {
 
 func (j *jsDOMElement) SetAttribute(key string, value string) {
 	j.jsValue.Call("setAttribute", key, value)
+}
+
+func (j *jsDOMElement) RemoveAttribute(key string) {
+	j.jsValue.Call("removeAttribute", key)
 }
 
 func (j *jsDOMElement) Focus() {

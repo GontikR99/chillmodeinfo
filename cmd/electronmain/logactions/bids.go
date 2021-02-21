@@ -1,6 +1,6 @@
 // +build wasm,electron
 
-package commands
+package logactions
 
 import (
 	"github.com/GontikR99/chillmodeinfo/cmd/electronmain/exerpcs"

@@ -1,7 +1,7 @@
 <div>
     <roster:DumpTarget @DumpPosted="go c.reloadMembers(event.Env)"></roster:DumpTarget>
     <div class="row">
-        <h5 class="col col-10">Leaderboard</h5>
+        <h5 class="col col-10">Members</h5>
         <div class="col col-2">
             <div class="text-right">
                 Hide inactive
@@ -80,14 +80,7 @@
                 <td vg-if="member.IsAlt()">&#x1F476;</td>
                 <td vg-if="!member.IsAlt()"></td>
                 <td vg-content='util.FormatTimestamp(member.GetLastActive())'></td>
-                <td>
-                    <ui:EditLabel
-                            class="col col-4"
-                            EditWidth="8rem"
-                            :Value='member.GetOwner()'
-                            :Editable='localprofile.IsAdmin()'
-                            @Submit='c.changeOwner(event, member)'/>
-                </td>
+                <td vg-content="member.GetOwner()"></td>
             </tr>
         </tbody>
     </table>
@@ -95,7 +88,6 @@
 <script type="application/x-go">
 import (
     "fmt"
-    "github.com/GontikR99/chillmodeinfo/cmd/webapp/ui"
     "github.com/GontikR99/chillmodeinfo/internal/util"
 )
 </script>

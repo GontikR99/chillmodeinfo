@@ -4,15 +4,12 @@ package roster
 
 import (
 	"context"
-	"errors"
-	"github.com/GontikR99/chillmodeinfo/cmd/webapp/ui"
 	"github.com/GontikR99/chillmodeinfo/internal/comms/restidl"
 	"github.com/GontikR99/chillmodeinfo/internal/place"
 	"github.com/GontikR99/chillmodeinfo/internal/record"
 	"github.com/GontikR99/chillmodeinfo/pkg/toast"
 	"github.com/vugu/vugu"
 	"sort"
-	"strings"
 )
 
 type Roster struct {
@@ -50,29 +47,6 @@ func (c *Roster) hideInactiveChanged(event vugu.DOMEvent) {
 
 func (c *Roster) hideAltsChanged(event vugu.DOMEvent) {
 	c.hideAlts=event.JSEventTarget().Get("checked").Bool()
-}
-
-func (c *Roster) changeOwner(event ui.SubmitEvent, member record.Member) {
-	go func() {
-		newMember, err := restidl.Members.MergeMember(c.ctx, &record.BasicMember{
-			Name:       member.GetName(),
-			Class:      member.GetClass(),
-			Level:      member.GetLevel(),
-			Rank:       member.GetRank(),
-			Alt:        member.IsAlt(),
-			Owner:      event.Value(),
-		})
-		if err!=nil {
-			event.Reject(err)
-			return
-		}
-		if !strings.EqualFold(member.GetName(), newMember.GetName()) {
-			event.Reject(errors.New("Failed to assign owner "+event.Value()+", does that character exist?"))
-			return
-		}
-		event.Accept(newMember.GetName())
-		c.reloadMembers(event.EventEnv())
-	}()
 }
 
 func (c *Roster) shouldShow(m record.Member) bool {

@@ -1,0 +1,9 @@
+<div style="position:relative;" vg-attr="c.AttrMap">
+    <input type="text" autocomplete="off" style="width:100%;" :id="c.editIdStr" :value="c.displayValue" @focus="c.onFocus(event)" @blur="c.onBlur(event)"/>
+    <div style="position:absolute; display: none; background-color: white;" :id="c.suggestIdStr">
+        <div class="text-nowrap overflow-hidden" vg-for="idx, suggestion := range c.currentSuggestions"
+             :style="c.suggestionStyle(idx)"
+             vg-content="suggestion"
+             @mousedown="c.suggestionClick(event, idx)"></div>
+    </div>
+</div>

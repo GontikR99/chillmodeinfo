@@ -24,7 +24,7 @@
                 <ui:EditLabel
                         :Value='fmt.Sprintf("%.1f", entry.GetDelta())'
                         :Editable="localprofile.IsAdmin() && entry.GetRaidId()==0"
-                        EditWidth="4rem"
+                        EditStyle="width: 4rem;"
                         @Submit="c.updateDelta(event, entry)"
                 />
             </td>
@@ -32,6 +32,7 @@
                 <ui:EditLabel
                         :Value="entry.GetDescription()"
                         :Editable="localprofile.IsAdmin() && entry.GetRaidId()==0"
+                        :TextStyle="descriptionStyle(entry)"
                         @Submit="c.updateDescription(event, entry)"/>
             </td>
             <td vg-content="entry.GetAuthority()"></td>

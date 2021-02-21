@@ -1,10 +1,10 @@
 <span vg-attr="c.AttrMap">
     <span vg-if="c.editState==editStateDisplay">
-        <span vg-content="c.Value"></span>
+        <span vg-content="c.Value" :style='c.TextStyle'></span>
         <a href="#" vg-if="c.Editable" @click="c.startEdit(event)" title="Edit">&#x270f;</a>
     </span>
     <span vg-if="c.editState==editStateEditing">
-        <input type="text" :value="c.editValue" @change="c.editChange(event)" :id="c.InputId" :style='"width:"+c.EditWidth+";"'/>
+        <input type="text" :value="c.editValue" @change="c.editChange(event)" :id="c.InputId" :style='c.EditStyle'/>
         <a href="#" @click="c.acceptEdit(event)" title="Apply">&#x2714;</a>
         <a href="#" @click="c.cancelEdit(event)" title="Revert">&#x274c;</a>
     </span>

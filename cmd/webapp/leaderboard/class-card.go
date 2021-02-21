@@ -59,7 +59,7 @@ func (c *ClassCard) updateDKP(event ui.SubmitEvent, member record.Member) {
 		delta:=&record.BasicDKPChangeEntry{
 			Target:      member.GetName(),
 			Delta:       newValue-member.GetDKP(),
-			Description: "Manual update",
+			Description: "Leaderboard edit",
 			RaidId:      0,
 		}
 		err = restidl.DKPLog.Append(context.Background(), delta)

@@ -22,7 +22,8 @@ type EditLabel struct {
 	Submit SubmitHandler
 
 	AttrMap vugu.AttrMap
-	EditWidth string
+	EditStyle string
+	TextStyle string
 
 	editState int
 	editValue string
@@ -47,8 +48,8 @@ func (c *EditLabel) Init(vCtx vugu.InitCtx) {
 	c.InputId=fmt.Sprintf("editlabel-%d", inputIdGen)
 
 	c.editState=editStateDisplay
-	if c.EditWidth=="" {
-		c.EditWidth="20rem"
+	if c.EditStyle=="" {
+		c.EditStyle="width: 20rem;"
 	}
 }
 

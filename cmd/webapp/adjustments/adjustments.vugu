@@ -10,13 +10,38 @@
         <th scope="col" vg-if="localprofile.IsAdmin()"></th>
         </thead>
         <tbody>
+        <tr vg-if="localprofile.IsAdmin() && !c.appending">
+            <td>Now</td>
+            <td>
+                <ui:SelectBox style="width:15rem;" :Value="c.pendingMember" :Options="c.KeyList()" @Change='c.updatePendingMember(event)'/>
+            </td>
+            <td><input type="text" :value='fmt.Sprintf("%.1f",c.pendingDKP)' @change="c.updatePendingDKP(event)"/></td>
+            <td><ui:AutoComplete width="100%" :Value='""' @Suggestion="c.suggest(event)" @Change="c.updatePendingDescription(event)"/></td>
+            <td vg-content="localprofile.GetProfile().GetDisplayName()"></td>
+            <td><a href="#" title="Add" @click="c.addEntry(event)">&#x2795;</a></td>
+        </tr>
         <tr vg-for="_, entry := range c.Logs" vg-key="entry.GetEntryId()">
             <td class="text-nowrap" vg-content="util.FormatTimestamp(entry.GetTimestamp())"></td>
-            <td><a :href='"#member:"+entry.GetTarget()' vg-content="entry.GetTarget()"></a></td>
-            <td class="text-right" vg-content='fmt.Sprintf("%.1f", entry.GetDelta())'></td>
-            <td vg-content="entry.GetDescription()"></td>
+            <td style="width:10rem;"><a :href='"#member:"+entry.GetTarget()' vg-content="entry.GetTarget()"></a></td>
+            <td class="text-right" style="width:6rem;">
+                <ui:EditLabel
+                        :Value='fmt.Sprintf("%.1f", entry.GetDelta())'
+                        :Editable="localprofile.IsAdmin() && entry.GetRaidId()==0"
+                        EditStyle="width: 4rem;"
+                        @Submit="c.updateDelta(event, entry)"
+                />
+            </td>
+            <td>
+                <ui:EditLabel
+                    :Value="entry.GetDescription()"
+                    :Editable="localprofile.IsAdmin() && entry.GetRaidId()==0"
+                    :TextStyle="descriptionStyle(entry)"
+                    @Submit="c.updateDescription(event, entry)"/>
+            </td>
             <td vg-content="entry.GetAuthority()"></td>
-            <td vg-if="localprofile.IsAdmin()"></td>
+            <td vg-if="localprofile.IsAdmin() && entry.GetRaidId()==0">
+                <a href="#" title="Remove" @click="c.cancelEntry(event, entry)">&#x1F5D1;</a>
+            </td>
         </tr>
         </tbody>
     </table>
@@ -24,6 +49,7 @@
 <script type="application/x-go">
 import (
     "fmt"
+    "github.com/GontikR99/chillmodeinfo/cmd/webapp/ui"
     "github.com/GontikR99/chillmodeinfo/internal/profile/localprofile"
     "github.com/GontikR99/chillmodeinfo/internal/util"
 )

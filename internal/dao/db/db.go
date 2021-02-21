@@ -5,6 +5,8 @@ package db
 import (
 	"github.com/timshannon/bolthold"
 	"go.etcd.io/bbolt"
+	"os"
+	"time"
 )
 
 var database *bolthold.Store
@@ -15,67 +17,54 @@ func init() {
 	if err!=nil {
 		panic(err)
 	}
+	go func() {
+		for {
+			<-time.After(100*time.Millisecond)
+			if time.Now().Minute()==59 && time.Now().Hour()%12==11 {
+				<-time.After(1*time.Minute)
+			} else {
+				continue
+			}
+			database.Bolt().View(func(tx *bbolt.Tx) error {
+				out, err := os.Create("chillmodeinfo-"+time.Now().Format("2006-01-02T15:04")+".db")
+				if err!=nil {
+					return err
+				}
+				defer out.Close()
+				_, err = tx.WriteTo(out)
+				return err
+			})
+		}
+	}()
 }
-
-//func Insert(key interface{}, value interface{}) error {
-//	return database.Insert(key, value)
-//}
 
 func TxInsert(tx *bbolt.Tx, key interface{}, value interface{}) error {
 	return database.TxInsert(tx, key, value)
 }
 
-//func Update(key interface{}, value interface{}) error {
-//	return database.Update(key, value)
-//}
-
 func TxUpdate(tx *bbolt.Tx, key interface{}, value interface{}) error {
 	return database.TxUpdate(tx, key, value)
 }
-
-//func Upsert(key interface{}, value interface{}) error {
-//	return database.Upsert(key, value)
-//}
 
 func TxUpsert(tx *bbolt.Tx, key interface{}, value interface{}) error {
 	return database.TxUpsert(tx, key, value)
 }
 
-//func Delete(key interface{}, dataType interface{}) error {
-//	return database.Delete(key, dataType)
-//}
-
 func TxDelete(tx *bbolt.Tx, key interface{}, dataType interface{}) error {
 	return database.TxDelete(tx, key, dataType)
 }
-
-//func Get(key interface{}, result interface{}) error {
-//	return database.Get(key, result)
-//}
 
 func TxGet(tx *bbolt.Tx, key interface{}, result interface{}) error {
 	return database.TxGet(tx, key, result)
 }
 
-//func Find(result interface{}, query *bolthold.Query) error {
-//	return database.Find(result, query)
-//}
-
 func TxFind(tx *bbolt.Tx, result interface{}, query *bolthold.Query) error {
 	return database.TxFind(tx, result, query)
 }
 
-//func ForEach(query *bolthold.Query, callback interface{}) error {
-//	return database.ForEach(query, callback)
-//}
-
 func TxForEach(tx *bbolt.Tx, query *bolthold.Query, callback interface{}) error {
 	return database.TxForEach(tx, query, callback)
 }
-
-//func DeleteMatching(dataType interface{}, query *bolthold.Query) error {
-//	return database.DeleteMatching(dataType, query)
-//}
 
 func TxDeleteMatching(tx *bbolt.Tx, dataType interface{}, query *bolthold.Query) error {
 	return database.TxDeleteMatching(tx, dataType, query)

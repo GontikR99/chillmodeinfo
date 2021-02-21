@@ -19,10 +19,9 @@ type serverDKPLogHandler struct {}
 func (s serverDKPLogHandler) Append(ctx context.Context, delta record.DKPChangeEntry) error {
 	selfProfile, err := requiresAdmin(ctx)
 	if err!=nil {return err}
-
 	return db.MakeUpdate([]db.TableName{dao.TableMembers, dao.TableDKPLog},func(tx *bbolt.Tx) error {
 		target:=initialCap(delta.GetTarget())
-		targetMemberRecord, err := dao.GetMember(target)
+		targetMemberRecord, err := dao.TxGetMember(tx, target)
 		if err!=nil {
 			return err
 		}
@@ -109,7 +108,6 @@ func (s serverDKPLogHandler) Update(ctx context.Context, newEntry record.DKPChan
 		*resHolder= newEntry
 		newEntry.Timestamp = oldEntry.GetTimestamp()
 		newEntry.Authority = selfProfile.GetDisplayName()
-		newEntry.Timestamp = time.Now()
 		err = dao.TxUpsertDKPChange(tx, newEntry)
 		if err!=nil {
 			return err
@@ -122,7 +120,6 @@ func (s serverDKPLogHandler) Update(ctx context.Context, newEntry record.DKPChan
 
 		newMember := record.NewBasicMember(member)
 		newMember.DKP += newEntry.GetDelta() - oldEntry.GetDelta()
-		newMember.LastActive = time.Now()
 
 		return dao.TxUpsertMember(tx, newMember)
 	})

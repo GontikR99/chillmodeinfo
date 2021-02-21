@@ -7,6 +7,7 @@ import (
 	"errors"
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/ui"
 	"github.com/GontikR99/chillmodeinfo/internal/comms/restidl"
+	"github.com/GontikR99/chillmodeinfo/internal/eqspec"
 	"github.com/GontikR99/chillmodeinfo/internal/place"
 	"github.com/GontikR99/chillmodeinfo/internal/record"
 	"github.com/GontikR99/chillmodeinfo/pkg/toast"
@@ -21,6 +22,14 @@ type Member struct {
 	LogEntries []record.DKPChangeEntry
 	ctx context.Context
 	ctxDone context.CancelFunc
+}
+
+func descriptionStyle(entry record.DKPChangeEntry) string {
+	if eqspec.IsItem(entry.GetDescription()) {
+		return "font-weight: bold;"
+	} else {
+		return ""
+	}
 }
 
 func (c *Member) updateDescription(submit ui.SubmitEvent, currentEntry record.DKPChangeEntry) {

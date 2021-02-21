@@ -1,0 +1,6 @@
+<select vg-attr="c.AttrMap" :id="c.idStr">
+    <option vg-for="idx, key:=range c.Options" :value="key" vg-content="key" :id='fmt.Sprintf("%s-option-%d", c.idStr, idx)'/>
+</select>
+<script type="application/x-go">
+import "fmt"
+</script>

@@ -1,5 +1,5 @@
 <div>
-    <raid:DumpTarget @DumpPosted="go c.refreshRaids(event.Env)"></raid:DumpTarget>
+    <raid:DumpTarget @DumpPosted="go c.refreshRaids(event.Env)" :Raids="c.Raids"></raid:DumpTarget>
     <h5>Raids</h5>
     <table class="table table-striped">
         <thead class="thead-dark">
@@ -24,7 +24,7 @@
                 <ui:EditLabel
                         :Value='fmt.Sprintf("%.1f", raid.GetDKPValue())'
                         :Editable="localprofile.IsAdmin()"
-                        EditWidth="4rem"
+                        EditStyle="width: 4rem;"
                         @Submit="c.updateDKP(event, raid)"
                 />
             </td>

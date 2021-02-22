@@ -3,8 +3,12 @@
 package main
 
 import (
+	"context"
+	"fmt"
+	"github.com/GontikR99/chillmodeinfo/internal/comms/restidl"
 	"github.com/GontikR99/chillmodeinfo/internal/eqspec"
 	"github.com/GontikR99/chillmodeinfo/internal/comms/rpcidl"
+	"github.com/GontikR99/chillmodeinfo/internal/record"
 	"github.com/GontikR99/chillmodeinfo/pkg/console"
 	"github.com/GontikR99/chillmodeinfo/pkg/electron/ipc/ipcrenderer"
 	"github.com/vugu/vugu"
@@ -20,6 +24,8 @@ import (
 type Root struct {
 	ActiveBids []*Bid
 	RandBag    map[int]struct{}
+	ItemAuctioned string
+	Members map[string]record.Member
 }
 
 type Bid struct {
@@ -29,9 +35,37 @@ type Bid struct {
 	Texts      []string
 }
 
+var bidSupport=rpcidl.BidSupport(ipcrenderer.Client)
+
 func (c *Root) Init(ctx vugu.InitCtx) {
 	rand.Seed(time.Now().UnixNano())
 	c.RandBag = make(map[int]struct{})
+	go func() {
+		members, err := restidl.Members.GetMembers(context.Background())
+		if err==nil {
+			ctx.EventEnv().Lock()
+			c.Members=members
+			ctx.EventEnv().UnlockRender()
+			if c.ActiveBids!=nil {
+				bidSupport.OfferBid(c.mainName(c.ActiveBids[0]), c.ItemAuctioned, float64(c.ActiveBids[0].Value))
+			}
+		}
+	}()
+	go func() {
+		for {
+			item, err := bidSupport.GetLastMentioned()
+			if err==nil && c.ItemAuctioned != item {
+				ctx.EventEnv().Lock()
+				c.ItemAuctioned = item
+				ctx.EventEnv().UnlockRender()
+				if c.ActiveBids!=nil {
+					bidSupport.OfferBid(c.mainName(c.ActiveBids[0]), c.ItemAuctioned, float64(c.ActiveBids[0].Value))
+				}
+			}
+			<-time.After(10*time.Millisecond)
+		}
+	}()
+
 	go func() {
 		logEntriesIn, _ := eqspec.ListenForLogs()
 		go func() {
@@ -50,6 +84,39 @@ func (c *Root) Init(ctx vugu.InitCtx) {
 			c.parseForBid(ctx.EventEnv(), logEntry)
 		}
 	}()
+}
+
+func (c *Root) isAlt(bid *Bid) bool {
+	return c.mainName(bid)!=""
+}
+
+func (c *Root) mainName(bid *Bid) string {
+	if c.Members==nil {return ""}
+	var m record.Member
+	var ok bool
+	if m, ok = c.Members[bid.Name]; !ok {}
+	if !m.IsAlt() {return ""}
+	if m, ok = c.Members[m.GetOwner()]; !ok {
+		return ""
+	}
+	return m.GetName()
+}
+
+func (c *Root) getDKP(bid *Bid) string {
+	if c.Members==nil {
+		return "???"
+	}
+	var m record.Member
+	var ok bool
+	if m, ok = c.Members[bid.Name]; !ok {
+		return "???"
+	}
+	if m.IsAlt() {
+		if m, ok = c.Members[m.GetOwner()]; !ok {
+			return "???"
+		}
+	}
+	return fmt.Sprintf("%.1f", m.GetDKP())
 }
 
 func extractNumbers(text string) []int {
@@ -123,6 +190,7 @@ func (c *Root) parseForBid(env vugu.EventEnv, entry *eqspec.LogEntry) {
 	env.Lock()
 	sort.Sort(byValueDesc(c.ActiveBids))
 	env.UnlockRender()
+	bidSupport.OfferBid(c.mainName(c.ActiveBids[0]), c.ItemAuctioned, float64(c.ActiveBids[0].Value))
 }
 
 type byValueDesc []*Bid

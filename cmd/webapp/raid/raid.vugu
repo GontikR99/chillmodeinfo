@@ -1,37 +1,74 @@
 <div>
     <raid:DumpTarget @DumpPosted="go c.refreshRaids(event.Env)" :Raids="c.Raids"></raid:DumpTarget>
     <h5>Raids</h5>
-    <table class="table table-striped">
+    <table class="table">
         <thead class="thead-dark">
+        <th scope="row"></th>
         <th scope="row">Date</th>
         <th scope="row">Size</th>
         <th scope="row" style="width:100%;">Description</th>
         <th scope="row">Value</th>
-        <th scope="row" vg-if="localprofile.IsAdmin()"></th>
+        <th scope="row"></th>
         </thead>
         <tbody>
-        <tr vg-for='_, raid := range c.Raids' vg-key='raid.GetRaidId()'>
-            <td class="text-nowrap" vg-content='util.FormatTimestamp(raid.GetTimestamp())'></td>
-            <td vg-content='fmt.Sprint(len(raid.GetAttendees()))'></td>
-            <td class="text-nowrap">
-                <ui:EditLabel
-                        :Value='raid.GetDescription()'
-                        :Editable="localprofile.IsAdmin()"
-                        @Submit="c.updateDescription(event, raid)"
-                />
-            </td>
-            <td class="text-nowrap text-right">
-                <ui:EditLabel
-                        :Value='fmt.Sprintf("%.1f", raid.GetDKPValue())'
-                        :Editable="localprofile.IsAdmin()"
-                        EditStyle="width: 4rem;"
-                        @Submit="c.updateDKP(event, raid)"
-                />
-            </td>
-            <td class="text-nowrap" vg-if="localprofile.IsAdmin()">
-                <a href="#" title="Remove" @click="c.deleteRaid(event, raid)">&#x1F5D1;</a>
-            </td>
-        </tr>
+            <tr :style="rowStyle(tableEntry.idx)" vg-for='_, tableEntry := range c.generateTableEntries()' vg-key='tableEntry.raid.GetRaidId()'>
+                <td vg-if="tableEntry.mainLine">
+                    <span vg-if="c.isRaidCollapsed(tableEntry.raid.GetRaidId())" tabindex="0"
+                          @click="c.toggleCollapsed(event, tableEntry.raid.GetRaidId())"
+                          style="font-family:Segoe UI Symbol; cursor: pointer;">&#x25b6;</span>
+                    <span vg-if="!c.isRaidCollapsed(tableEntry.raid.GetRaidId())" tabindex="0"
+                          @click="c.toggleCollapsed(event, tableEntry.raid.GetRaidId())"
+                          style="font-family:Segoe UI Symbol; cursor: pointer;">&#x25bc;</span>
+                </td>
+                <td class="text-nowrap" vg-content='util.FormatTimestamp(tableEntry.raid.GetTimestamp())' vg-if="tableEntry.mainLine"></td>
+                <td vg-content='fmt.Sprint(len(tableEntry.raid.GetAttendees()))' vg-if="tableEntry.mainLine"></td>
+                <td class="text-nowrap" vg-if="tableEntry.mainLine">
+                    <ui:EditLabel
+                            :Value='tableEntry.raid.GetDescription()'
+                            :Editable="localprofile.IsAdmin()"
+                            @Submit="c.updateDescription(event, tableEntry.raid)"
+                    />
+                </td>
+                <td class="text-nowrap text-right" vg-if="tableEntry.mainLine">
+                    <ui:EditLabel
+                            :Value='fmt.Sprintf("%.1f", tableEntry.raid.GetDKPValue())'
+                            :Editable="localprofile.IsAdmin()"
+                            EditStyle="width: 4rem;"
+                            @Submit="c.updateDKP(event, tableEntry.raid)"
+                    />
+                </td>
+                <td class="text-nowrap" vg-if="tableEntry.mainLine">
+                    <a href="#" title="Remove" vg-if="localprofile.IsAdmin()" @click="c.deleteRaid(event, tableEntry.raid)">&#x1F5D1;</a>
+                    <a href="#" title="Recalculate" vg-if="localprofile.IsAdmin()" @click="c.recalculateRaid(event, tableEntry.raid)"><b>&#x27f3;</b></a>
+                </td>
+
+                <td vg-if="!tableEntry.mainLine">&nbsp;</td>
+                <td vg-if="!tableEntry.mainLine" colspan="5">
+                    <div>
+                        <b>Credited:</b>
+                        <span>
+                            <div vg-for="i:=0;i<len(tableEntry.credited);i+=8">
+                                <vg-template vg-for="j:=i;j<len(tableEntry.credited) && j<i+8;j++">
+                                    <a :href='"#member:"+tableEntry.credited[j]'
+                                   vg-content="tableEntry.credited[j]"></a>
+                                    <span> </span>
+                                </vg-template>
+                            </div>
+                        </span>
+                    </div>
+                    <div>
+                        <b>Uncredited:</b>
+                        <span>
+                            <div vg-for="i:=0;i<len(tableEntry.uncredited);i+=8">
+                                <vg-template vg-for="j:=i;j<len(tableEntry.uncredited) && j<i+8;j++">
+                                    <span vg-content="tableEntry.uncredited[j]"></span>
+                                    <span> </span>
+                                </vg-template>
+                            </div>
+                        </span>
+                    </div>
+                </td>
+            </tr>
         </tbody>
     </table>
 </div>

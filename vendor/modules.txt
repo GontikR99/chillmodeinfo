@@ -26,6 +26,7 @@ github.com/shurcooL/vfsgen/cmd/vfsgendev
 ## explicit
 github.com/timshannon/bolthold
 # github.com/vugu/html v0.0.0-20190914200101-c62dc20b8289
+## explicit
 github.com/vugu/html
 github.com/vugu/html/atom
 # github.com/vugu/vjson v0.0.0-20200505061711-f9cbed27d3d9

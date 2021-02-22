@@ -64,6 +64,7 @@ func (b *raidV0) GetTimestamp() time.Time {return b.Timestamp}
 func (b *raidV0) GetDescription() string {return b.Description}
 func (b *raidV0) GetAttendees() []string {return b.Attendees}
 func (b *raidV0) GetDKPValue() float64   {return b.DKPValue}
+func (b *raidV0) GetCredited() []string {return nil}
 
 func newRaidV0(evt record.Raid) *raidV0 {
 	return &raidV0{

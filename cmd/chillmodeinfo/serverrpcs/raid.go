@@ -8,6 +8,7 @@ import (
 	"github.com/GontikR99/chillmodeinfo/internal/dao"
 	"github.com/GontikR99/chillmodeinfo/internal/dao/db"
 	"github.com/GontikR99/chillmodeinfo/internal/record"
+	"github.com/timshannon/bolthold"
 	"go.etcd.io/bbolt"
 	"log"
 	"time"
@@ -17,11 +18,31 @@ type serverRaidStub struct {}
 
 func (s serverRaidStub) Fetch(ctx context.Context) ([]record.Raid, error) {
 	raidsHolder:=new([]record.Raid)
-	err := db.MakeView([]db.TableName{dao.TableRaid},func(tx *bbolt.Tx) error {
+	err := db.MakeView([]db.TableName{dao.TableRaid, dao.TableDKPLog},func(tx *bbolt.Tx) error {
+		creditedByRaid := make(map[uint64]map[string]struct{})
+		logs, err := dao.TxGetDKPChanges(tx)
+		if err!=nil {
+			return nil
+		}
+		for _, log := range logs {
+			if log.GetRaidId()==0 {continue}
+			if _, ok := creditedByRaid[log.GetRaidId()]; !ok {
+				creditedByRaid[log.GetRaidId()]=make(map[string]struct{})
+			}
+			creditedByRaid[log.GetRaidId()][log.GetTarget()]=struct{}{}
+		}
+
 		raids, err := dao.TxGetRaids(tx)
 		if err!=nil {return err}
 		for _, v := range raids {
-			*raidsHolder = append(*raidsHolder, record.NewBasicRaid(v))
+			br := record.NewBasicRaid(v)
+			br.Credited=nil
+			if creditMap, ok := creditedByRaid[v.GetRaidId()]; ok {
+				for k, _ := range creditMap {
+					br.Credited=append(br.Credited, k)
+				}
+			}
+			*raidsHolder = append(*raidsHolder, br)
 		}
 		return nil
 	})
@@ -52,7 +73,9 @@ func (s serverRaidStub) Add(ctx context.Context, raid record.Raid) error {
 			}
 			seenMembers[attendee]=struct{}{}
 			member, err := dao.TxGetMember(tx, attendee)
-			if err!=nil {
+			if err == bolthold.ErrNotFound {
+				continue
+			} else if err!=nil {
 				return err
 			}
 			if member.IsAlt() {
@@ -112,7 +135,9 @@ func (s serverRaidStub) Delete(ctx context.Context, raidId uint64) error {
 			if err!=nil {return err}
 
 			member, err := dao.TxGetMember(tx, changeEntry.GetTarget())
-			if err!=nil {
+			if err == bolthold.ErrNotFound {
+				continue
+			} else if err!=nil {
 				return err
 			}
 			newMember := record.NewBasicMember(member)
@@ -159,7 +184,9 @@ func (s serverRaidStub) Update(ctx context.Context, raid record.Raid) (record.Ra
 			if err!=nil {return err}
 
 			member, err := dao.TxGetMember(tx, changeEntry.GetTarget())
-			if err!=nil {
+			if err == bolthold.ErrNotFound {
+				continue
+			} else if err!=nil {
 				return err
 			}
 			newMember := record.NewBasicMember(member)
@@ -179,7 +206,9 @@ func (s serverRaidStub) Update(ctx context.Context, raid record.Raid) (record.Ra
 			}
 			seenMembers[attendee]=struct{}{}
 			member, err := dao.TxGetMember(tx, attendee)
-			if err!=nil {
+			if err == bolthold.ErrNotFound {
+				continue
+			} else if err!=nil {
 				return err
 			}
 			if member.IsAlt() {

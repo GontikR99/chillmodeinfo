@@ -1,4 +1,8 @@
+// +build wasm
+
 package msgcomm
+
+import "syscall/js"
 
 const Prefix = "golang-msgcomm-"
 
@@ -12,6 +16,8 @@ type Message interface {
 
 	// Send a response back to the sender
 	Reply(channelName string, data []byte)
+
+	JSValue() js.Value
 }
 
 type Endpoint interface {

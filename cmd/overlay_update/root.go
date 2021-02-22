@@ -5,6 +5,7 @@ package main
 import (
 	"github.com/GontikR99/chillmodeinfo/internal/comms/rpcidl"
 	"github.com/GontikR99/chillmodeinfo/internal/overlay"
+	"github.com/GontikR99/chillmodeinfo/internal/profile/localprofile"
 	"github.com/GontikR99/chillmodeinfo/pkg/console"
 	"github.com/GontikR99/chillmodeinfo/pkg/electron/ipc/ipcrenderer"
 	"github.com/vugu/vugu"
@@ -27,12 +28,14 @@ func (c *Root) Init(vCtx vugu.InitCtx) {
 				console.Log(err)
 				continue
 			}
-			vCtx.EventEnv().Lock()
-			for k, v := range newEntries {
-				c.queue[k]=v
-				console.Log(v)
+			if len(newEntries)!=0 {
+				vCtx.EventEnv().Lock()
+				for k, v := range newEntries {
+					c.queue[k] = v
+					localprofile.SetProfileIfAbsent(v.Self)
+				}
+				vCtx.EventEnv().UnlockRender()
 			}
-			vCtx.EventEnv().UnlockRender()
 			remaining := map[int]*overlay.UpdateEntry {}
 			for k,v := range c.queue {
 				remaining[k]=v.Duplicate()

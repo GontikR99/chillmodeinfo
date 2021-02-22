@@ -3,9 +3,10 @@
 package updateoverlay
 
 import (
-	"github.com/GontikR99/chillmodeinfo/cmd/electronmain/exerpcs"
 	"github.com/GontikR99/chillmodeinfo/cmd/electronmain/overlaymap"
 	"github.com/GontikR99/chillmodeinfo/internal/overlay"
+	"github.com/GontikR99/chillmodeinfo/internal/profile"
+	"github.com/GontikR99/chillmodeinfo/internal/profile/localprofile"
 )
 
 var updateIdGen=0
@@ -30,6 +31,10 @@ func Enqueue(update *overlay.UpdateEntry) {
 func Drain() map[int]*overlay.UpdateEntry {
 	old := currentQueue
 	currentQueue = make(map[int]*overlay.UpdateEntry)
+	for k, v := range old {
+		old[k]=v.Duplicate()
+		old[k].Self=profile.NewBasicProfile(localprofile.GetProfile())
+	}
 	return old
 }
 
@@ -51,8 +56,4 @@ func (o overlayUpdateHandler) Enqueue(entries map[int]*overlay.UpdateEntry) erro
 		}
 	}
 	return nil
-}
-
-func init() {
-	exerpcs.SetUpdateQueueHandler(overlayUpdateHandler{})
 }

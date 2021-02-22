@@ -5,7 +5,6 @@ package ui
 import (
 	"context"
 	"fmt"
-	"github.com/GontikR99/chillmodeinfo/pkg/console"
 	"github.com/GontikR99/chillmodeinfo/pkg/dom/document"
 	"github.com/vugu/vugu"
 	"syscall/js"
@@ -115,7 +114,6 @@ func (c *AutoComplete) suggestionClick(event vugu.DOMEvent, idx int) {
 		input.JSValue().Call("select")
 	}
 	c.displayValue=c.currentSuggestions[c.selectedSuggestion]
-	console.Log(c.displayValue)
 }
 
 func (c *AutoComplete) onKeyDown(event js.Value, env vugu.EventEnv) {

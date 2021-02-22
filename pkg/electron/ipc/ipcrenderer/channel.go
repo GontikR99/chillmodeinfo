@@ -40,6 +40,10 @@ type electronMessage struct {
 	content []byte
 }
 
+func (e *electronMessage) JSValue() js.Value {
+	return e.event
+}
+
 func (e *electronMessage) Content() []byte {
 	return e.content
 }

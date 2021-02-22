@@ -10,7 +10,6 @@ import (
 	"github.com/GontikR99/chillmodeinfo/internal/comms/restidl"
 	"github.com/GontikR99/chillmodeinfo/internal/eqspec"
 	"github.com/GontikR99/chillmodeinfo/internal/record"
-	"github.com/GontikR99/chillmodeinfo/pkg/console"
 	"github.com/GontikR99/chillmodeinfo/pkg/toast"
 	"github.com/vugu/vugu"
 	"sort"
@@ -80,7 +79,6 @@ func (c *Adjustments) addEntry(event vugu.DOMEvent) {
 	c.appending = true
 	go func() {
 		defer func() {
-			console.Log("done submitting")
 			event.EventEnv().Lock()
 			c.appending=false
 			event.EventEnv().UnlockRender()

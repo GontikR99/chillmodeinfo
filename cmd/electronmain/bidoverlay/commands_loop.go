@@ -39,10 +39,12 @@ func WatchLogs() {
 				OpenBids(entries[i+1:])
 			}
 			if matchesSetting(entry, settings.BidEndPattern) {
-				EndBids()
+				EndBidForward()
+				sendBidToUpdate()
 			}
 			if matchesSetting(entry, settings.BidClosePattern) {
 				ClearBids()
+				sendBidToUpdate()
 			}
 		}
 	})

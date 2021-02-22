@@ -5,9 +5,9 @@ package bidoverlay
 import (
 	"github.com/GontikR99/chillmodeinfo/cmd/electronmain/exerpcs"
 	"github.com/GontikR99/chillmodeinfo/cmd/electronmain/overlaymap"
+	"github.com/GontikR99/chillmodeinfo/internal/comms/rpcidl"
 	"github.com/GontikR99/chillmodeinfo/internal/eqspec"
 	"github.com/GontikR99/chillmodeinfo/internal/overlay"
-	"github.com/GontikR99/chillmodeinfo/internal/comms/rpcidl"
 	"github.com/GontikR99/chillmodeinfo/pkg/electron/browserwindow"
 )
 
@@ -60,17 +60,16 @@ func OpenBids(initialBuffer []*eqspec.LogEntry) {
 
 		rpcServer := exerpcs.NewServer()
 		rpcidl.HandleLogEntryBuffer(logBuffer)(rpcServer)
+		rpcidl.HandleBidSupport(serverBidSupport{})(rpcServer)
 		bw.ServeRPC(rpcServer)
 	}()
 }
 
-func EndBids() {
-	onCloseBids()
+func EndBidForward() {
 	lastListener.Release()
 }
 
 func ClearBids() {
-	onCloseBids()
 	page := overlaymap.Lookup("bid").Page
 	go overlay.Close(page)
 }

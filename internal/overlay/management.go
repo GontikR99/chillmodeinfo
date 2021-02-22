@@ -141,6 +141,5 @@ func Launch(fileRoot string, interactive bool) browserwindow.BrowserWindow {
 		delete(activeOverlays, fileRoot)
 	})
 	overlayWindow.LoadFile(path.Join(application.GetAppPath(), "src", fileRoot))
-
 	return overlayWindow
 }

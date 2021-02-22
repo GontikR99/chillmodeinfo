@@ -1,28 +1,41 @@
 // +build wasm,electron
 
-package exerpcs
+package bidoverlay
 
 import (
-	"github.com/GontikR99/chillmodeinfo/internal/comms/rpcidl"
+	"github.com/GontikR99/chillmodeinfo/cmd/electronmain/updateoverlay"
 	"github.com/GontikR99/chillmodeinfo/internal/eqspec"
+	"github.com/GontikR99/chillmodeinfo/internal/overlay"
 	"regexp"
 	"strings"
 )
 
+var currentUpdate *overlay.UpdateEntry
+
+func onOpenBids() {
+	currentUpdate=overlay.NewBidUpdate("","",0)
+	currentUpdate.SeqId=updateoverlay.AllocateUpdate()
+}
+
+func sendBidToUpdate() {
+	if currentUpdate!=nil && currentUpdate.Bid!=0 {
+		updateoverlay.Enqueue(currentUpdate.Duplicate())
+	}
+	currentUpdate=nil
+}
+
 type serverBidSupport struct {}
 
-func (s *serverBidSupport) GetLastMentioned() (string, error) {
+func (s serverBidSupport) GetLastMentioned() (string, error) {
 	return lastMentionedItem, nil
 }
 
-var bidOfferedFunc func(string, string, float64)
-func OnBidOffered(bof func(string, string, float64)) {
-	bidOfferedFunc=bof
-}
 
-func (s *serverBidSupport) OfferBid(bidder string, itemname string, bidValue float64) error {
-	if bidOfferedFunc!=nil {
-		bidOfferedFunc(bidder, itemname, bidValue)
+func (s serverBidSupport) OfferBid(bidder string, itemname string, bidValue float64) error {
+	if currentUpdate!=nil {
+		currentUpdate.Bidder=bidder
+		currentUpdate.ItemName=itemname
+		currentUpdate.Bid=bidValue
 	}
 	return nil
 }
@@ -74,6 +87,4 @@ func init() {
 			}
 		}
 	})
-
-	register(rpcidl.HandleBidSupport(&serverBidSupport{}))
 }

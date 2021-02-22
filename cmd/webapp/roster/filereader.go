@@ -10,7 +10,6 @@ import (
 	"github.com/GontikR99/chillmodeinfo/internal/comms/restidl"
 	"github.com/GontikR99/chillmodeinfo/internal/eqspec"
 	"github.com/GontikR99/chillmodeinfo/internal/record"
-	"github.com/GontikR99/chillmodeinfo/pkg/console"
 	"github.com/GontikR99/chillmodeinfo/pkg/jsbinding"
 	"github.com/GontikR99/chillmodeinfo/pkg/toast"
 	"github.com/vugu/vugu"
@@ -22,7 +21,6 @@ import (
 func (c *DumpTarget) dropFile(event vugu.DOMEvent) {
 	event.StopPropagation()
 	event.PreventDefault()
-	console.Log("Dropped")
 	jsFiles := event.JSEvent().Get("dataTransfer").Get("files")
 	if jsFiles.IsUndefined() {
 		toast.Error("drop", errors.New("Whoa, was that a file you dropped?"))

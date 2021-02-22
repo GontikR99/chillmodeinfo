@@ -1,5 +1,8 @@
 <div>
-    Enqueued entries: <div vg-content="fmt.Sprint(len(c.queue))"></div>
+    <div>Enqueued entries: <span vg-content="fmt.Sprint(len(c.queue))"></span></div>
+    <div vg-for="_, entry := range c.queue" vg-key="fmt.Sprint(entry.SeqId)">
+        <span vg-content='fmt.Sprint("#",entry.SeqId)'></span>:<span vg-content='fmt.Sprint(entry.Type)'></span>
+    </div>
 </div>
 <script type="application/x-go">
 import "fmt"

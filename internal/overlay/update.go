@@ -13,6 +13,7 @@ const (
 	UpdateGuildDump = UpdateType(iota)
 	UpdateRaidDump
 	UpdateBid
+	UpdateError
 )
 
 type UpdateEntry struct {
@@ -29,15 +30,18 @@ type UpdateEntry struct {
 	Members []*record.BasicMember
 
 	// For raid dumps
-	Raid *record.BasicRaid
+	Attendees []string
 
 	// For loot
 	Bidder string
 	ItemName string
 	Bid float64
+
+	// For error message
+	ErrorMsg string
 }
 
-func NewGuildDump(entry profile.Entry, members []record.Member) *UpdateEntry {
+func NewGuildDump(members []record.Member) *UpdateEntry {
 	var newMembers []*record.BasicMember
 	for _, v := range members {
 		newMembers = append(newMembers, record.NewBasicMember(v))
@@ -45,28 +49,33 @@ func NewGuildDump(entry profile.Entry, members []record.Member) *UpdateEntry {
 	return &UpdateEntry{
 		Type:    UpdateGuildDump,
 		SeqId:   0,
-		Self:    profile.NewBasicProfile(entry),
 		Members: newMembers,
 	}
 }
 
-func NewRaidDump(entry profile.Entry, raid record.Raid) *UpdateEntry {
+func NewRaidDump(attendees []string) *UpdateEntry {
 	return &UpdateEntry{
 		Type:  UpdateRaidDump,
 		SeqId: 0,
-		Self:  profile.NewBasicProfile(entry),
-		Raid:  record.NewBasicRaid(raid),
+		Attendees: attendees,
 	}
 }
 
-func NewBidUpdate(entry profile.Entry, bidder string, itemName string, bid float64) *UpdateEntry {
+func NewBidUpdate(bidder string, itemName string, bid float64) *UpdateEntry {
 	return &UpdateEntry{
 		Type:     UpdateBid,
 		SeqId:    0,
-		Self:     profile.NewBasicProfile(entry),
 		Bidder:   bidder,
 		ItemName: itemName,
 		Bid:      bid,
+	}
+}
+
+func NewError(message string) *UpdateEntry {
+	return &UpdateEntry{
+		Type:     UpdateError,
+		SeqId:    0,
+		ErrorMsg: message,
 	}
 }
 
@@ -76,9 +85,10 @@ func (u *UpdateEntry) Duplicate() *UpdateEntry {
 		SeqId:    u.SeqId,
 		Self:     u.Self,
 		Members:  u.Members,
-		Raid:     u.Raid,
+		Attendees: u.Attendees,
 		Bidder:   u.Bidder,
 		ItemName: u.ItemName,
 		Bid:      u.Bid,
+		ErrorMsg: u.ErrorMsg,
 	}
 }

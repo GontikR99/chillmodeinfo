@@ -214,7 +214,7 @@ func Broadcast(channel string, content []byte) {
 }
 
 func (bw *electronBrowserWindow) Id() int {
-	return bw.browserWindow.Get("id").Int()
+	return bw.webContents.Get("id").Int()
 }
 
 func (bw *electronBrowserWindow) Listen(channelName string) (<-chan msgcomm.Message, func()) {

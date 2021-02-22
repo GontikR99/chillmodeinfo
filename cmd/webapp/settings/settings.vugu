@@ -33,11 +33,11 @@
             <button type="button" class="btn btn-primary" @click='c.ResetOverlay(event, "bid")'>Reset</button>
             <button type="button" class="btn btn-primary" @click='c.CloseOverlay(event, "bid")'>Close</button>
         </div>
-        <label class="col-form-label col-sm-2">Raid dump overlay:</label>
+        <label class="col-form-label col-sm-2">Updates overlay:</label>
         <div class="col-sm-3">
-            <button type="button" class="btn btn-primary" @click='c.PositionOverlay(event, "raiddump")'>Position</button>
-            <button type="button" class="btn btn-primary" @click='c.ResetOverlay(event, "raiddump")'>Reset</button>
-            <button type="button" class="btn btn-primary" @click='c.CloseOverlay(event, "raiddump")'>Close</button>
+            <button type="button" class="btn btn-primary" @click='c.PositionOverlay(event, "update")'>Position</button>
+            <button type="button" class="btn btn-primary" @click='c.ResetOverlay(event, "update")'>Reset</button>
+            <button type="button" class="btn btn-primary" @click='c.CloseOverlay(event, "update")'>Close</button>
         </div>
     </div>
 </form>

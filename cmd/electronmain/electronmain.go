@@ -6,8 +6,9 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
-	"github.com/GontikR99/chillmodeinfo/cmd/electronmain/logactions"
+	"github.com/GontikR99/chillmodeinfo/cmd/electronmain/bidoverlay"
 	"github.com/GontikR99/chillmodeinfo/cmd/electronmain/exerpcs"
+	"github.com/GontikR99/chillmodeinfo/cmd/electronmain/updateoverlay"
 	"github.com/GontikR99/chillmodeinfo/internal/eqspec"
 	"github.com/GontikR99/chillmodeinfo/internal/profile/localprofile"
 	"github.com/GontikR99/chillmodeinfo/internal/settings"
@@ -33,7 +34,7 @@ func main() {
 
 	settings.DefaultSetting(settings.EverQuestDirectory, "C:\\Users\\Public\\Daybreak Game Company\\Installed Games\\EverQuest")
 	eqspec.RestartLogScans()
-	logactions.WatchLogs()
+	bidoverlay.WatchLogs()
 	localprofile.StartElectronPoll()
 
 	appCtx, exitApp := context.WithCancel(context.Background())
@@ -56,7 +57,7 @@ func main() {
 			mainWindow.Once("ready-to-show", func() {
 				//mainWindow.RemoveMenu()
 				mainWindow.Show()
-//				go eqspec.BuildTrie()
+				updateoverlay.PollForUpdates()
 			})
 			mainWindow.LoadFile(path.Join(application.GetAppPath(), "src/index.html"))
 		}()

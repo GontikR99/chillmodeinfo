@@ -5,7 +5,6 @@ package exerpcs
 import (
 	"github.com/GontikR99/chillmodeinfo/internal/comms/rpcidl"
 	"github.com/GontikR99/chillmodeinfo/internal/eqspec"
-	"github.com/GontikR99/chillmodeinfo/pkg/console"
 	"regexp"
 	"strings"
 )
@@ -16,8 +15,15 @@ func (s *serverBidSupport) GetLastMentioned() (string, error) {
 	return lastMentionedItem, nil
 }
 
+var bidOfferedFunc func(string, string, float64)
+func OnBidOffered(bof func(string, string, float64)) {
+	bidOfferedFunc=bof
+}
+
 func (s *serverBidSupport) OfferBid(bidder string, itemname string, bidValue float64) error {
-	console.Logf("New high bid: %s %s %f", bidder, itemname, bidValue)
+	if bidOfferedFunc!=nil {
+		bidOfferedFunc(bidder, itemname, bidValue)
+	}
 	return nil
 }
 

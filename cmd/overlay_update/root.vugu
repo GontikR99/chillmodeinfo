@@ -1,0 +1,6 @@
+<div>
+    Enqueued entries: <div vg-content="fmt.Sprint(len(c.queue))"></div>
+</div>
+<script type="application/x-go">
+import "fmt"
+</script>

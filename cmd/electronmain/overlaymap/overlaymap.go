@@ -8,8 +8,7 @@ type Description struct {
 
 var overlays = []*Description{
 	{"bid", "Bid Overlay", "overlay_bids.html"},
-	{"guilddump", "Guild Dump Overlay", "overlay_guild_dump.html"},
-	{"raiddump", "Raid Dump Overlay", "overlay_raid_dump.html"},
+	{"update", "Update Overlay", "overlay_update.html"},
 }
 
 func Lookup(name string) *Description {

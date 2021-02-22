@@ -1,6 +1,6 @@
 // +build wasm,electron
 
-package logactions
+package bidoverlay
 
 import (
 	"github.com/GontikR99/chillmodeinfo/internal/eqspec"

@@ -1,6 +1,6 @@
 // +build wasm,electron
 
-package logactions
+package bidoverlay
 
 import (
 	"github.com/GontikR99/chillmodeinfo/cmd/electronmain/exerpcs"
@@ -37,6 +37,7 @@ func (b *BufferedLogEntries) DispatchMessages(entries []*eqspec.LogEntry) {
 var lastListener eqspec.ListenerHandle
 
 func OpenBids(initialBuffer []*eqspec.LogEntry) {
+	onOpenBids()
 	logBuffer := &BufferedLogEntries{
 		buffer: initialBuffer,
 	}
@@ -64,10 +65,12 @@ func OpenBids(initialBuffer []*eqspec.LogEntry) {
 }
 
 func EndBids() {
+	onCloseBids()
 	lastListener.Release()
 }
 
 func ClearBids() {
+	onCloseBids()
 	page := overlaymap.Lookup("bid").Page
 	go overlay.Close(page)
 }

@@ -6,6 +6,12 @@ import "github.com/GontikR99/chillmodeinfo/internal/profile"
 
 var currentProfile profile.Entry
 
+func SetProfileIfAbsent(entry profile.Entry) {
+	if currentProfile==nil {
+		currentProfile=entry
+	}
+}
+
 func GetProfile() profile.Entry {
 	return currentProfile
 }

@@ -3,7 +3,7 @@
     <div class="row">
         <span class="text-nowrap col-6">
             Name:
-            <span class="col-5 text-black-50"><ui:AutoComplete EditStyle="width:6rem;" :Value="c.RaidName" @Suggestion="c.suggest(event)" @Change="c.updateDescription(event)"></ui:AutoComplete></span>
+            <span class="col-5" style="color: black;"><ui:AutoComplete EditStyle="width:6rem;" :Value="c.RaidName" @Suggestion="c.suggest(event)" @Change="c.updateDescription(event)"></ui:AutoComplete></span>
         </span>
         <span class="text-nowrap col-4">
             Value:

@@ -1,0 +1,31 @@
+<div class="container-fluid">
+    <div class="row"><u>Completed auction</u></div>
+    <div class="row">
+        <span class="text-nowrap">
+            Name:
+            <span class="col-10" style="color: black;"><ui:AutoComplete EditStyle="width:15rem;" :Value="c.ItemName" @Suggestion="c.suggest(event)" @Change="c.updateItem(event)"></ui:AutoComplete></span>
+        </span>
+    </div>
+    <div class="row">
+        Bidder:
+        <ui:SelectBox style="width:15rem;" :Value="c.Bidder" :Options="c.memberList()" @Change='c.updateBidder(event)'/>
+    </div>
+    <div class="row">
+        <span class="text-nowrap col-4">
+            Value:
+            <input type="text" style="width:4rem;" :value='fmt.Sprintf("%.1f", c.Bid)' @change="c.updateDKP(event)">
+        </span>
+        <span class="text-nowrap col-4">
+            <a href="#" title="Award" @click="c.submit(event)" vg-if="c.submittable()">&#x2714;</a>
+            <a href="#" title="Dismiss" @click="c.dismiss(event)">&#x274c;</a>
+        </span>
+    </div>
+    <div vg-if='c.Error!=""' class="row text-warning" vg-content="c.Error"></div>
+    <hr class="border-light"/>
+</div>
+<script type="application/x-go">
+    import (
+    "fmt"
+    "github.com/GontikR99/chillmodeinfo/cmd/webapp/ui"
+    )
+</script>

@@ -19,7 +19,7 @@ func onOpenBids() {
 
 func sendBidToUpdate() {
 	if currentUpdate!=nil && currentUpdate.Bid!=0 {
-		updateoverlay.Enqueue(currentUpdate.Duplicate())
+		updateoverlay.Enqueue(currentUpdate)
 	}
 	currentUpdate=nil
 }

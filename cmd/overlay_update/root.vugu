@@ -1,10 +1,11 @@
 <div class="container-fluid text-white">
     <h5><u>Pending updates</u></h5>
-    <div vg-for="_, entry := range c.enumerateQueue()" vg-key="fmt.Sprint(entry.SeqId)">
+    <div vg-for="_, entry := range c.enumerateQueue()" vg-key="entry.SeqId">
         <main:GuildDump :Owner="c" :Update="entry" vg-if="entry.Type==update.UpdateGuildDump"></main:GuildDump>
         <main:RaidDump :Owner="c" :Update="entry" vg-if="entry.Type==update.UpdateRaidDump"></main:RaidDump>
+        <main:Bid :Owner="c" :Update="entry" vg-if="entry.Type==update.UpdateBid"></main:Bid>
         <main:ErrMsg :Owner="c" :Update="entry" vg-if="entry.Type==update.UpdateError"></main:ErrMsg>
-        <div class="text-nowrap col-12" vg-if="entry.Type!=update.UpdateGuildDump && entry.Type!=update.UpdateRaidDump && entry.Type!=update.UpdateError">
+        <div class="text-nowrap col-12" vg-if="entry.Type!=update.UpdateGuildDump && entry.Type!=update.UpdateRaidDump && entry.Type != update.UpdateBid && entry.Type!=update.UpdateError">
             <span vg-content='fmt.Sprint("#",entry.SeqId)'></span>:<span vg-content='fmt.Sprint(entry.Type)'></span>
         </div>
     </div>

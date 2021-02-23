@@ -32,7 +32,7 @@ func (c *Root) removeFromQueue(env vugu.EventEnv, item *update.UpdateEntry) {
 func (c *Root) updateMembers(env vugu.EventEnv) {
 	go func() {
 		members, err := restidl.Members.GetMembers(context.Background())
-		if err!=nil {
+		if err==nil {
 			env.Lock()
 			c.membership=members
 			env.UnlockRender()
@@ -46,8 +46,10 @@ func (c *Root) Init(vCtx vugu.InitCtx) {
 	c.queue=make(map[int]*update.UpdateEntry)
 	c.membership=make(map[string]record.Member)
 	go func() {
-		c.updateMembers(vCtx.EventEnv())
-		<-time.After(60*time.Second)
+		for {
+			c.updateMembers(vCtx.EventEnv())
+			<-time.After(60 * time.Second)
+		}
 	}()
 	go func() {
 		for {
@@ -58,11 +60,11 @@ func (c *Root) Init(vCtx vugu.InitCtx) {
 				continue
 			}
 			if len(newEntries)!=0 {
-				vCtx.EventEnv().Lock()
 				for k, v := range newEntries {
 					c.queue[k] = v
 					localprofile.SetProfileIfAbsent(v.Self)
 				}
+				vCtx.EventEnv().Lock()
 				vCtx.EventEnv().UnlockRender()
 			}
 			remaining := map[int]*update.UpdateEntry{}

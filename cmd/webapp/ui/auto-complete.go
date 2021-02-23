@@ -77,7 +77,8 @@ func (c *AutoComplete) onFocus(event vugu.DOMEvent) {
 						"background-color:white; "+
 						"top: %dpx; "+
 						"left: -2px; "+
-						"width: %dpx; ",
+						"width: %dpx; " +
+						"z-index: 100;",
 						inputElt.JSValue().Get("offsetHeight").Int()-2,
 						inputElt.JSValue().Get("offsetWidth").Int()))
 			}
@@ -200,8 +201,8 @@ func (s *suggestionEvent) Propose(strings []string) {
 		if curValue != s.value {
 			return
 		}
-		if len(strings) > 50 {
-			strings = strings[:50]
+		if len(strings) > 20 {
+			strings = strings[:20]
 		}
 		s.env.Lock()
 		s.ac.currentSuggestions = strings
@@ -241,6 +242,10 @@ func (c *AutoComplete) Init(vCtx vugu.InitCtx) {
 		c.onKeyDown(args[0], vCtx.EventEnv())
 		return nil
 	})
+}
+
+func (c *AutoComplete) Compute(vCtx vugu.ComputeCtx) {
+	c.displayValue = c.Value
 }
 
 func (c *AutoComplete) Destroy(vCtx vugu.DestroyCtx) {

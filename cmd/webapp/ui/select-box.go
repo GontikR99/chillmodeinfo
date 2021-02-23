@@ -27,13 +27,16 @@ type SelectBox struct {
 }
 
 func (c *SelectBox) onChange(event js.Value, env vugu.EventEnv) {
-	c.Value = event.Get("target").Get("value").String()
-	if c.Change != nil {
-		c.Change.ChangeHandle(&selectBoxChangeEvent{
-			value: c.Value,
-			env:   env,
-			sb:    c,
-		})
+	newValue := event.Get("target").Get("value").String()
+	if c.Value != newValue {
+		c.Value = newValue
+		if c.Change != nil {
+			c.Change.ChangeHandle(&selectBoxChangeEvent{
+				value: c.Value,
+				env:   env,
+				sb:    c,
+			})
+		}
 	}
 }
 
@@ -72,14 +75,25 @@ func (c *SelectBox) Init(vCtx vugu.InitCtx) {
 			elt := document.GetElementById(c.idStr)
 			if elt != nil {
 				elt.JSValue().Set("onchange", c.changeFunc)
-			}
-			for idx, value := range c.Options {
-				elt := document.GetElementById(fmt.Sprintf("%s-option-%d", c.idStr, idx))
-				if elt != nil {
-					if c.Value == value {
-						elt.SetAttribute("selected", "selected")
-					} else {
-						elt.RemoveAttribute("selected")
+				if v:=elt.JSValue().Get("value").String(); v!=c.Value && c.Options!=nil {
+					selectedIdx:=-1
+					for idx, value := range c.Options {
+						if c.Value==value {
+							selectedIdx=idx
+							break
+						}
+					}
+					if selectedIdx!=-1 {
+						for idx, value := range c.Options {
+							elt := document.GetElementById(fmt.Sprintf("%s-option-%d", c.idStr, idx))
+							if elt != nil {
+								if c.Value == value {
+									elt.SetAttribute("selected", "selected")
+								} else {
+									elt.RemoveAttribute("selected")
+								}
+							}
+						}
 					}
 				}
 			}

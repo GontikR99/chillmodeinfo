@@ -31,8 +31,12 @@ func (s serverMembersHandler) GetMember(ctx context.Context, name string) (recor
 			return err
 		}
 		sum:=float64(0)
+		lastAttend:=time.Time{}
 		for _, log := range logs {
 			sum+=log.GetDelta()
+			if lastAttend.Before(log.GetTimestamp()) {
+				lastAttend=log.GetTimestamp()
+			}
 		}
 		member, err := dao.TxGetMember(tx, initialCap(name))
 		if err!=nil {
@@ -40,6 +44,7 @@ func (s serverMembersHandler) GetMember(ctx context.Context, name string) (recor
 		}
 		newMember := record.NewBasicMember(member)
 		newMember.DKP=sum
+		newMember.LastActive=lastAttend
 		*res=newMember
 		return nil
 	})
@@ -52,11 +57,16 @@ func (s serverMembersHandler) GetMembers(ctx context.Context) (map[string]record
 		logs, err := dao.TxGetDKPChanges(tx)
 		if err!=nil {return err}
 		totals:=make(map[string]float64)
+		dates:=make(map[string]time.Time)
 		for _, delta := range logs {
 			if _, ok := totals[delta.GetTarget()]; !ok {
 				totals[delta.GetTarget()]=0.0
+				dates[delta.GetTarget()]=time.Time{}
 			}
 			totals[delta.GetTarget()] += delta.GetDelta()
+			if dates[delta.GetTarget()].Before(delta.GetTimestamp()) {
+				dates[delta.GetTarget()]=delta.GetTimestamp()
+			}
 		}
 
 		*res, err = dao.TxGetMembers(tx)
@@ -65,8 +75,10 @@ func (s serverMembersHandler) GetMembers(ctx context.Context) (map[string]record
 			newMember := record.NewBasicMember(v)
 			if total, ok := totals[k]; ok {
 				newMember.DKP=total
+				newMember.LastActive=dates[k]
 			} else {
 				newMember.DKP=0
+				newMember.LastActive=time.Time{}
 			}
 			(*res)[k]=newMember
 		}

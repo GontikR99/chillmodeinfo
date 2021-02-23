@@ -34,10 +34,15 @@ func init() {
 						return
 					}
 
-					raid, err := eqspec.ParseRaidDump(bytes.NewReader(contents))
+					attendees, err := eqspec.ParseRaidDump(bytes.NewReader(contents))
 					if err==nil {
-						Enqueue(overlay.NewRaidDump(raid))
-						return
+						if len(attendees)==0 {
+							Enqueue(overlay.NewError("Empty raid dump: "+filename))
+							return
+						} else {
+							Enqueue(overlay.NewRaidDump(attendees))
+							return
+						}
 					}
 
 					members, err := eqspec.ParseGuildDump(bytes.NewReader(contents))

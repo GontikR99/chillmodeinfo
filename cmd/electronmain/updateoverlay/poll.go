@@ -39,10 +39,10 @@ func PollForUpdates() {
 					}
 				})
 
-				//bw.JSValue().Get("webContents").Call("openDevTools", map[string]interface{} {
-				//	"mode":"detach",
-				//	"activate":"false",
-				//})
+				bw.JSValue().Get("webContents").Call("openDevTools", map[string]interface{} {
+					"mode":"detach",
+					"activate":"false",
+				})
 			}
 		}
 	}()

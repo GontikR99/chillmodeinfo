@@ -88,6 +88,12 @@ func GetDKPChanges() ([]record.DKPChangeEntry, error) {
 	return *records, err
 }
 
+func WipeDKP() error {
+	return db.MakeUpdate([]db.TableName{TableDKPLog}, func(tx *bbolt.Tx) error {
+		return db.TxDeleteMatching(tx, &dkpChangeLogEntryV1{}, &bolthold.Query{})
+	})
+}
+
 type dkpChangeLogEntryV1 struct {
 	EntryId uint64 `boltholdKey:"EntryId"`
 	Timestamp time.Time

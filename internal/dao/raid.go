@@ -31,6 +31,12 @@ func TxGetRaids(tx *bbolt.Tx) ([]record.Raid, error) {
 	return *raidResult, err
 }
 
+func WipeRaids() error {
+	return db.MakeUpdate([]db.TableName{TableRaid}, func(tx *bbolt.Tx) error {
+		return db.TxDeleteMatching(tx, &raidV0{}, &bolthold.Query{})
+	})
+}
+
 type byTimestampDesc []record.Raid
 
 func (b byTimestampDesc) Len() int {return len(b)}

@@ -16,8 +16,7 @@
                     <tr vg-for='idx, dump := range c.Dumps' vg-key="dump.UniqueId()">
                         <th role="col" class="text-nowrap" vg-content="dump.Filename()"></th>
                         <td class="text-nowrap small" vg-content="dump.Message()"></td>
-                        <td><ui:AutoComplete width="100%" :Value='dump.Description()' @Suggestion="c.suggest(event)" @Change="c.descriptionChange(event, dump)"/></td>
-<!--                        <td><input type="text" :value="dump.Description()" @change="c.descriptionChange(event, dump)" @focus="c.textFocus(event)"/></td>-->
+                        <td><ui:AutoComplete EditStyle="width: 100%;" :Value='dump.Description()' @Suggestion="c.suggest(event)" @Change="c.descriptionChange(event, dump)"/></td>
                         <td><input type="text" :value='fmt.Sprintf("%.1f", dump.DKP())' @change="c.dkpChange(event, dump)" @focus="c.textFocus(event)"/></td>
                         <td>
                             <a href="#" vg-if="dump.Valid()" @click="c.Commit(event, dump)" title="Upload">&#x2714;</a>

@@ -1,0 +1,11 @@
+<div class="container-fluid">
+    <div class="row">
+        <span class="col-10">
+            <span vg-content="c.Update.ErrorMessage"></span>
+        </span>
+        <span class="col-2">
+            <a href="#" title="Dismiss" @click="c.dismiss(event)">&#x274c;</a>
+        </span>
+    </div>
+    <hr class="border-light"/>
+</div>

@@ -6,7 +6,7 @@ import (
 	"bytes"
 	"errors"
 	"github.com/GontikR99/chillmodeinfo/internal/eqspec"
-	"github.com/GontikR99/chillmodeinfo/internal/overlay"
+	"github.com/GontikR99/chillmodeinfo/internal/overlay/update"
 	"github.com/GontikR99/chillmodeinfo/internal/settings"
 	"github.com/GontikR99/chillmodeinfo/pkg/nodejs/path"
 	"github.com/GontikR99/chillmodeinfo/pkg/toast"
@@ -30,28 +30,28 @@ func init() {
 					dumpFullPath := path.Join(eqDir, filename)
 					contents, err := ioutil.ReadFile(dumpFullPath)
 					if err!=nil {
-						Enqueue(overlay.NewError("Couldn't read dump: "+err.Error()))
+						Enqueue(update.NewError("Couldn't read dump: "+err.Error()))
 						return
 					}
 
 					attendees, err := eqspec.ParseRaidDump(bytes.NewReader(contents))
 					if err==nil {
 						if len(attendees)==0 {
-							Enqueue(overlay.NewError("Empty raid dump: "+filename))
+							Enqueue(update.NewError("Empty raid dump: "+filename))
 							return
 						} else {
-							Enqueue(overlay.NewRaidDump(attendees))
+							Enqueue(update.NewRaidDump(attendees))
 							return
 						}
 					}
 
 					members, err := eqspec.ParseGuildDump(bytes.NewReader(contents))
 					if err==nil {
-						Enqueue(overlay.NewGuildDump(members))
+						Enqueue(update.NewGuildDump(members))
 						return
 					}
 
-					Enqueue(overlay.NewError("Unrecognized Outputfile: "+filename))
+					Enqueue(update.NewError("Unrecognized Outputfile: "+filename))
 				}()
 			}
 		}

@@ -56,9 +56,12 @@ func main() {
 		for k, v:=range m {
 			fmt.Printf("%v = %v\n", k, *record.NewBasicMember(v))
 		}
-	case "wipemembers":
-		fmt.Println("Wiping members.")
+	case "wipe":
+		fmt.Println("Wiping members/etc.")
 		dao.WipeMembers()
+		dao.WipeDKP()
+		dao.WipeRaids()
+
 	case "zeromember":
 		if len(os.Args)<3 {
 			fmt.Println("zeromember <name>")

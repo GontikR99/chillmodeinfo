@@ -5,15 +5,15 @@ package bidoverlay
 import (
 	"github.com/GontikR99/chillmodeinfo/cmd/electronmain/updateoverlay"
 	"github.com/GontikR99/chillmodeinfo/internal/eqspec"
-	"github.com/GontikR99/chillmodeinfo/internal/overlay"
+	"github.com/GontikR99/chillmodeinfo/internal/overlay/update"
 	"regexp"
 	"strings"
 )
 
-var currentUpdate *overlay.UpdateEntry
+var currentUpdate *update.UpdateEntry
 
 func onOpenBids() {
-	currentUpdate=overlay.NewBidUpdate("","",0)
+	currentUpdate= update.NewBidUpdate("","",0)
 	currentUpdate.SeqId=updateoverlay.AllocateUpdate()
 }
 

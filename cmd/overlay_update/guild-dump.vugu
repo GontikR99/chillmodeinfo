@@ -1,0 +1,14 @@
+<div>
+    <div>
+        <span class="col-8 text-nowrap" vg-content='fmt.Sprintf("Guild dump with %d members", len(c.Update.Members))'></span>
+        <span class="col-4 text-nowrap">
+            <a href="#" title="Upload" @click="c.upload(event)">&#x2714;</a>
+            <a href="#" title="Ignore" @click="c.dismiss(event)">&#x274c;</a>
+        </span>
+    </div>
+    <div vg-if='c.Error!=""' class="col-12 text-warning" vg-content="c.Error"></div>
+    <hr class="border-light"/>
+</div>
+<script type="application/x-go">
+import "fmt"
+</script>

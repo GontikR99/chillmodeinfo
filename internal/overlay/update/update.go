@@ -1,6 +1,6 @@
 // +build wasm
 
-package overlay
+package update
 
 import (
 	"github.com/GontikR99/chillmodeinfo/internal/profile"
@@ -38,7 +38,7 @@ type UpdateEntry struct {
 	Bid float64
 
 	// For error message
-	ErrorMsg string
+	ErrorMessage string
 }
 
 func NewGuildDump(members []record.Member) *UpdateEntry {
@@ -55,8 +55,8 @@ func NewGuildDump(members []record.Member) *UpdateEntry {
 
 func NewRaidDump(attendees []string) *UpdateEntry {
 	return &UpdateEntry{
-		Type:  UpdateRaidDump,
-		SeqId: 0,
+		Type:      UpdateRaidDump,
+		SeqId:     0,
 		Attendees: attendees,
 	}
 }
@@ -73,22 +73,22 @@ func NewBidUpdate(bidder string, itemName string, bid float64) *UpdateEntry {
 
 func NewError(message string) *UpdateEntry {
 	return &UpdateEntry{
-		Type:     UpdateError,
-		SeqId:    0,
-		ErrorMsg: message,
+		Type:         UpdateError,
+		SeqId:        0,
+		ErrorMessage: message,
 	}
 }
 
 func (u *UpdateEntry) Duplicate() *UpdateEntry {
 	return &UpdateEntry{
-		Type:     u.Type,
-		SeqId:    u.SeqId,
-		Self:     u.Self,
-		Members:  u.Members,
-		Attendees: u.Attendees,
-		Bidder:   u.Bidder,
-		ItemName: u.ItemName,
-		Bid:      u.Bid,
-		ErrorMsg: u.ErrorMsg,
+		Type:         u.Type,
+		SeqId:        u.SeqId,
+		Self:         u.Self,
+		Members:      u.Members,
+		Attendees:    u.Attendees,
+		Bidder:       u.Bidder,
+		ItemName:     u.ItemName,
+		Bid:          u.Bid,
+		ErrorMessage: u.ErrorMessage,
 	}
 }

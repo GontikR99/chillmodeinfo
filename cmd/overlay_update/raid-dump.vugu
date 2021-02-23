@@ -1,0 +1,25 @@
+<div class="container-fluid">
+    <div class="text-nowrap row" vg-content='fmt.Sprintf("Raid dump with %d attendees", len(c.Update.Attendees))'></div>
+    <div class="row">
+        <span class="text-nowrap col-6">
+            Name:
+            <span class="col-5 text-black-50"><ui:AutoComplete EditStyle="width:6rem;" :Value="c.RaidName" @Suggestion="c.suggest(event)" @Change="c.updateDescription(event)"></ui:AutoComplete></span>
+        </span>
+        <span class="text-nowrap col-4">
+            Value:
+            <input type="text" style="width:4rem;" :value='fmt.Sprintf("%.1f", c.RaidValue)' @change="c.updateDKP(event)">
+        </span>
+        <span class="col-2 text-nowrap">
+            <a href="#" title="Upload" vg-if='c.RaidName!="" && c.RaidValue>0' @click="c.upload(event)">&#x2714;</a>
+            <a href="#" title="Ignore" @click="c.dismiss(event)">&#x274c;</a>
+        </span>
+    </div>
+    <div vg-if='c.Error!=""' class="row text-warning" vg-content="c.Error"></div>
+    <hr class="border-light"/>
+</div>
+<script type="application/x-go">
+import (
+    "fmt"
+    "github.com/GontikR99/chillmodeinfo/cmd/webapp/ui"
+)
+</script>

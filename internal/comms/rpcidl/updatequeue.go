@@ -3,13 +3,13 @@
 package rpcidl
 
 import (
-	"github.com/GontikR99/chillmodeinfo/internal/overlay"
+	"github.com/GontikR99/chillmodeinfo/internal/overlay/update"
 	"net/rpc"
 )
 
 type UpdateQueueHandler interface {
-	Poll() (map[int]*overlay.UpdateEntry, error)
-	Enqueue(map[int]*overlay.UpdateEntry) error
+	Poll() (map[int]*update.UpdateEntry, error)
+	Enqueue(map[int]*update.UpdateEntry) error
 }
 
 type UpdateQueueServerStub struct {
@@ -22,7 +22,7 @@ type updateQueueClientStub struct {
 
 type UpdateQueuePollRequest struct{}
 type UpdateQueuePollResponse struct {
-	Entries map[int]*overlay.UpdateEntry
+	Entries map[int]*update.UpdateEntry
 }
 
 func (uss *UpdateQueueServerStub) Poll(req *UpdateQueuePollRequest, res *UpdateQueuePollResponse) error {
@@ -31,7 +31,7 @@ func (uss *UpdateQueueServerStub) Poll(req *UpdateQueuePollRequest, res *UpdateQ
 	return err
 }
 
-func (ucs *updateQueueClientStub) Poll() (map[int]*overlay.UpdateEntry, error) {
+func (ucs *updateQueueClientStub) Poll() (map[int]*update.UpdateEntry, error) {
 	req := new(UpdateQueuePollRequest)
 	res := new(UpdateQueuePollResponse)
 	err := ucs.client.Call("UpdateQueueServerStub.Poll", req, res)
@@ -39,7 +39,7 @@ func (ucs *updateQueueClientStub) Poll() (map[int]*overlay.UpdateEntry, error) {
 }
 
 type UpdateQueueEnqueueRequest struct {
-	Entries map[int]*overlay.UpdateEntry
+	Entries map[int]*update.UpdateEntry
 }
 type UpdateQueueEnqueueResponse struct{}
 
@@ -47,7 +47,7 @@ func (uss *UpdateQueueServerStub) Enqueue(req *UpdateQueueEnqueueRequest, res *U
 	return uss.handler.Enqueue(req.Entries)
 }
 
-func (ucs *updateQueueClientStub) Enqueue(entries map[int]*overlay.UpdateEntry) error {
+func (ucs *updateQueueClientStub) Enqueue(entries map[int]*update.UpdateEntry) error {
 	req := &UpdateQueueEnqueueRequest{entries}
 	res := new(UpdateQueueEnqueueResponse)
 	return ucs.client.Call("UpdateQueueServerStub.Enqueue", req, res)

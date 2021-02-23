@@ -18,6 +18,7 @@ type AutoComplete struct {
 	Value      string
 	Suggestion SuggestionHandler
 	Change     ChangeHandler
+	EditStyle  string
 
 	displayValue string
 

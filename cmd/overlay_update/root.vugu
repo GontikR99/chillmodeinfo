@@ -1,9 +1,17 @@
-<div>
-    <div>Enqueued entries: <span vg-content="fmt.Sprint(len(c.queue))"></span></div>
-    <div vg-for="_, entry := range c.queue" vg-key="fmt.Sprint(entry.SeqId)">
-        <span vg-content='fmt.Sprint("#",entry.SeqId)'></span>:<span vg-content='fmt.Sprint(entry.Type)'></span>
+<div class="container-fluid text-white">
+    <h5><u>Pending updates</u></h5>
+    <div vg-for="_, entry := range c.enumerateQueue()" vg-key="fmt.Sprint(entry.SeqId)">
+        <main:GuildDump :Owner="c" :Update="entry" vg-if="entry.Type==update.UpdateGuildDump"></main:GuildDump>
+        <main:RaidDump :Owner="c" :Update="entry" vg-if="entry.Type==update.UpdateRaidDump"></main:RaidDump>
+        <main:ErrMsg :Owner="c" :Update="entry" vg-if="entry.Type==update.UpdateError"></main:ErrMsg>
+        <div class="text-nowrap col-12" vg-if="entry.Type!=update.UpdateGuildDump && entry.Type!=update.UpdateRaidDump && entry.Type!=update.UpdateError">
+            <span vg-content='fmt.Sprint("#",entry.SeqId)'></span>:<span vg-content='fmt.Sprint(entry.Type)'></span>
+        </div>
     </div>
 </div>
 <script type="application/x-go">
-import "fmt"
+import (
+    "fmt"
+    "github.com/GontikR99/chillmodeinfo/internal/overlay/update"
+)
 </script>

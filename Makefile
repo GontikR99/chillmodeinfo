@@ -22,9 +22,11 @@ deploy: bin/chillmodeinfo.linux bin/cmidb.linux
 	ssh sawalk4@chillmode.info
 
 WASMS=bin/webapp.wasm bin/overlay_position.wasm bin/overlay_bids.wasm bin/overlay_update.wasm
+HTMLS=cmd/overlay_bids/overlay_bids.html cmd/overlay_position/overlay_position.html cmd/overlay_update/overlay_update.html
 
-electron/.electron: $(WASMS) bin/electronmain.wasm cmd/electronmain/electronmain.js cmd/electronmain/preload.js $(shell find web/static/data -type f)
+electron/.electron: $(WASMS) $(HTMLS) bin/electronmain.wasm cmd/electronmain/electronmain.js cmd/electronmain/preload.js $(shell find web/static/data -type f)
 	cp -r web/static/data/* electron/src
+	cp $(HTMLS) electron/src
 	cp bin/electronmain.wasm cmd/electronmain/electronmain.js cmd/electronmain/preload.js electron/src
 	mkdir -p electron/src/bin
 	cp $(WASMS) electron/src/bin
@@ -57,7 +59,7 @@ bin/overlay_bids.wasm: $(shell find cmd/overlay_bids -type f) $(shell find inter
 	go run -mod=vendor github.com/vugu/vugu/cmd/vugugen -s -r -skip-go-mod -skip-main cmd/overlay_bids
 	GOOS=js GOARCH=wasm go build -tags web -o $@ ./cmd/overlay_bids
 
-bin/overlay_update.wasm: $(shell find cmd/overlay_update -type f) $(shell find internal -type f) $(shell find pkg -type f)
+bin/overlay_update.wasm: $(shell find cmd/overlay_update -type f) $(shell find internal -type f) $(shell find pkg -type f) bin/webapp.wasm
 	go run -mod=vendor github.com/vugu/vugu/cmd/vugugen -s -r -skip-go-mod -skip-main cmd/overlay_update
 	GOOS=js GOARCH=wasm go build -tags web -o $@ ./cmd/overlay_update
 

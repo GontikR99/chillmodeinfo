@@ -17,35 +17,37 @@ import (
 )
 
 func initialCap(s string) string {
-	if s=="" {return ""}
-	return strings.ToUpper(s[:1])+strings.ToLower(s[1:])
+	if s == "" {
+		return ""
+	}
+	return strings.ToUpper(s[:1]) + strings.ToLower(s[1:])
 }
 
-type serverMembersHandler struct {}
+type serverMembersHandler struct{}
 
 func (s serverMembersHandler) GetMember(ctx context.Context, name string) (record.Member, error) {
-	res:=new(record.Member)
-	err:=db.MakeView([]db.TableName{dao.TableMembers, dao.TableDKPLog}, func(tx *bbolt.Tx) error {
+	res := new(record.Member)
+	err := db.MakeView([]db.TableName{dao.TableMembers, dao.TableDKPLog}, func(tx *bbolt.Tx) error {
 		logs, err := dao.TxGetDKPChangesForTarget(tx, initialCap(name))
-		if err!=nil {
+		if err != nil {
 			return err
 		}
-		sum:=float64(0)
-		lastAttend:=time.Time{}
+		sum := float64(0)
+		lastAttend := time.Time{}
 		for _, log := range logs {
-			sum+=log.GetDelta()
+			sum += log.GetDelta()
 			if lastAttend.Before(log.GetTimestamp()) {
-				lastAttend=log.GetTimestamp()
+				lastAttend = log.GetTimestamp()
 			}
 		}
 		member, err := dao.TxGetMember(tx, initialCap(name))
-		if err!=nil {
+		if err != nil {
 			return err
 		}
 		newMember := record.NewBasicMember(member)
-		newMember.DKP=sum
-		newMember.LastActive=lastAttend
-		*res=newMember
+		newMember.DKP = sum
+		newMember.LastActive = lastAttend
+		*res = newMember
 		return nil
 	})
 	return *res, err
@@ -55,32 +57,36 @@ func (s serverMembersHandler) GetMembers(ctx context.Context) (map[string]record
 	res := new(map[string]record.Member)
 	err := db.MakeView([]db.TableName{dao.TableMembers, dao.TableDKPLog}, func(tx *bbolt.Tx) error {
 		logs, err := dao.TxGetDKPChanges(tx)
-		if err!=nil {return err}
-		totals:=make(map[string]float64)
-		dates:=make(map[string]time.Time)
+		if err != nil {
+			return err
+		}
+		totals := make(map[string]float64)
+		dates := make(map[string]time.Time)
 		for _, delta := range logs {
 			if _, ok := totals[delta.GetTarget()]; !ok {
-				totals[delta.GetTarget()]=0.0
-				dates[delta.GetTarget()]=time.Time{}
+				totals[delta.GetTarget()] = 0.0
+				dates[delta.GetTarget()] = time.Time{}
 			}
 			totals[delta.GetTarget()] += delta.GetDelta()
 			if dates[delta.GetTarget()].Before(delta.GetTimestamp()) {
-				dates[delta.GetTarget()]=delta.GetTimestamp()
+				dates[delta.GetTarget()] = delta.GetTimestamp()
 			}
 		}
 
 		*res, err = dao.TxGetMembers(tx)
-		if err!=nil {return err}
+		if err != nil {
+			return err
+		}
 		for k, v := range *res {
 			newMember := record.NewBasicMember(v)
 			if total, ok := totals[k]; ok {
-				newMember.DKP=total
-				newMember.LastActive=dates[k]
+				newMember.DKP = total
+				newMember.LastActive = dates[k]
 			} else {
-				newMember.DKP=0
-				newMember.LastActive=time.Time{}
+				newMember.DKP = 0
+				newMember.LastActive = time.Time{}
 			}
-			(*res)[k]=newMember
+			(*res)[k] = newMember
 		}
 		return nil
 	})
@@ -89,17 +95,17 @@ func (s serverMembersHandler) GetMembers(ctx context.Context) (map[string]record
 
 func (s serverMembersHandler) MergeMember(ctx context.Context, member record.Member) (record.Member, error) {
 	_, err := requiresAdmin(ctx)
-	if err!=nil {
+	if err != nil {
 		return nil, err
 	}
 
-	if member==nil {
+	if member == nil {
 		return nil, nil
 	}
 	err = db.MakeUpdate([]db.TableName{dao.TableMembers}, func(tx *bbolt.Tx) error {
 		return txMergeMember(tx, member)
 	})
-	if err!=nil {
+	if err != nil {
 		return nil, err
 	}
 	return dao.GetMember(member.GetName())
@@ -107,70 +113,70 @@ func (s serverMembersHandler) MergeMember(ctx context.Context, member record.Mem
 
 func (s serverMembersHandler) MergeMembers(ctx context.Context, members []record.Member) (map[string]record.Member, error) {
 	_, err := requiresAdmin(ctx)
-	if err!=nil {
+	if err != nil {
 		return nil, err
 	}
 
 	err = db.MakeUpdate([]db.TableName{dao.TableMembers}, func(tx *bbolt.Tx) error {
 		// Merge twice so we get owners better
 		for _, v := range members {
-			if v==nil {
+			if v == nil {
 				continue
 			}
 			err := txMergeMember(tx, v)
-			if err!=nil {
+			if err != nil {
 				return err
 			}
 		}
 
 		for _, v := range members {
-			if v==nil {
+			if v == nil {
 				continue
 			}
 			err := txMergeMember(tx, v)
-			if err!=nil {
+			if err != nil {
 				return err
 			}
 		}
 
 		return nil
 	})
-	if err!=nil {
+	if err != nil {
 		return nil, err
 	}
 	return dao.GetMembers()
 }
 
 func txMergeMember(tx *bbolt.Tx, member record.Member) error {
-	if member.GetName()=="" {
+	if member.GetName() == "" {
 		return errors.New("Each member must have a non-empty name")
 	}
 	if _, ok := eqspec.ClassMap[member.GetClass()]; !ok {
-		return errors.New("Unrecognized class "+member.GetClass())
+		return errors.New("Unrecognized class " + member.GetClass())
 	}
-	realOwner:=""
+	realOwner := ""
 	_, err := dao.TxGetMember(tx, initialCap(member.GetOwner()))
-	if err==nil {
-		realOwner=initialCap(member.GetOwner())
+	if err == nil {
+		realOwner = initialCap(member.GetOwner())
 	}
 
 	oldMember, err := dao.TxGetMember(tx, initialCap(member.GetName()))
-	if err==bolthold.ErrNotFound {
+	if err == bolthold.ErrNotFound {
 		return dao.TxUpsertMember(tx, &record.BasicMember{
 			Name:       initialCap(member.GetName()),
 			Class:      member.GetClass(),
 			Level:      member.GetLevel(),
-			Rank: 		member.GetRank(),
+			Rank:       member.GetRank(),
 			Alt:        member.IsAlt(),
 			DKP:        0,
 			LastActive: time.Time{},
 			Owner:      realOwner,
 		})
-	} else if err!=nil {
+	} else if err != nil {
 		return err
 	} else {
-		if realOwner=="" {
-			realOwner=oldMember.GetOwner()
+		if realOwner == "" {
+			realOwner = oldMember.GetOwner()
 		}
 		return dao.TxUpsertMember(tx, &record.BasicMember{
 			Name:       initialCap(member.GetName()),

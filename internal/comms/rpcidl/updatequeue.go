@@ -8,8 +8,8 @@ import (
 )
 
 type UpdateQueueHandler interface {
-	Poll()(map[int]*overlay.UpdateEntry, error)
-	Enqueue(map[int]*overlay.UpdateEntry)error
+	Poll() (map[int]*overlay.UpdateEntry, error)
+	Enqueue(map[int]*overlay.UpdateEntry) error
 }
 
 type UpdateQueueServerStub struct {
@@ -20,7 +20,7 @@ type updateQueueClientStub struct {
 	client *rpc.Client
 }
 
-type UpdateQueuePollRequest struct {}
+type UpdateQueuePollRequest struct{}
 type UpdateQueuePollResponse struct {
 	Entries map[int]*overlay.UpdateEntry
 }
@@ -31,7 +31,7 @@ func (uss *UpdateQueueServerStub) Poll(req *UpdateQueuePollRequest, res *UpdateQ
 	return err
 }
 
-func (ucs *updateQueueClientStub) Poll()(map[int]*overlay.UpdateEntry, error) {
+func (ucs *updateQueueClientStub) Poll() (map[int]*overlay.UpdateEntry, error) {
 	req := new(UpdateQueuePollRequest)
 	res := new(UpdateQueuePollResponse)
 	err := ucs.client.Call("UpdateQueueServerStub.Poll", req, res)
@@ -41,7 +41,8 @@ func (ucs *updateQueueClientStub) Poll()(map[int]*overlay.UpdateEntry, error) {
 type UpdateQueueEnqueueRequest struct {
 	Entries map[int]*overlay.UpdateEntry
 }
-type UpdateQueueEnqueueResponse struct {}
+type UpdateQueueEnqueueResponse struct{}
+
 func (uss *UpdateQueueServerStub) Enqueue(req *UpdateQueueEnqueueRequest, res *UpdateQueueEnqueueResponse) error {
 	return uss.handler.Enqueue(req.Entries)
 }

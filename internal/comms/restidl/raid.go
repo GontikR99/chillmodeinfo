@@ -8,8 +8,10 @@ import (
 	"strings"
 )
 
-const endpointRaidV0="/rest/v0/raid"
-type raidClientStub struct {}
+const endpointRaidV0 = "/rest/v0/raid"
+
+type raidClientStub struct{}
+
 var Raid = &raidClientStub{}
 
 type RaidHandler interface {
@@ -19,8 +21,8 @@ type RaidHandler interface {
 	Update(ctx context.Context, raid record.Raid) (record.Raid, error)
 }
 
-type addRaidRequestV0 struct { Raid *record.BasicRaid}
-type addRaidResponseV0 struct {}
+type addRaidRequestV0 struct{ Raid *record.BasicRaid }
+type addRaidResponseV0 struct{}
 
 func (r raidClientStub) Add(ctx context.Context, raid record.Raid) error {
 	req := &addRaidRequestV0{record.NewBasicRaid(raid)}
@@ -28,25 +30,25 @@ func (r raidClientStub) Add(ctx context.Context, raid record.Raid) error {
 	return call(http.MethodPut, endpointRaidV0, req, res)
 }
 
-type getRaidsRequestV0 struct {}
-type getRaidsResponseV0 struct { Raids []*record.BasicRaid}
+type getRaidsRequestV0 struct{}
+type getRaidsResponseV0 struct{ Raids []*record.BasicRaid }
 
 func (r raidClientStub) Fetch(ctx context.Context) ([]record.Raid, error) {
 	req := new(getRaidsRequestV0)
 	res := new(getRaidsResponseV0)
 	err := call(http.MethodGet, endpointRaidV0, req, res)
-	if err!=nil {
+	if err != nil {
 		return nil, err
 	}
 	var raids []record.Raid
 	for _, v := range res.Raids {
-		raids=append(raids, record.NewBasicRaid(v))
+		raids = append(raids, record.NewBasicRaid(v))
 	}
 	return raids, nil
 }
 
-type deleteRaidRequestV0 struct { RaidId uint64}
-type deleteRaidResponseV0 struct {}
+type deleteRaidRequestV0 struct{ RaidId uint64 }
+type deleteRaidResponseV0 struct{}
 
 func (r raidClientStub) Delete(ctx context.Context, raidId uint64) error {
 	req := &deleteRaidRequestV0{raidId}
@@ -54,10 +56,10 @@ func (r raidClientStub) Delete(ctx context.Context, raidId uint64) error {
 	return call(http.MethodDelete, endpointRaidV0, req, res)
 }
 
-type updateRaidRequestV0 struct {Raid *record.BasicRaid}
-type updateRaidResponseV0 struct {Updated *record.BasicRaid}
+type updateRaidRequestV0 struct{ Raid *record.BasicRaid }
+type updateRaidResponseV0 struct{ Updated *record.BasicRaid }
 
-func (r raidClientStub) Update(ctx context.Context, raid record.Raid) (record.Raid,error) {
+func (r raidClientStub) Update(ctx context.Context, raid record.Raid) (record.Raid, error) {
 	req := &updateRaidRequestV0{record.NewBasicRaid(raid)}
 	res := new(updateRaidResponseV0)
 	err := call(http.MethodPatch, endpointRaidV0, req, res)
@@ -77,7 +79,7 @@ func HandleRaid(handler RaidHandler) func(mux *http.ServeMux) {
 			} else if strings.EqualFold(http.MethodPut, method) {
 				var req addRaidRequestV0
 				request.ReadTo(&req)
-				res:=new(addRaidRequestV0)
+				res := new(addRaidRequestV0)
 				err := handler.Add(ctx, req.Raid)
 				return res, err
 			} else if strings.EqualFold(http.MethodDelete, method) {

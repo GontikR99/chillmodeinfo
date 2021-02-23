@@ -4,10 +4,10 @@ package serverrpcs
 
 import (
 	"context"
-	"github.com/GontikR99/chillmodeinfo/internal/dao"
-	"github.com/GontikR99/chillmodeinfo/internal/profile"
 	"github.com/GontikR99/chillmodeinfo/internal/comms/httputil"
 	"github.com/GontikR99/chillmodeinfo/internal/comms/restidl"
+	"github.com/GontikR99/chillmodeinfo/internal/dao"
+	"github.com/GontikR99/chillmodeinfo/internal/profile"
 	"net/http"
 	"time"
 )
@@ -16,7 +16,9 @@ type serverProfileHandler struct{}
 
 func (s *serverProfileHandler) UpdateAdmin(ctx context.Context, userId string, state profile.AdminState) error {
 	selfProfile, err := requiresAdmin(ctx)
-	if err!=nil {return err}
+	if err != nil {
+		return err
+	}
 
 	userProfile, err := dao.LookupProfile(userId)
 	if err != nil {
@@ -34,7 +36,9 @@ func (s *serverProfileHandler) UpdateAdmin(ctx context.Context, userId string, s
 
 func (s *serverProfileHandler) ListAdmins(ctx context.Context) ([]profile.Entry, error) {
 	_, err := requiresAdmin(ctx)
-	if err!=nil {return nil, err}
+	if err != nil {
+		return nil, err
+	}
 
 	resultProfiles := []profile.Entry{}
 	allProfiles := dao.ListAllProfiles()

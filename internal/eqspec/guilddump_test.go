@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-const guildDump="Adax\t65\tBeastlord\tRetired\t\t06/06/20\t\t\t\toff\toff\t0\t\t\t\n" +
+const guildDump = "Adax\t65\tBeastlord\tRetired\t\t06/06/20\t\t\t\toff\toff\t0\t\t\t\n" +
 	"Alexandre\t70\tPaladin\tRaider\t\t02/13/21\t\t\t\ton\toff\t1290\t11/25/20\t\t\n" +
 	"Allak\t65\tMagician\tRetired\t\t08/07/20\t\tNeedsbuffs\t\toff\toff\t0\t\tNeedsbuffs\t\n" +
 	"Allegory\t65\tEnchanter\tRetired\t\t08/10/20\t\tWordsworth\t\toff\toff\t0\t\tWordsworth\t\n" +
@@ -43,7 +43,7 @@ const guildDump="Adax\t65\tBeastlord\tRetired\t\t06/06/20\t\t\t\toff\toff\t0\t\t
 func TestParseGuildDump(t *testing.T) {
 	file := strings.NewReader(guildDump)
 	members, err := ParseGuildDump(file)
-	if err!=nil {
+	if err != nil {
 		t.Fatal(err)
 	}
 	for _, v := range members {

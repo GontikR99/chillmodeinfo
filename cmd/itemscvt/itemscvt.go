@@ -12,16 +12,16 @@ import (
 )
 
 func main() {
-	if len(os.Args)!=3 {
+	if len(os.Args) != 3 {
 		fmt.Fprintf(os.Stderr, "Usage: %s <trie/listing> <filename>\n", os.Args[0])
 	}
 	dbFile, err := os.Open(os.Args[2])
-	if err!=nil {
+	if err != nil {
 		panic(err)
 	}
 	defer dbFile.Close()
 	lineFile, err := gzip.NewReader(dbFile)
-	if err!=nil {
+	if err != nil {
 		panic(err)
 	}
 	defer lineFile.Close()
@@ -32,11 +32,11 @@ func main() {
 		var itemNames []string
 		for lineScanner.Scan() {
 			line := lineScanner.Text()
-			fields := strings.Split(line,"|")
-			if len(fields)<2 {
+			fields := strings.Split(line, "|")
+			if len(fields) < 2 {
 				continue
 			}
-			itemName:=fields[1]
+			itemName := fields[1]
 			itemNames = append(itemNames, itemName)
 		}
 		sort.Sort(eqspec.LexOrderIgnoreCase(itemNames))
@@ -45,18 +45,18 @@ func main() {
 		fmt.Println("var everquestItems=[]string{")
 		for _, name := range itemNames {
 			v, _ := json.Marshal(name)
-			fmt.Println("    "+string(v)+",")
+			fmt.Println("    " + string(v) + ",")
 		}
 		fmt.Println("}")
 	case "trie":
 		itemTrie := eqspec.NewItemTrie()
 		for lineScanner.Scan() {
 			line := lineScanner.Text()
-			fields := strings.Split(line,"|")
-			if len(fields)<2 {
+			fields := strings.Split(line, "|")
+			if len(fields) < 2 {
 				continue
 			}
-			itemName:=fields[1]
+			itemName := fields[1]
 			itemTrie = itemTrie.With(itemName)
 		}
 		cTrie := itemTrie.Compress()
@@ -68,7 +68,7 @@ func main() {
 		fmt.Print("    Transitions: CompressedItemTrieTransitions{")
 		outIdx := 0
 		for _, val := range cTrie.Transitions {
-			if outIdx%8==0 {
+			if outIdx%8 == 0 {
 				fmt.Println()
 				fmt.Print("        ")
 			}
@@ -77,9 +77,9 @@ func main() {
 		}
 		fmt.Println("    },")
 		fmt.Print("    Accepts: []int{")
-		outIdx=0
+		outIdx = 0
 		for _, val := range cTrie.Accepts {
-			if outIdx%8==0 {
+			if outIdx%8 == 0 {
 				fmt.Println()
 				fmt.Print("        ")
 			}

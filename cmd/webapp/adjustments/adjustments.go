@@ -20,49 +20,50 @@ import (
 type Adjustments struct {
 	Logs []record.DKPChangeEntry
 
-	ctx context.Context
+	ctx     context.Context
 	ctxDone context.CancelFunc
 
-	pendingMember string
-	pendingDKP float64
+	pendingMember      string
+	pendingDKP         float64
 	pendingDescription string
-	appending bool
+	appending          bool
 
 	members map[string]record.Member
 }
 
 func (c *Adjustments) KeyList() []string {
 	names := []string{""}
-	for _, member := range c.members{
-		names=append(names, member.GetName())
+	for _, member := range c.members {
+		names = append(names, member.GetName())
 	}
 	sort.Sort(byValue(names))
 	return names
 }
 
 type byValue []string
-func (b byValue) Len() int {return len(b)}
-func (b byValue) Less(i, j int) bool {return b[i]<b[j]}
-func (b byValue) Swap(i, j int) {b[i],b[j]=b[j],b[i]}
+
+func (b byValue) Len() int           { return len(b) }
+func (b byValue) Less(i, j int) bool { return b[i] < b[j] }
+func (b byValue) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 
 func (c *Adjustments) updatePendingMember(event ui.ChangeEvent) {
-	c.pendingMember=event.Value()
+	c.pendingMember = event.Value()
 }
 
 func (c *Adjustments) updatePendingDKP(event vugu.DOMEvent) {
 	newval, err := strconv.ParseFloat(event.JSEventTarget().Get("value").String(), 64)
-	if err!=nil {
+	if err != nil {
 		toast.Error("dkp", errors.New("You must enter a number"))
 		event.JSEventTarget().Set("value", fmt.Sprintf("%.1f", c.pendingDKP))
 		event.JSEventTarget().Call("select")
 		return
 	}
-	c.pendingDKP=newval
+	c.pendingDKP = newval
 	event.JSEventTarget().Set("value", fmt.Sprintf("%.1f", c.pendingDKP))
 }
 
 func (c *Adjustments) updatePendingDescription(change ui.ChangeEvent) {
-	c.pendingDescription=change.Value()
+	c.pendingDescription = change.Value()
 }
 
 func descriptionStyle(entry record.DKPChangeEntry) string {
@@ -80,10 +81,10 @@ func (c *Adjustments) addEntry(event vugu.DOMEvent) {
 	go func() {
 		defer func() {
 			event.EventEnv().Lock()
-			c.appending=false
+			c.appending = false
 			event.EventEnv().UnlockRender()
 		}()
-		<-time.After(100*time.Millisecond)
+		<-time.After(100 * time.Millisecond)
 		if c.pendingMember == "" {
 			toast.Error("adjustments", errors.New("You must select a member"))
 			return
@@ -97,12 +98,12 @@ func (c *Adjustments) addEntry(event vugu.DOMEvent) {
 			Delta:       c.pendingDKP,
 			Description: c.pendingDescription,
 		})
-		if err!=nil {
+		if err != nil {
 			toast.Error("adjustments", err)
 		}
-		c.pendingDKP=0
-		c.pendingDescription=""
-		c.pendingMember=""
+		c.pendingDKP = 0
+		c.pendingDescription = ""
+		c.pendingMember = ""
 		c.reloadLog(event.EventEnv())
 	}()
 }
@@ -112,7 +113,7 @@ func (c *Adjustments) cancelEntry(event vugu.DOMEvent, entry record.DKPChangeEnt
 	event.StopPropagation()
 	go func() {
 		err := restidl.DKPLog.Remove(c.ctx, entry.GetEntryId())
-		if err!=nil {
+		if err != nil {
 			toast.Error("adjustments", err)
 			return
 		} else {
@@ -123,32 +124,32 @@ func (c *Adjustments) cancelEntry(event vugu.DOMEvent, entry record.DKPChangeEnt
 
 func (c *Adjustments) updateDescription(submit ui.SubmitEvent, currentEntry record.DKPChangeEntry) {
 	newEntry := record.NewBasicDKPChangeEntry(currentEntry)
-	newEntry.Description=submit.Value()
+	newEntry.Description = submit.Value()
 	c.processLogUpdate(submit, newEntry)
 }
 
 func (c *Adjustments) updateDelta(submit ui.SubmitEvent, currentEntry record.DKPChangeEntry) {
 	newEntry := record.NewBasicDKPChangeEntry(currentEntry)
 	deltaValue, err := strconv.ParseFloat(submit.Value(), 64)
-	if err!=nil {
+	if err != nil {
 		submit.Reject(errors.New("Please input a number"))
 		return
 	}
-	newEntry.Delta=deltaValue
+	newEntry.Delta = deltaValue
 	c.processLogUpdate(submit, newEntry)
 }
 
 func (c *Adjustments) processLogUpdate(submit ui.SubmitEvent, newEntry record.DKPChangeEntry) {
 	go func() {
 		update, err := restidl.DKPLog.Update(c.ctx, newEntry)
-		if err!=nil {
+		if err != nil {
 			submit.Reject(err)
 			return
 		} else {
 			for idx, oldEntry := range c.Logs {
-				if oldEntry.GetEntryId()==newEntry.GetEntryId() {
+				if oldEntry.GetEntryId() == newEntry.GetEntryId() {
 					submit.EventEnv().Lock()
-					c.Logs[idx]=update
+					c.Logs[idx] = update
 					submit.EventEnv().UnlockRender()
 					break
 				}
@@ -161,20 +162,20 @@ func (c *Adjustments) processLogUpdate(submit ui.SubmitEvent, newEntry record.DK
 
 func (c *Adjustments) reloadLog(env vugu.EventEnv) {
 	logs, err := restidl.DKPLog.Retrieve(c.ctx, "")
-	if err!=nil {
+	if err != nil {
 		toast.Error("adjustments", err)
 		return
 	}
 	env.Lock()
-	c.Logs=logs
+	c.Logs = logs
 	env.UnlockRender()
 }
 
 func (c *Adjustments) Init(vCtx vugu.InitCtx) {
 	c.ctx, c.ctxDone = context.WithCancel(context.Background())
-	go func(){
+	go func() {
 		members, err := restidl.Members.GetMembers(c.ctx)
-		if err!=nil {
+		if err != nil {
 			toast.Error("adjustments", err)
 			return
 		}
@@ -183,14 +184,14 @@ func (c *Adjustments) Init(vCtx vugu.InitCtx) {
 		vCtx.EventEnv().UnlockRender()
 	}()
 	go func() {
-		done:=false
+		done := false
 		for !done {
 			c.reloadLog(vCtx.EventEnv())
 			select {
 			case <-c.ctx.Done():
-				done=true
+				done = true
 				break
-			case <-time.After(60*time.Second):
+			case <-time.After(60 * time.Second):
 			}
 		}
 	}()

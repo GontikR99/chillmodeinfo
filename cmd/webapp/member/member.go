@@ -18,10 +18,10 @@ import (
 )
 
 type Member struct {
-	Member record.Member
+	Member     record.Member
 	LogEntries []record.DKPChangeEntry
-	ctx context.Context
-	ctxDone context.CancelFunc
+	ctx        context.Context
+	ctxDone    context.CancelFunc
 }
 
 func descriptionStyle(entry record.DKPChangeEntry) string {
@@ -34,32 +34,32 @@ func descriptionStyle(entry record.DKPChangeEntry) string {
 
 func (c *Member) updateDescription(submit ui.SubmitEvent, currentEntry record.DKPChangeEntry) {
 	newEntry := record.NewBasicDKPChangeEntry(currentEntry)
-	newEntry.Description=submit.Value()
+	newEntry.Description = submit.Value()
 	c.processLogUpdate(submit, newEntry)
 }
 
 func (c *Member) updateDelta(submit ui.SubmitEvent, currentEntry record.DKPChangeEntry) {
 	newEntry := record.NewBasicDKPChangeEntry(currentEntry)
 	deltaValue, err := strconv.ParseFloat(submit.Value(), 64)
-	if err!=nil {
+	if err != nil {
 		submit.Reject(errors.New("Please input a number"))
 		return
 	}
-	newEntry.Delta=deltaValue
+	newEntry.Delta = deltaValue
 	c.processLogUpdate(submit, newEntry)
 }
 
 func (c *Member) processLogUpdate(submit ui.SubmitEvent, newEntry record.DKPChangeEntry) {
 	go func() {
 		update, err := restidl.DKPLog.Update(c.ctx, newEntry)
-		if err!=nil {
+		if err != nil {
 			submit.Reject(err)
 			return
 		} else {
 			for idx, oldEntry := range c.LogEntries {
-				if oldEntry.GetEntryId()==newEntry.GetEntryId() {
+				if oldEntry.GetEntryId() == newEntry.GetEntryId() {
 					submit.EventEnv().Lock()
-					c.LogEntries[idx]=update
+					c.LogEntries[idx] = update
 					submit.EventEnv().UnlockRender()
 					break
 				}
@@ -76,7 +76,7 @@ func (c *Member) cancelEntry(event vugu.DOMEvent, entry record.DKPChangeEntry) {
 	event.PreventDefault()
 	go func() {
 		err := restidl.DKPLog.Remove(c.ctx, entry.GetEntryId())
-		if err!=nil {
+		if err != nil {
 			toast.Error("member page", err)
 		} else {
 			go c.reloadMember(event.EventEnv())
@@ -98,23 +98,23 @@ func (c *Member) reloadMember(env vugu.EventEnv) {
 
 func (c *Member) reloadLogs(env vugu.EventEnv) {
 	entries, err := restidl.DKPLog.Retrieve(c.ctx, c.Member.GetName())
-	if err!=nil {
+	if err != nil {
 		toast.Error("member page", err)
 	} else {
 		env.Lock()
-		c.LogEntries=entries
+		c.LogEntries = entries
 		env.UnlockRender()
 	}
 }
 
 func (c *Member) Init(vCtx vugu.InitCtx) {
 	placeParts := strings.Split(place.GetPlace(), ":")
-	if len(placeParts)>=1 {
-		c.Member=&record.BasicMember{
+	if len(placeParts) >= 1 {
+		c.Member = &record.BasicMember{
 			Name: placeParts[1],
 		}
 	} else {
-		c.Member=&record.BasicMember{}
+		c.Member = &record.BasicMember{}
 	}
 	c.ctx, c.ctxDone = context.WithCancel(context.Background())
 	go func() {
@@ -133,7 +133,7 @@ func (c *Member) Init(vCtx vugu.InitCtx) {
 			select {
 			case <-c.ctx.Done():
 				return
-			case <-time.After(60*time.Second):
+			case <-time.After(60 * time.Second):
 			}
 		}
 	}()

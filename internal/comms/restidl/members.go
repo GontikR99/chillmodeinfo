@@ -13,16 +13,17 @@ const endpointMemberSingleV0 = "/rest/v0/member"
 
 type MemberHandler interface {
 	GetMember(ctx context.Context, name string) (record.Member, error)
-	MergeMember(ctx context.Context, member record.Member) (record.Member,error)
+	MergeMember(ctx context.Context, member record.Member) (record.Member, error)
 
 	GetMembers(context.Context) (map[string]record.Member, error)
 	MergeMembers(context.Context, []record.Member) (map[string]record.Member, error)
 }
 
-type membersClientStub struct {}
+type membersClientStub struct{}
+
 var Members = &membersClientStub{}
 
-type getMembersRequestV0 struct {}
+type getMembersRequestV0 struct{}
 type getMembersResponseV0 struct {
 	Members map[string]*record.BasicMember
 }
@@ -31,15 +32,15 @@ func (m membersClientStub) GetMembers(ctx context.Context) (map[string]record.Me
 	req := new(getMembersRequestV0)
 	res := new(getMembersResponseV0)
 	err := call(http.MethodGet, endpointMembersAllV0, req, res)
-	if err!=nil {
+	if err != nil {
 		return nil, err
 	}
-	if res.Members==nil {
+	if res.Members == nil {
 		return nil, nil
 	}
 	result := make(map[string]record.Member)
-	for k,v := range res.Members {
-		result[k]=v
+	for k, v := range res.Members {
+		result[k] = v
 	}
 	return result, err
 }
@@ -47,7 +48,7 @@ func (m membersClientStub) GetMembers(ctx context.Context) (map[string]record.Me
 type mergeMembersRequestV0 struct {
 	Members []*record.BasicMember
 }
-type mergeMembersResponseV0 struct{
+type mergeMembersResponseV0 struct {
 	Members map[string]*record.BasicMember
 }
 
@@ -58,15 +59,15 @@ func (m membersClientStub) MergeMembers(ctx context.Context, members []record.Me
 		req.Members = append(req.Members, record.NewBasicMember(v))
 	}
 	err := call(http.MethodPut, endpointMembersAllV0, req, res)
-	if err!=nil {
+	if err != nil {
 		return nil, err
 	}
-	if res.Members==nil {
+	if res.Members == nil {
 		return nil, nil
 	}
 	result := make(map[string]record.Member)
 	for k, v := range res.Members {
-		result[k]=v
+		result[k] = v
 	}
 	return result, nil
 }
@@ -82,7 +83,7 @@ func (m membersClientStub) GetMember(ctx context.Context, name string) (record.M
 	req := &getMemberRequestV0{name}
 	res := new(getMemberResponseV0)
 	err := call(http.MethodGet, endpointMemberSingleV0, req, res)
-	if err!=nil {
+	if err != nil {
 		return nil, err
 	}
 	return res.Member, nil
@@ -99,13 +100,13 @@ func (m membersClientStub) MergeMember(ctx context.Context, member record.Member
 	req := &mergeMemberRequestV0{record.NewBasicMember(member)}
 	res := new(mergeMemberResponseV0)
 	err := call(http.MethodPut, endpointMemberSingleV0, req, res)
-	if err!=nil {
+	if err != nil {
 		return nil, err
 	}
 	return res.Member, nil
 }
 
-func HandleMembers(handler MemberHandler)func(mux *http.ServeMux) {
+func HandleMembers(handler MemberHandler) func(mux *http.ServeMux) {
 	return func(mux *http.ServeMux) {
 		serve(mux, endpointMemberSingleV0, func(ctx context.Context, method string, request *Request) (interface{}, error) {
 			if strings.EqualFold(http.MethodGet, method) {
@@ -125,11 +126,11 @@ func HandleMembers(handler MemberHandler)func(mux *http.ServeMux) {
 		serve(mux, endpointMembersAllV0, func(ctx context.Context, method string, request *Request) (interface{}, error) {
 			if strings.EqualFold(http.MethodGet, method) {
 				members, err := handler.GetMembers(ctx)
-				res:=new(getMembersResponseV0)
-				if members!=nil {
-					res.Members=make(map[string]*record.BasicMember)
-					for k,v := range members {
-						res.Members[k]=record.NewBasicMember(v)
+				res := new(getMembersResponseV0)
+				if members != nil {
+					res.Members = make(map[string]*record.BasicMember)
+					for k, v := range members {
+						res.Members[k] = record.NewBasicMember(v)
 					}
 				}
 				return res, err
@@ -142,10 +143,10 @@ func HandleMembers(handler MemberHandler)func(mux *http.ServeMux) {
 				}
 				members, err := handler.MergeMembers(ctx, newMembers)
 				res := new(mergeMembersResponseV0)
-				if members!=nil {
-					res.Members=make(map[string]*record.BasicMember)
+				if members != nil {
+					res.Members = make(map[string]*record.BasicMember)
 					for k, v := range members {
-						res.Members[k]=record.NewBasicMember(v)
+						res.Members[k] = record.NewBasicMember(v)
 					}
 				}
 				return res, err

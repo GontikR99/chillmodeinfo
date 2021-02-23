@@ -26,30 +26,30 @@ type DKPChangeEntry interface {
 }
 
 type BasicDKPChangeEntry struct {
-	EntryId uint64
-	Timestamp time.Time
-	Target string
-	Delta float64
+	EntryId     uint64
+	Timestamp   time.Time
+	Target      string
+	Delta       float64
 	Description string
 
 	RaidId    uint64
 	Authority string
 }
 
-func (b *BasicDKPChangeEntry) GetEntryId() uint64 {return b.EntryId}
-func (b *BasicDKPChangeEntry) GetTimestamp() time.Time {return b.Timestamp}
-func (b *BasicDKPChangeEntry) GetTarget() string {return b.Target}
-func (b *BasicDKPChangeEntry) GetDelta() float64 {return b.Delta}
-func (b *BasicDKPChangeEntry) GetDescription() string {return b.Description}
-func (b *BasicDKPChangeEntry) GetAuthority() string {return b.Authority}
-func (b *BasicDKPChangeEntry) GetRaidId() uint64 {return b.RaidId}
+func (b *BasicDKPChangeEntry) GetEntryId() uint64      { return b.EntryId }
+func (b *BasicDKPChangeEntry) GetTimestamp() time.Time { return b.Timestamp }
+func (b *BasicDKPChangeEntry) GetTarget() string       { return b.Target }
+func (b *BasicDKPChangeEntry) GetDelta() float64       { return b.Delta }
+func (b *BasicDKPChangeEntry) GetDescription() string  { return b.Description }
+func (b *BasicDKPChangeEntry) GetAuthority() string    { return b.Authority }
+func (b *BasicDKPChangeEntry) GetRaidId() uint64       { return b.RaidId }
 
 func NewBasicDKPChangeEntry(dce DKPChangeEntry) *BasicDKPChangeEntry {
-	if dce==nil {
+	if dce == nil {
 		return nil
 	}
 	return &BasicDKPChangeEntry{
-		EntryId: dce.GetEntryId(),
+		EntryId:     dce.GetEntryId(),
 		Timestamp:   dce.GetTimestamp(),
 		Target:      dce.GetTarget(),
 		Delta:       dce.GetDelta(),

@@ -4,8 +4,8 @@ package signins
 
 import (
 	"context"
-	"github.com/GontikR99/chillmodeinfo/internal/dao"
 	"github.com/GontikR99/chillmodeinfo/internal/comms/httputil"
+	"github.com/GontikR99/chillmodeinfo/internal/dao"
 	"google.golang.org/api/oauth2/v2"
 	"google.golang.org/api/option"
 	"net/http"

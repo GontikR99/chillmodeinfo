@@ -2,8 +2,8 @@ package restidl
 
 import (
 	"context"
-	"github.com/GontikR99/chillmodeinfo/internal/profile"
 	"github.com/GontikR99/chillmodeinfo/internal/comms/httputil"
+	"github.com/GontikR99/chillmodeinfo/internal/profile"
 	"net/http"
 	"strings"
 	"time"

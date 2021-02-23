@@ -14,29 +14,31 @@ import (
 	"time"
 )
 
-type serverDKPLogHandler struct {}
+type serverDKPLogHandler struct{}
 
 func (s serverDKPLogHandler) Append(ctx context.Context, delta record.DKPChangeEntry) error {
 	selfProfile, err := requiresAdmin(ctx)
-	if err!=nil {return err}
-	return db.MakeUpdate([]db.TableName{dao.TableMembers, dao.TableDKPLog},func(tx *bbolt.Tx) error {
-		target:=initialCap(delta.GetTarget())
+	if err != nil {
+		return err
+	}
+	return db.MakeUpdate([]db.TableName{dao.TableMembers, dao.TableDKPLog}, func(tx *bbolt.Tx) error {
+		target := initialCap(delta.GetTarget())
 		targetMemberRecord, err := dao.TxGetMember(tx, target)
-		if err!=nil {
+		if err != nil {
 			return err
 		}
-		nowTime:=time.Now()
-		updatedMember :=record.NewBasicMember(targetMemberRecord)
-		updatedMember.LastActive=nowTime
-		updatedMember.DKP = updatedMember.DKP+ delta.GetDelta()
+		nowTime := time.Now()
+		updatedMember := record.NewBasicMember(targetMemberRecord)
+		updatedMember.LastActive = nowTime
+		updatedMember.DKP = updatedMember.DKP + delta.GetDelta()
 
-		updatedDelta:=record.NewBasicDKPChangeEntry(delta)
-		updatedDelta.Target=updatedMember.GetName()
-		updatedDelta.Authority=selfProfile.GetDisplayName()
-		updatedDelta.Timestamp=nowTime
+		updatedDelta := record.NewBasicDKPChangeEntry(delta)
+		updatedDelta.Target = updatedMember.GetName()
+		updatedDelta.Authority = selfProfile.GetDisplayName()
+		updatedDelta.Timestamp = nowTime
 
-		err=dao.TxUpsertMember(tx, updatedMember)
-		if err!=nil {
+		err = dao.TxUpsertMember(tx, updatedMember)
+		if err != nil {
 			return err
 		}
 		return dao.TxAppendDKPChange(tx, updatedDelta)
@@ -44,17 +46,17 @@ func (s serverDKPLogHandler) Append(ctx context.Context, delta record.DKPChangeE
 }
 
 func (s serverDKPLogHandler) Retrieve(ctx context.Context, target string) ([]record.DKPChangeEntry, error) {
-	if target!="" {
+	if target != "" {
 		return dao.GetDKPChangesForTarget(target)
 	} else {
 		all, err := dao.GetDKPChanges()
-		if err!=nil {
+		if err != nil {
 			return nil, err
 		}
 		var filtered []record.DKPChangeEntry
 		for _, v := range all {
-			if v.GetRaidId()==0 {
-				filtered=append(filtered, v)
+			if v.GetRaidId() == 0 {
+				filtered = append(filtered, v)
 			}
 		}
 		return filtered, nil
@@ -63,20 +65,22 @@ func (s serverDKPLogHandler) Retrieve(ctx context.Context, target string) ([]rec
 
 func (s serverDKPLogHandler) Remove(ctx context.Context, entryId uint64) error {
 	_, err := requiresAdmin(ctx)
-	if err!=nil {return err}
+	if err != nil {
+		return err
+	}
 
-	return db.MakeUpdate([]db.TableName{dao.TableMembers, dao.TableDKPLog},func(tx *bbolt.Tx) error {
+	return db.MakeUpdate([]db.TableName{dao.TableMembers, dao.TableDKPLog}, func(tx *bbolt.Tx) error {
 		dkpEntry, err := dao.TxGetDKPChange(tx, entryId)
-		if err!=nil {
+		if err != nil {
 			return err
 		}
-		if dkpEntry.GetRaidId()!=0 {
+		if dkpEntry.GetRaidId() != 0 {
 			return httputil.NewError(http.StatusBadRequest, "You may not remove a log entry corresponding to a raid.  Go remove the raid.")
 		}
 		dao.TxRemoveDKPChange(tx, entryId)
 
 		member, err := dao.TxGetMember(tx, dkpEntry.GetTarget())
-		if err!=nil {
+		if err != nil {
 			return err
 		}
 
@@ -90,31 +94,33 @@ func (s serverDKPLogHandler) Remove(ctx context.Context, entryId uint64) error {
 
 func (s serverDKPLogHandler) Update(ctx context.Context, newEntry record.DKPChangeEntry) (record.DKPChangeEntry, error) {
 	selfProfile, err := requiresAdmin(ctx)
-	if err!=nil {return nil, err}
+	if err != nil {
+		return nil, err
+	}
 
-	resHolder:=new(record.DKPChangeEntry)
-	err = db.MakeUpdate([]db.TableName{dao.TableMembers, dao.TableDKPLog},func(tx *bbolt.Tx) error {
+	resHolder := new(record.DKPChangeEntry)
+	err = db.MakeUpdate([]db.TableName{dao.TableMembers, dao.TableDKPLog}, func(tx *bbolt.Tx) error {
 		oldEntry, err := dao.TxGetDKPChange(tx, newEntry.GetEntryId())
-		if err!=nil {
+		if err != nil {
 			return err
 		}
-		if oldEntry.GetRaidId()!=0 {
+		if oldEntry.GetRaidId() != 0 {
 			return httputil.NewError(http.StatusBadRequest, "You may not update a log entry corresponding to a raid.  Go update the raid.")
 		}
-		if oldEntry.GetTarget()!=newEntry.GetTarget() {
+		if oldEntry.GetTarget() != newEntry.GetTarget() {
 			return httputil.NewError(http.StatusBadRequest, "You may not change the target of a DKP update with this API.")
 		}
 		newEntry := record.NewBasicDKPChangeEntry(newEntry)
-		*resHolder= newEntry
+		*resHolder = newEntry
 		newEntry.Timestamp = oldEntry.GetTimestamp()
 		newEntry.Authority = selfProfile.GetDisplayName()
 		err = dao.TxUpsertDKPChange(tx, newEntry)
-		if err!=nil {
+		if err != nil {
 			return err
 		}
 
 		member, err := dao.TxGetMember(tx, newEntry.GetTarget())
-		if err!=nil {
+		if err != nil {
 			return err
 		}
 

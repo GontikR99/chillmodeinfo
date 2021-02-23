@@ -20,7 +20,7 @@ type bidSupportClientStub struct {
 	client *rpc.Client
 }
 
-type BidSupportGetLastMentionedRequest struct {}
+type BidSupportGetLastMentionedRequest struct{}
 type BidSupportGetLastMentionedResponse struct {
 	LastMentioned string
 }
@@ -39,7 +39,7 @@ func (bsc *bidSupportClientStub) GetLastMentioned() (string, error) {
 }
 
 type BidSupportOfferBidRequest struct {
-	Bidder string
+	Bidder   string
 	ItemName string
 	BidValue float64
 }
@@ -51,8 +51,8 @@ func (bss *BidSupportServerStub) OfferBid(req *BidSupportOfferBidRequest, res *B
 }
 
 func (bsc *bidSupportClientStub) OfferBid(bidder string, itemName string, bidValue float64) error {
-	req:=&BidSupportOfferBidRequest{bidder, itemName, bidValue}
-	res:=new(BidSupportOfferBidResponse)
+	req := &BidSupportOfferBidRequest{bidder, itemName, bidValue}
+	res := new(BidSupportOfferBidResponse)
 	return bsc.client.Call("BidSupportServerStub.OfferBid", req, res)
 }
 

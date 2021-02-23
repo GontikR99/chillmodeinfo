@@ -17,7 +17,6 @@ import (
 	js2 "syscall/js"
 )
 
-
 func (c *DumpTarget) dropFile(event vugu.DOMEvent) {
 	event.StopPropagation()
 	event.PreventDefault()
@@ -25,23 +24,23 @@ func (c *DumpTarget) dropFile(event vugu.DOMEvent) {
 	if jsFiles.IsUndefined() {
 		toast.Error("drop", errors.New("Whoa, was that a file you dropped?"))
 	}
-	for i:=0;i<jsFiles.Length();i++ {
+	for i := 0; i < jsFiles.Length(); i++ {
 		c.handleFile(event.EventEnv(), jsFiles.Index(i))
 	}
 }
 
-var fileReader=js.Global().Get("FileReader")
+var fileReader = js.Global().Get("FileReader")
 
 func (c *DumpTarget) handleFile(env vugu.EventEnv, fileObj js.Value) {
 	fileName := "unspecified"
 	if !fileObj.Get("name").IsUndefined() {
 		fileName = fileObj.Get("name").String()
 	}
-	fileSize:=int(-1)
+	fileSize := int(-1)
 	if !fileObj.Get("size").IsUndefined() {
 		fileSize = fileObj.Get("size").Int()
 	}
-	if fileSize>1024*1024 {
+	if fileSize > 1024*1024 {
 		go c.addDump(env, &uploadError{fileName, fmt.Sprintf("File too large to parse (%2.2f MiB> 1MiB)", float32(fileSize)/(1024*1024))})
 		return
 	}
@@ -71,22 +70,22 @@ func (c *DumpTarget) handleFile(env vugu.EventEnv, fileObj js.Value) {
 
 type uploadError struct {
 	filename string
-	message string
+	message  string
 }
 
-func (u *uploadError) Filename() string {return u.filename}
-func (u *uploadError) Message() string {return u.message}
-func (u *uploadError) Valid() bool {return false}
+func (u *uploadError) Filename() string         { return u.filename }
+func (u *uploadError) Message() string          { return u.message }
+func (u *uploadError) Valid() bool              { return false }
 func (u *uploadError) Commit(f func(err error)) {}
-func (u *uploadError) Busy() bool {return true}
+func (u *uploadError) Busy() bool               { return true }
 
 type uploadReady struct {
 	filename string
-	members []record.Member
-	busy bool
+	members  []record.Member
+	busy     bool
 }
 
-func (c *uploadReady) Filename() string {return c.filename}
+func (c *uploadReady) Filename() string { return c.filename }
 
 func (c *uploadReady) Message() string {
 	mains := 0
@@ -101,13 +100,12 @@ func (c *uploadReady) Message() string {
 	return fmt.Sprintf("%d mains, %d alts", mains, alts)
 }
 
-func (c *uploadReady) Valid() bool {return true}
+func (c *uploadReady) Valid() bool { return true }
 func (c *uploadReady) Commit(f func(err error)) {
-	c.busy=true
+	c.busy = true
 	go func() {
 		_, err := restidl.Members.MergeMembers(context.Background(), c.members)
 		f(err)
 	}()
 }
-func (c *uploadReady) Busy() bool {return c.busy}
-
+func (c *uploadReady) Busy() bool { return c.busy }

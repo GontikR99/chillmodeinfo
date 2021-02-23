@@ -3,8 +3,8 @@ package exerpcs
 import (
 	"errors"
 	"github.com/GontikR99/chillmodeinfo/cmd/electronmain/overlaymap"
-	"github.com/GontikR99/chillmodeinfo/internal/overlay"
 	"github.com/GontikR99/chillmodeinfo/internal/comms/rpcidl"
+	"github.com/GontikR99/chillmodeinfo/internal/overlay"
 )
 
 type overlayServer struct{}

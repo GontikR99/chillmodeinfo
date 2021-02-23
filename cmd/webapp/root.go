@@ -40,10 +40,10 @@ var alwaysShow = func() bool { return true }
 var routes = []routeEntry{
 	{"", "Home", "home", neverShow, func() vugu.Builder { return &home.Home{} }},
 	{"leaderboard", "Leaderboard", "\U0001f3c5", alwaysShow, func() vugu.Builder { return &leaderboard.Leaderboard{} }},
-	{"raid", "Raids", "\u2694", alwaysShow, func()vugu.Builder{return &raid.Raid{}}},
-	{"log", "Loot and Adjustments", "\U0001F4B0", alwaysShow, func()vugu.Builder{return &adjustments.Adjustments{}}},
-	{"roster", "Members", "\U0001F4D6", alwaysShow, func() vugu.Builder { return &roster.Roster{}}},
-	{"member", "Member page", "", neverShow, func() vugu.Builder { return &member.Member{}}},
+	{"raid", "Raids", "\u2694", alwaysShow, func() vugu.Builder { return &raid.Raid{} }},
+	{"log", "Loot and Adjustments", "\U0001F4B0", alwaysShow, func() vugu.Builder { return &adjustments.Adjustments{} }},
+	{"roster", "Members", "\U0001F4D6", alwaysShow, func() vugu.Builder { return &roster.Roster{} }},
+	{"member", "Member page", "", neverShow, func() vugu.Builder { return &member.Member{} }},
 	{"admin", "Admin", "\U0001F6E0", func() bool {
 		if localprofile.GetProfile() == nil {
 			return false
@@ -74,11 +74,11 @@ func (c *Root) Init(ctx vugu.InitCtx) {
 	go func() {
 		lastPlace := place.GetPlace()
 		for {
-			<-time.After(10*time.Millisecond)
+			<-time.After(10 * time.Millisecond)
 			curPlace := place.GetPlace()
-			if lastPlace!=curPlace {
+			if lastPlace != curPlace {
 				ctx.EventEnv().Lock()
-				lastPlace=curPlace
+				lastPlace = curPlace
 				ctx.EventEnv().UnlockRender()
 			}
 		}

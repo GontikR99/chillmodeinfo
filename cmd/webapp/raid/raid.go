@@ -16,17 +16,17 @@ import (
 )
 
 type Raid struct {
-	Raids []record.Raid
+	Raids    []record.Raid
 	raidOpen map[uint64]struct{}
-	ctx context.Context
-	ctxDone context.CancelFunc
+	ctx      context.Context
+	ctxDone  context.CancelFunc
 }
 
 type raidTableEntry struct {
-	idx int
-	raid record.Raid
-	mainLine bool
-	credited []string
+	idx        int
+	raid       record.Raid
+	mainLine   bool
+	credited   []string
 	uncredited []string
 }
 
@@ -37,7 +37,7 @@ func (c *Raid) generateTableEntries() []raidTableEntry {
 		if !c.isRaidCollapsed(raid.GetRaidId()) {
 			creditMap := make(map[string]struct{})
 			for _, v := range raid.GetCredited() {
-				creditMap[v]= struct{}{}
+				creditMap[v] = struct{}{}
 			}
 			var credited []string
 			var uncredited []string
@@ -45,12 +45,12 @@ func (c *Raid) generateTableEntries() []raidTableEntry {
 				if _, ok := creditMap[v]; ok {
 					credited = append(credited, v)
 				} else {
-					uncredited=append(uncredited, v)
+					uncredited = append(uncredited, v)
 				}
 			}
 			sort.Sort(byValue(credited))
 			sort.Sort(byValue(uncredited))
-			entries=append(entries, raidTableEntry{idx, raid, false, credited, uncredited})
+			entries = append(entries, raidTableEntry{idx, raid, false, credited, uncredited})
 		}
 	}
 	return entries
@@ -67,20 +67,20 @@ func (c *Raid) toggleCollapsed(event vugu.DOMEvent, raidId uint64) {
 	if _, ok := c.raidOpen[raidId]; ok {
 		delete(c.raidOpen, raidId)
 	} else {
-		c.raidOpen[raidId]=struct{}{}
+		c.raidOpen[raidId] = struct{}{}
 	}
 }
 
 func (c *Raid) updateDescription(submit ui.SubmitEvent, raid record.Raid) {
 	go func() {
-		if submit.Value()=="" {
+		if submit.Value() == "" {
 			submit.Reject(errors.New("Give this raid a name!"))
 			return
 		}
 		newRaid := record.NewBasicRaid(raid)
-		newRaid.Description=submit.Value()
+		newRaid.Description = submit.Value()
 		_, err := restidl.Raid.Update(c.ctx, newRaid)
-		if err!=nil {
+		if err != nil {
 			submit.Reject(err)
 			return
 		} else {
@@ -91,7 +91,7 @@ func (c *Raid) updateDescription(submit ui.SubmitEvent, raid record.Raid) {
 }
 
 func rowStyle(idx int) string {
-	if idx%2==0 {
+	if idx%2 == 0 {
 		return "background-color: rgba(0,0,0,0.05)"
 	} else {
 		return ""
@@ -103,7 +103,7 @@ func (c *Raid) recalculateRaid(event vugu.DOMEvent, raid record.Raid) {
 	event.StopPropagation()
 	go func() {
 		_, err := restidl.Raid.Update(c.ctx, raid)
-		if err!=nil {
+		if err != nil {
 			toast.Error("Raids", err)
 			return
 		}
@@ -114,14 +114,14 @@ func (c *Raid) recalculateRaid(event vugu.DOMEvent, raid record.Raid) {
 func (c *Raid) updateDKP(submit ui.SubmitEvent, raid record.Raid) {
 	go func() {
 		dkpValue, err := strconv.ParseFloat(submit.Value(), 64)
-		if err!=nil {
+		if err != nil {
 			submit.Reject(errors.New("Sorry, that's not a number"))
 			return
 		}
 		newRaid := record.NewBasicRaid(raid)
-		newRaid.DKPValue=dkpValue
+		newRaid.DKPValue = dkpValue
 		_, err = restidl.Raid.Update(c.ctx, newRaid)
-		if err!=nil {
+		if err != nil {
 			submit.Reject(err)
 			return
 		} else {
@@ -131,15 +131,14 @@ func (c *Raid) updateDKP(submit ui.SubmitEvent, raid record.Raid) {
 	}()
 }
 
-
 func (c *Raid) refreshRaids(env vugu.EventEnv) {
 	raids, err := restidl.Raid.Fetch(c.ctx)
-	if err!=nil {
+	if err != nil {
 		toast.Error("raids", err)
 		return
 	}
 	env.Lock()
-	c.Raids=raids
+	c.Raids = raids
 	env.UnlockRender()
 }
 
@@ -148,7 +147,7 @@ func (c *Raid) deleteRaid(event vugu.DOMEvent, raid record.Raid) {
 	event.StopPropagation()
 	go func() {
 		err := restidl.Raid.Delete(c.ctx, raid.GetRaidId())
-		if err!=nil {
+		if err != nil {
 			toast.Error("raids", err)
 			return
 		}
@@ -158,14 +157,14 @@ func (c *Raid) deleteRaid(event vugu.DOMEvent, raid record.Raid) {
 
 func (c *Raid) Init(vCtx vugu.InitCtx) {
 	c.ctx, c.ctxDone = context.WithCancel(context.Background())
-	c.raidOpen=make(map[uint64]struct{})
+	c.raidOpen = make(map[uint64]struct{})
 	go func() {
 		for {
 			c.refreshRaids(vCtx.EventEnv())
 			select {
 			case <-c.ctx.Done():
 				return
-			case <-time.After(60*time.Second):
+			case <-time.After(60 * time.Second):
 			}
 		}
 	}()

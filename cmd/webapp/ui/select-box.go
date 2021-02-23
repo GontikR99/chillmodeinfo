@@ -15,20 +15,20 @@ var selectBoxIdGen int
 
 type SelectBox struct {
 	AttrMap vugu.AttrMap
-	Value string
-	Change ChangeHandler
+	Value   string
+	Change  ChangeHandler
 	Options []string
 
 	idStr string
 
-	ctx context.Context
-	doneFunc context.CancelFunc
+	ctx        context.Context
+	doneFunc   context.CancelFunc
 	changeFunc js.Func
 }
 
 func (c *SelectBox) onChange(event js.Value, env vugu.EventEnv) {
-	c.Value=event.Get("target").Get("value").String()
-	if c.Change!=nil {
+	c.Value = event.Get("target").Get("value").String()
+	if c.Change != nil {
 		c.Change.ChangeHandle(&selectBoxChangeEvent{
 			value: c.Value,
 			env:   env,
@@ -39,16 +39,16 @@ func (c *SelectBox) onChange(event js.Value, env vugu.EventEnv) {
 
 type selectBoxChangeEvent struct {
 	value string
-	env vugu.EventEnv
-	sb *SelectBox
+	env   vugu.EventEnv
+	sb    *SelectBox
 }
 
-func (s *selectBoxChangeEvent) Value() string {return s.value}
-func (s *selectBoxChangeEvent) Env() vugu.EventEnv {return s.env}
+func (s *selectBoxChangeEvent) Value() string      { return s.value }
+func (s *selectBoxChangeEvent) Env() vugu.EventEnv { return s.env }
 func (s *selectBoxChangeEvent) SetValue(s2 string) {
 	go func() {
 		s.env.Lock()
-		s.sb.Value=s2
+		s.sb.Value = s2
 		s.env.UnlockRender()
 	}()
 }
@@ -57,8 +57,8 @@ func (c *SelectBox) Init(vCtx vugu.InitCtx) {
 	c.ctx, c.doneFunc = context.WithCancel(context.Background())
 
 	selectBoxIdGen++
-	c.idStr=fmt.Sprintf("select-box-%d", selectBoxIdGen)
-	c.changeFunc=js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+	c.idStr = fmt.Sprintf("select-box-%d", selectBoxIdGen)
+	c.changeFunc = js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		c.onChange(args[0], vCtx.EventEnv())
 		return nil
 	})
@@ -67,16 +67,16 @@ func (c *SelectBox) Init(vCtx vugu.InitCtx) {
 			select {
 			case <-c.ctx.Done():
 				return
-			case <-time.After(10*time.Millisecond):
+			case <-time.After(10 * time.Millisecond):
 			}
 			elt := document.GetElementById(c.idStr)
-			if elt!=nil {
+			if elt != nil {
 				elt.JSValue().Set("onchange", c.changeFunc)
 			}
 			for idx, value := range c.Options {
 				elt := document.GetElementById(fmt.Sprintf("%s-option-%d", c.idStr, idx))
-				if elt!=nil {
-					if c.Value==value {
+				if elt != nil {
+					if c.Value == value {
 						elt.SetAttribute("selected", "selected")
 					} else {
 						elt.RemoveAttribute("selected")

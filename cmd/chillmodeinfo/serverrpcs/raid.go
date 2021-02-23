@@ -14,32 +14,36 @@ import (
 	"time"
 )
 
-type serverRaidStub struct {}
+type serverRaidStub struct{}
 
 func (s serverRaidStub) Fetch(ctx context.Context) ([]record.Raid, error) {
-	raidsHolder:=new([]record.Raid)
-	err := db.MakeView([]db.TableName{dao.TableRaid, dao.TableDKPLog},func(tx *bbolt.Tx) error {
+	raidsHolder := new([]record.Raid)
+	err := db.MakeView([]db.TableName{dao.TableRaid, dao.TableDKPLog}, func(tx *bbolt.Tx) error {
 		creditedByRaid := make(map[uint64]map[string]struct{})
 		logs, err := dao.TxGetDKPChanges(tx)
-		if err!=nil {
+		if err != nil {
 			return nil
 		}
 		for _, log := range logs {
-			if log.GetRaidId()==0 {continue}
-			if _, ok := creditedByRaid[log.GetRaidId()]; !ok {
-				creditedByRaid[log.GetRaidId()]=make(map[string]struct{})
+			if log.GetRaidId() == 0 {
+				continue
 			}
-			creditedByRaid[log.GetRaidId()][log.GetTarget()]=struct{}{}
+			if _, ok := creditedByRaid[log.GetRaidId()]; !ok {
+				creditedByRaid[log.GetRaidId()] = make(map[string]struct{})
+			}
+			creditedByRaid[log.GetRaidId()][log.GetTarget()] = struct{}{}
 		}
 
 		raids, err := dao.TxGetRaids(tx)
-		if err!=nil {return err}
+		if err != nil {
+			return err
+		}
 		for _, v := range raids {
 			br := record.NewBasicRaid(v)
-			br.Credited=nil
+			br.Credited = nil
 			if creditMap, ok := creditedByRaid[v.GetRaidId()]; ok {
 				for k, _ := range creditMap {
-					br.Credited=append(br.Credited, k)
+					br.Credited = append(br.Credited, k)
 				}
 			}
 			*raidsHolder = append(*raidsHolder, br)
@@ -49,11 +53,12 @@ func (s serverRaidStub) Fetch(ctx context.Context) ([]record.Raid, error) {
 	return *raidsHolder, err
 }
 
-
 func (s serverRaidStub) Add(ctx context.Context, raid record.Raid) error {
 	log.Println("Starting add")
 	selfProfile, err := requiresAdmin(ctx)
-	if err!=nil {return err}
+	if err != nil {
+		return err
+	}
 
 	return db.MakeUpdate([]db.TableName{dao.TableMembers, dao.TableDKPLog, dao.TableRaid}, func(tx *bbolt.Tx) error {
 		newRaid := record.NewBasicRaid(raid)
@@ -61,7 +66,7 @@ func (s serverRaidStub) Add(ctx context.Context, raid record.Raid) error {
 		newRaid.Timestamp = time.Now()
 
 		raidId, err := dao.TxInsertRaid(tx, newRaid)
-		if err!=nil {
+		if err != nil {
 			return err
 		}
 
@@ -71,24 +76,24 @@ func (s serverRaidStub) Add(ctx context.Context, raid record.Raid) error {
 			if _, present := seenMembers[attendee]; present {
 				continue
 			}
-			seenMembers[attendee]=struct{}{}
+			seenMembers[attendee] = struct{}{}
 			member, err := dao.TxGetMember(tx, attendee)
 			if err == bolthold.ErrNotFound {
 				continue
-			} else if err!=nil {
+			} else if err != nil {
 				return err
 			}
 			if member.IsAlt() {
 				continue
 			}
 
-			newMember:=record.NewBasicMember(member)
+			newMember := record.NewBasicMember(member)
 			if newMember.LastActive.Before(newRaid.Timestamp) {
-				newMember.LastActive=newRaid.Timestamp
+				newMember.LastActive = newRaid.Timestamp
 			}
 			newMember.DKP += raid.GetDKPValue()
 			err = dao.TxUpsertMember(tx, newMember)
-			if err!=nil {
+			if err != nil {
 				return err
 			}
 
@@ -103,7 +108,7 @@ func (s serverRaidStub) Add(ctx context.Context, raid record.Raid) error {
 			}
 
 			err = dao.TxAppendDKPChange(tx, newLogEntry)
-			if err!=nil {
+			if err != nil {
 				return err
 			}
 		}
@@ -113,37 +118,41 @@ func (s serverRaidStub) Add(ctx context.Context, raid record.Raid) error {
 
 func (s serverRaidStub) Delete(ctx context.Context, raidId uint64) error {
 	_, err := requiresAdmin(ctx)
-	if err!=nil {return err}
+	if err != nil {
+		return err
+	}
 
 	return db.MakeUpdate([]db.TableName{dao.TableMembers, dao.TableDKPLog, dao.TableRaid}, func(tx *bbolt.Tx) error {
 		_, err := dao.TxGetRaid(tx, raidId)
-		if err!=nil {
+		if err != nil {
 			return err
 		}
 		err = dao.TxDeleteRaid(tx, raidId)
-		if err!=nil {
+		if err != nil {
 			return err
 		}
 
 		changeSet, err := dao.TxGetDKPChangesForRaid(tx, raidId)
-		if err!=nil {
+		if err != nil {
 			return err
 		}
 
 		for _, changeEntry := range changeSet {
 			err = dao.TxRemoveDKPChange(tx, changeEntry.GetEntryId())
-			if err!=nil {return err}
+			if err != nil {
+				return err
+			}
 
 			member, err := dao.TxGetMember(tx, changeEntry.GetTarget())
 			if err == bolthold.ErrNotFound {
 				continue
-			} else if err!=nil {
+			} else if err != nil {
 				return err
 			}
 			newMember := record.NewBasicMember(member)
 			newMember.DKP -= changeEntry.GetDelta()
 			err = dao.TxUpsertMember(tx, newMember)
-			if err!=nil {
+			if err != nil {
 				return err
 			}
 		}
@@ -153,10 +162,12 @@ func (s serverRaidStub) Delete(ctx context.Context, raidId uint64) error {
 
 func (s serverRaidStub) Update(ctx context.Context, raid record.Raid) (record.Raid, error) {
 	selfProfile, err := requiresAdmin(ctx)
-	if err!=nil {return nil, err}
+	if err != nil {
+		return nil, err
+	}
 
-	newRaidHolder:=new(record.Raid)
-	err=db.MakeUpdate([]db.TableName{dao.TableMembers, dao.TableDKPLog, dao.TableRaid}, func(tx *bbolt.Tx) error {
+	newRaidHolder := new(record.Raid)
+	err = db.MakeUpdate([]db.TableName{dao.TableMembers, dao.TableDKPLog, dao.TableRaid}, func(tx *bbolt.Tx) error {
 		oldRaid, err := dao.TxGetRaid(tx, raid.GetRaidId())
 		if err != nil {
 			return err
@@ -168,31 +179,33 @@ func (s serverRaidStub) Update(ctx context.Context, raid record.Raid) (record.Ra
 		newRaid.Attendees = raid.GetAttendees()
 
 		err = dao.TxUpsertRaid(tx, newRaid)
-		if err !=nil {
+		if err != nil {
 			return err
 		}
 		*newRaidHolder = newRaid
 
 		// Remove old changes
 		changeSet, err := dao.TxGetDKPChangesForRaid(tx, raid.GetRaidId())
-		if err!=nil {
+		if err != nil {
 			return err
 		}
 
 		for _, changeEntry := range changeSet {
 			err = dao.TxRemoveDKPChange(tx, changeEntry.GetEntryId())
-			if err!=nil {return err}
+			if err != nil {
+				return err
+			}
 
 			member, err := dao.TxGetMember(tx, changeEntry.GetTarget())
 			if err == bolthold.ErrNotFound {
 				continue
-			} else if err!=nil {
+			} else if err != nil {
 				return err
 			}
 			newMember := record.NewBasicMember(member)
 			newMember.DKP -= changeEntry.GetDelta()
 			err = dao.TxUpsertMember(tx, newMember)
-			if err!=nil {
+			if err != nil {
 				return err
 			}
 		}
@@ -204,24 +217,24 @@ func (s serverRaidStub) Update(ctx context.Context, raid record.Raid) (record.Ra
 			if _, present := seenMembers[attendee]; present {
 				continue
 			}
-			seenMembers[attendee]=struct{}{}
+			seenMembers[attendee] = struct{}{}
 			member, err := dao.TxGetMember(tx, attendee)
 			if err == bolthold.ErrNotFound {
 				continue
-			} else if err!=nil {
+			} else if err != nil {
 				return err
 			}
 			if member.IsAlt() {
 				continue
 			}
 
-			newMember:=record.NewBasicMember(member)
+			newMember := record.NewBasicMember(member)
 			if newMember.LastActive.Before(newRaid.GetTimestamp()) {
 				newMember.LastActive = newRaid.GetTimestamp()
 			}
 			newMember.DKP += raid.GetDKPValue()
 			err = dao.TxUpsertMember(tx, newMember)
-			if err!=nil {
+			if err != nil {
 				return err
 			}
 
@@ -236,7 +249,7 @@ func (s serverRaidStub) Update(ctx context.Context, raid record.Raid) (record.Ra
 			}
 
 			err = dao.TxAppendDKPChange(tx, newLogEntry)
-			if err!=nil {
+			if err != nil {
 				return err
 			}
 		}

@@ -3,8 +3,8 @@
 package exerpcs
 
 import (
-	"github.com/GontikR99/chillmodeinfo/internal/eqspec"
 	"github.com/GontikR99/chillmodeinfo/internal/comms/rpcidl"
+	"github.com/GontikR99/chillmodeinfo/internal/eqspec"
 )
 
 func init() {

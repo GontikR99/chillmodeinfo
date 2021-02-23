@@ -11,29 +11,29 @@ import (
 )
 
 type DumpTarget struct {
-	DumpPosted DumpPostedHandler
-	Dumps []ParsedDump
+	DumpPosted   DumpPostedHandler
+	Dumps        []ParsedDump
 	dragOverFunc js.Func
-	dead bool
+	dead         bool
 }
 
 func (c *DumpTarget) Init(ctx vugu.InitCtx) {
-	c.dragOverFunc=js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+	c.dragOverFunc = js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		event := args[0]
 		event.Call("stopPropagation")
 		event.Call("preventDefault")
 		event.Get("dataTransfer").Set("dropEffect", "copy")
 		return nil
 	})
-	c.dead=false
+	c.dead = false
 	go func() {
 		for !c.dead {
 			elt := document.GetElementById("guild-dump-drop")
-			if elt!=nil {
+			if elt != nil {
 				elt.AddEventListener("dragover", c.dragOverFunc)
 				return
 			}
-			<-time.After(10*time.Millisecond)
+			<-time.After(10 * time.Millisecond)
 		}
 	}()
 }
@@ -47,26 +47,26 @@ func (c *DumpTarget) addDump(env vugu.EventEnv, dump ParsedDump) {
 	newDumps := []ParsedDump{dump}
 	newDumps = append(newDumps, c.Dumps...)
 	env.Lock()
-	c.Dumps=newDumps
+	c.Dumps = newDumps
 	env.UnlockRender()
 }
 
 func (c *DumpTarget) removeDump(env vugu.EventEnv, dump ParsedDump) {
 	var newDumps []ParsedDump
 	for _, v := range c.Dumps {
-		if v!=dump {
-			newDumps=append(newDumps, v)
+		if v != dump {
+			newDumps = append(newDumps, v)
 		}
 	}
 	env.Lock()
-	c.Dumps=newDumps
+	c.Dumps = newDumps
 	env.UnlockRender()
 }
 
 func (c *DumpTarget) Commit(event vugu.DOMEvent, dump ParsedDump) {
 	event.PreventDefault()
 	dump.Commit(func(err error) {
-		if err==nil {
+		if err == nil {
 			go func() {
 				c.removeDump(event.EventEnv(), dump)
 				c.DumpPosted.DumpPostedHandle(DumpPostedEvent{Env: event.EventEnv()})
@@ -87,7 +87,7 @@ type ParsedDump interface {
 	Message() string
 	Valid() bool
 	Commit(func(err error))
-	Busy()bool
+	Busy() bool
 }
 
 type dumpAttrs struct {
@@ -96,7 +96,7 @@ type dumpAttrs struct {
 
 func (d dumpAttrs) AttributeList() []vugu.VGAttribute {
 	if d.dump.Busy() {
-		return []vugu.VGAttribute{{"","disabled", "true"}}
+		return []vugu.VGAttribute{{"", "disabled", "true"}}
 	} else {
 		return nil
 	}

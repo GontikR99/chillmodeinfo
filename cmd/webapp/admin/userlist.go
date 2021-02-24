@@ -7,6 +7,7 @@ import (
 	"github.com/GontikR99/chillmodeinfo/internal/comms/restidl"
 	"github.com/GontikR99/chillmodeinfo/internal/profile"
 	"github.com/GontikR99/chillmodeinfo/internal/profile/localprofile"
+	"github.com/GontikR99/chillmodeinfo/pkg/modal"
 	"github.com/GontikR99/chillmodeinfo/pkg/toast"
 	"github.com/vugu/vugu"
 	"sort"
@@ -95,6 +96,9 @@ func (c *Userlist) Destroy(ctx vugu.DestroyCtx) {
 func (c *Userlist) ChangeState(event vugu.DOMEvent, userId string, newState profile.AdminState) {
 	event.PreventDefault()
 	go func() {
+		if !modal.Verify("Change Admin State", "Are you sure you want to update the admin state of this user?", "Change") {
+			return
+		}
 		err := restidl.GetProfile().UpdateAdmin(context.Background(), userId, newState)
 		if err == nil {
 			selfProfile := localprofile.GetProfile()

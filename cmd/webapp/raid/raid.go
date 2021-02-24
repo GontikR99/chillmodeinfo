@@ -8,6 +8,7 @@ import (
 	"github.com/GontikR99/chillmodeinfo/cmd/webapp/ui"
 	"github.com/GontikR99/chillmodeinfo/internal/comms/restidl"
 	"github.com/GontikR99/chillmodeinfo/internal/record"
+	"github.com/GontikR99/chillmodeinfo/pkg/modal"
 	"github.com/GontikR99/chillmodeinfo/pkg/toast"
 	"github.com/vugu/vugu"
 	"sort"
@@ -146,6 +147,9 @@ func (c *Raid) deleteRaid(event vugu.DOMEvent, raid record.Raid) {
 	event.PreventDefault()
 	event.StopPropagation()
 	go func() {
+		if !modal.Verify("Remove: "+raid.GetDescription(), "Are you sure you wish to remove this raid?", "Remove") {
+			return
+		}
 		err := restidl.Raid.Delete(c.ctx, raid.GetRaidId())
 		if err != nil {
 			toast.Error("raids", err)

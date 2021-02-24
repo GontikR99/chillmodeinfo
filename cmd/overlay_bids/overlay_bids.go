@@ -4,6 +4,7 @@ package main
 
 import (
 	"github.com/GontikR99/chillmodeinfo/pkg/console"
+	"github.com/GontikR99/chillmodeinfo/pkg/vuguutil"
 	"github.com/vugu/vugu"
 	"github.com/vugu/vugu/domrender"
 	"github.com/vugu/vugu/js"
@@ -28,6 +29,7 @@ func main() {
 
 		err = renderer.Render(buildResults)
 		js.Global().Get("feather").Call("replace")
+		vuguutil.InvokeRenderCallbacks()
 
 		if err != nil {
 			console.Log(err)

@@ -3,6 +3,7 @@
 package browserwindow
 
 import (
+	"github.com/GontikR99/chillmodeinfo/pkg/console"
 	"github.com/GontikR99/chillmodeinfo/pkg/electron"
 	"github.com/GontikR99/chillmodeinfo/pkg/electron/binding"
 	"github.com/GontikR99/chillmodeinfo/pkg/electron/ipc"
@@ -83,6 +84,10 @@ type Conf struct {
 }
 
 func New(conf *Conf) BrowserWindow {
+	if nextWindowId<0 {
+		console.Log("All windows should be closed")
+		return nil
+	}
 	browserWindowInternal := browserWindow.New(binding.JsonifyOptions(conf))
 
 	browserWindowInstance := &electronBrowserWindow{
@@ -92,8 +97,8 @@ func New(conf *Conf) BrowserWindow {
 		nextCallback:  0,
 		windowId:      nextWindowId,
 	}
-	openWindows[nextWindowId]=browserWindowInstance
 	nextWindowId++
+	openWindows[nextWindowId]=browserWindowInstance
 
 	var handleClosedFunc js.Func
 	handleClosedFuncAddr :=&handleClosedFunc
@@ -105,6 +110,13 @@ func New(conf *Conf) BrowserWindow {
 	browserWindowInternal.Call("on", "closed", handleClosedFunc)
 
 	return browserWindowInstance
+}
+
+func CloseAll() {
+	nextWindowId=-1
+	for _, v := range openWindows {
+		v.Destroy()
+	}
 }
 
 func (bw *electronBrowserWindow) registerCallback(callback func()) (int, js.Func) {
@@ -203,6 +215,11 @@ func (bw *electronBrowserWindow) SetAlwaysOnTop(b bool) {
 
 // Send a message to this window on the specified channel
 func (bw *electronBrowserWindow) Send(channelName string, content []byte) {
+	defer func() {
+		if r := recover(); r!=nil {
+			// ignore errors sending
+		}
+	}()
 	bw.webContents.Call("send", msgcomm.Prefix+channelName, ipc.Encode(content))
 }
 

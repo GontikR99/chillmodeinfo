@@ -24,8 +24,8 @@
     <hr class="border-light"/>
 </div>
 <script type="application/x-go">
-    import (
+import (
     "fmt"
     "github.com/GontikR99/chillmodeinfo/cmd/webapp/ui"
-    )
+)
 </script>

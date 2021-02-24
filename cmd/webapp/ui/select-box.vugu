@@ -1,5 +1,5 @@
-<select vg-attr="c.AttrMap" :id="c.idStr">
-    <option vg-for="idx, key:=range c.Options" :value="key" vg-content="key" :id='fmt.Sprintf("%s-option-%d", c.idStr, idx)'/>
+<select vg-attr="c.AttrMap" :node-id="c.idStr" :onchange="c.onChangeHookText()">
+    <option vg-for="idx, key:=range c.Options" :value="key" vg-content="key" :node-id='c.optNodeId(idx)'></option>
 </select>
 <script type="application/x-go">
 import "fmt"

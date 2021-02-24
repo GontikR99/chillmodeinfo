@@ -66,6 +66,7 @@ func main() {
 	application.OnWindowAllClosed(exitApp)
 
 	<-appCtx.Done()
+	browserwindow.CloseAll()
 	application.Quit()
 
 	<-context.Background().Done()

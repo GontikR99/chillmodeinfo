@@ -14,7 +14,11 @@ type Element interface {
 	AppendChild(Element)
 	Remove()
 
-	SetAttribute(key string, value string)
+	Get(key string) js.Value
+	Set(key string, value interface{})
+
+	SetAttribute(key string, value interface{})
+	GetAttribute(key string) js.Value
 	RemoveAttribute(key string)
 }
 
@@ -40,8 +44,12 @@ func (j *jsDOMElement) Remove() {
 	j.jsValue.Call("remove")
 }
 
-func (j *jsDOMElement) SetAttribute(key string, value string) {
+func (j *jsDOMElement) SetAttribute(key string, value interface{}) {
 	j.jsValue.Call("setAttribute", key, value)
+}
+
+func (j *jsDOMElement) GetAttribute(key string) js.Value {
+	return j.jsValue.Call("getAttribute", key)
 }
 
 func (j *jsDOMElement) RemoveAttribute(key string) {
@@ -54,6 +62,14 @@ func (j *jsDOMElement) Focus() {
 
 func (j *jsDOMElement) Blur() {
 	j.jsValue.Call("blur")
+}
+
+func (j *jsDOMElement) Get(key string) js.Value {
+	return j.jsValue.Get(key)
+}
+
+func (j *jsDOMElement) Set(key string, value interface{}) {
+	j.jsValue.Set(key, value)
 }
 
 func WrapElement(value js.Value) Element {

@@ -16,7 +16,7 @@
                 <ui:SelectBox style="width:15rem;" :Value="c.pendingMember" :Options="c.KeyList()" @Change='c.updatePendingMember(event)'/>
             </td>
             <td><input type="text" :value='fmt.Sprintf("%.1f",c.pendingDKP)' @change="c.updatePendingDKP(event)"/></td>
-            <td><ui:AutoComplete width="100%" EditStyle="width: 100%;" :Value='""' @Suggestion="c.suggest(event)" @Change="c.updatePendingDescription(event)"/></td>
+            <td><ui:AutoComplete width="100%" EditStyle="width: 100%;" :Value='c.pendingDescription' @Suggestion="c.suggest(event)" @Change="c.updatePendingDescription(event)"/></td>
             <td vg-content="localprofile.GetProfile().GetDisplayName()"></td>
             <td><a href="#" title="Add" @click="c.addEntry(event)">&#x2795;</a></td>
         </tr>

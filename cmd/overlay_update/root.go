@@ -81,12 +81,12 @@ func (c *Root) enumerateQueue() []*update.UpdateEntry {
 	for _, v := range c.queue {
 		res=append(res, v)
 	}
-	sort.Sort(bySeqNumDesc(res))
+	sort.Sort(bySeqNum(res))
 	return res
 }
 
-type bySeqNumDesc []*update.UpdateEntry
+type bySeqNum []*update.UpdateEntry
 
-func (b bySeqNumDesc) Len() int {return len(b)}
-func (b bySeqNumDesc) Less(i, j int) bool {return b[i].SeqId>b[j].SeqId}
-func (b bySeqNumDesc) Swap(i, j int) {b[i], b[j] = b[j],b[i]}
+func (b bySeqNum) Len() int           {return len(b)}
+func (b bySeqNum) Less(i, j int) bool {return b[i].SeqId>b[j].SeqId}
+func (b bySeqNum) Swap(i, j int)      {b[i], b[j] = b[j],b[i]}

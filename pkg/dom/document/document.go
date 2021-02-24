@@ -9,6 +9,15 @@ import (
 
 var doc=js.Global().Get("document")
 
+func QuerySelector(selector string) dom.Element {
+	jsv := doc.Call("querySelector", selector)
+	if jsv.IsNull() || jsv.IsUndefined() {
+		return nil
+	} else {
+		return dom.WrapElement(jsv)
+	}
+}
+
 func GetElementById(id string) dom.Element {
 	jsv := doc.Call("getElementById", id)
 	if jsv.IsNull() || jsv.IsUndefined() {

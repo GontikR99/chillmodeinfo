@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/GontikR99/chillmodeinfo/pkg/vuguutil"
 	"github.com/vugu/vugu"
-	"strings"
 	"time"
 )
 
@@ -135,10 +134,12 @@ func (c *AutoComplete) RunInBackground() {
 						editBoxElt.Set("value", c.proposedValues[c.suggestionIdx])
 					}
 				}()
-			} else if strings.HasPrefix(keyCode, "Key") {
+			} else {
 				go func() {
 					<-time.After(100*time.Millisecond)
-					c.populateSuggestions(c.editorText(), c.env)
+					if hasFocus {
+						c.populateSuggestions(c.editorText(), c.env)
+					}
 				}()
 			}
 		case <-time.After(100*time.Millisecond):

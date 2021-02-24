@@ -95,7 +95,7 @@ func (c *Root) mainName(bid *Bid) string {
 	var m record.Member
 	var ok bool
 	if m, ok = c.Members[bid.Name]; !ok {}
-	if !m.IsAlt() {return ""}
+	if !m.IsAlt() {return m.GetName()}
 	if m, ok = c.Members[m.GetOwner()]; !ok {
 		return ""
 	}

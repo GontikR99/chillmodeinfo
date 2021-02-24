@@ -97,6 +97,7 @@ func (c *RaidDump) upload(event vugu.DOMEvent) {
 			event.EventEnv().UnlockRender()
 		} else {
 			c.Owner.removeFromQueue(event.EventEnv(), c.Update)
+			c.Owner.updateMembers(event.EventEnv())
 		}
 	}()
 }

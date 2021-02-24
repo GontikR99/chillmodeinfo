@@ -51,6 +51,7 @@ func (c *Bid) submit(event vugu.DOMEvent) {
 			return
 		} else {
 			c.Owner.removeFromQueue(event.EventEnv(), c.Update)
+			c.Owner.updateMembers(event.EventEnv())
 		}
 	}()
 }

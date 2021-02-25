@@ -17,7 +17,7 @@
                 <div class="small" vg-if="c.isAlt(bidVal)" vg-content='"("+c.mainName(bidVal)+")"'></div>
             </th>
             <td>
-                <span vg-if="bidVal.Value>0" vg-content="bidVal.Value"></span><span vg-if="bidVal.Value<=0">&#x1F4A9;</span><span vg-if="bidVal.Value>0">/</span><span vg-if="bidVal.Value>0" vg-content="c.getDKP(bidVal)"></span>
+                <span vg-if="bidVal.Value>0" vg-content="bidVal.Value"></span><span vg-if="bidVal.Value<=0">&#x1F4A9;</span><span vg-if="bidVal.Value>0">&nbsp;/&nbsp;</span><span vg-if="bidVal.Value>0" vg-content="c.getDKP(bidVal)"></span>
             </td>
             <td style="width:100%;">
                 <div class="small text-nowrap text-monospace" vg-for='_, line:=range bidVal.Texts' vg-content='line'></div>

@@ -17,7 +17,7 @@ import (
 )
 
 type Root struct {
-	queue map[int]*update.UpdateEntry
+	queue      map[int]*update.UpdateEntry
 	membership map[string]record.Member
 }
 
@@ -32,19 +32,19 @@ func (c *Root) removeFromQueue(env vugu.EventEnv, item *update.UpdateEntry) {
 func (c *Root) updateMembers(env vugu.EventEnv) {
 	go func() {
 		members, err := restidl.Members.GetMembers(context.Background())
-		if err==nil {
+		if err == nil {
 			env.Lock()
-			c.membership=members
+			c.membership = members
 			env.UnlockRender()
 		}
 	}()
 }
 
-var updateQueue=rpcidl.UpdateQueue(ipcrenderer.Client)
+var updateQueue = rpcidl.UpdateQueue(ipcrenderer.Client)
 
 func (c *Root) Init(vCtx vugu.InitCtx) {
-	c.queue=make(map[int]*update.UpdateEntry)
-	c.membership=make(map[string]record.Member)
+	c.queue = make(map[int]*update.UpdateEntry)
+	c.membership = make(map[string]record.Member)
 	go func() {
 		for {
 			c.updateMembers(vCtx.EventEnv())
@@ -53,13 +53,13 @@ func (c *Root) Init(vCtx vugu.InitCtx) {
 	}()
 	go func() {
 		for {
-			<-time.After(100*time.Millisecond)
+			<-time.After(100 * time.Millisecond)
 			newEntries, err := updateQueue.Poll()
-			if err!=nil {
+			if err != nil {
 				console.Log(err)
 				continue
 			}
-			if len(newEntries)!=0 {
+			if len(newEntries) != 0 {
 				for k, v := range newEntries {
 					c.queue[k] = v
 					localprofile.SetProfileIfAbsent(v.Self)
@@ -68,8 +68,8 @@ func (c *Root) Init(vCtx vugu.InitCtx) {
 				vCtx.EventEnv().UnlockRender()
 			}
 			remaining := map[int]*update.UpdateEntry{}
-			for k,v := range c.queue {
-				remaining[k]=v.Duplicate()
+			for k, v := range c.queue {
+				remaining[k] = v.Duplicate()
 			}
 			updateQueue.Enqueue(remaining)
 		}
@@ -79,7 +79,7 @@ func (c *Root) Init(vCtx vugu.InitCtx) {
 func (c *Root) enumerateQueue() []*update.UpdateEntry {
 	var res []*update.UpdateEntry
 	for _, v := range c.queue {
-		res=append(res, v)
+		res = append(res, v)
 	}
 	sort.Sort(bySeqNum(res))
 	return res
@@ -87,6 +87,6 @@ func (c *Root) enumerateQueue() []*update.UpdateEntry {
 
 type bySeqNum []*update.UpdateEntry
 
-func (b bySeqNum) Len() int           {return len(b)}
-func (b bySeqNum) Less(i, j int) bool {return b[i].SeqId>b[j].SeqId}
-func (b bySeqNum) Swap(i, j int)      {b[i], b[j] = b[j],b[i]}
+func (b bySeqNum) Len() int           { return len(b) }
+func (b bySeqNum) Less(i, j int) bool { return b[i].SeqId > b[j].SeqId }
+func (b bySeqNum) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }

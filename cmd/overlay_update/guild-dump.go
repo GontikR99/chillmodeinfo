@@ -11,9 +11,9 @@ import (
 )
 
 type GuildDump struct {
-	Owner *Root
+	Owner  *Root
 	Update *update.UpdateEntry
-	Error string
+	Error  string
 }
 
 func (c *GuildDump) upload(event vugu.DOMEvent) {
@@ -22,11 +22,11 @@ func (c *GuildDump) upload(event vugu.DOMEvent) {
 	go func() {
 		var m []record.Member
 		for _, v := range c.Update.Members {
-			m=append(m, v)
+			m = append(m, v)
 		}
 		_, err := restidl.Members.MergeMembers(context.Background(), m)
-		if err!=nil {
-			c.Error=err.Error()
+		if err != nil {
+			c.Error = err.Error()
 			return
 		}
 		c.Owner.updateMembers(event.EventEnv())

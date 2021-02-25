@@ -8,7 +8,7 @@ import (
 )
 
 type ErrMsg struct {
-	Owner *Root
+	Owner  *Root
 	Update *update.UpdateEntry
 }
 

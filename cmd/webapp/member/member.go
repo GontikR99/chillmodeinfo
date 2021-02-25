@@ -76,7 +76,7 @@ func (c *Member) cancelEntry(event vugu.DOMEvent, entry record.DKPChangeEntry) {
 	event.StopPropagation()
 	event.PreventDefault()
 	go func() {
-		if !modal.Verify("Remove: "+entry.GetDescription(), "Are you sure you wish to remove this DKP change?", "Remove") {
+		if !modal.Verify("member", "Remove: "+entry.GetDescription(), "Are you sure you wish to remove this DKP change?", "Remove") {
 			return
 		}
 		err := restidl.DKPLog.Remove(c.ctx, entry.GetEntryId())

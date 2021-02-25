@@ -147,7 +147,7 @@ func (c *Raid) deleteRaid(event vugu.DOMEvent, raid record.Raid) {
 	event.PreventDefault()
 	event.StopPropagation()
 	go func() {
-		if !modal.Verify("Remove: "+raid.GetDescription(), "Are you sure you wish to remove this raid?", "Remove") {
+		if !modal.Verify("raid", "Remove: "+raid.GetDescription(), "Are you sure you wish to remove this raid?", "Remove") {
 			return
 		}
 		err := restidl.Raid.Delete(c.ctx, raid.GetRaidId())

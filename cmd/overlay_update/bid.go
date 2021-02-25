@@ -17,24 +17,24 @@ import (
 )
 
 type Bid struct {
-	Owner *Root
+	Owner  *Root
 	Update *update.UpdateEntry
-	Error string
+	Error  string
 
-	Bidder string
+	Bidder   string
 	ItemName string
-	Bid float64
+	Bid      float64
 }
 
 func (c *Bid) Init(vCtx vugu.InitCtx) {
-	c.ItemName=c.Update.ItemName
-	c.Bidder=c.Update.Bidder
-	c.Bid=c.Update.Bid
+	c.ItemName = c.Update.ItemName
+	c.Bidder = c.Update.Bidder
+	c.Bid = c.Update.Bid
 }
 
 func (c *Bid) submittable() bool {
 	_, bidderPresent := c.Owner.membership[c.Bidder]
-	return c.Bid!=0 && c.ItemName!="" && bidderPresent
+	return c.Bid != 0 && c.ItemName != "" && bidderPresent
 }
 
 func (c *Bid) submit(event vugu.DOMEvent) {
@@ -44,9 +44,9 @@ func (c *Bid) submit(event vugu.DOMEvent) {
 			Delta:       -math.Abs(c.Bid),
 			Description: c.ItemName,
 		})
-		if err!=nil {
+		if err != nil {
 			event.EventEnv().Lock()
-			c.Error=err.Error()
+			c.Error = err.Error()
 			event.EventEnv().UnlockRender()
 			return
 		} else {
@@ -65,15 +65,15 @@ func (c *Bid) dismiss(event vugu.DOMEvent) {
 func (c *Bid) updateItem(event ui.ChangeEvent) {
 	go func() {
 		event.Env().Lock()
-		c.ItemName=event.Value()
+		c.ItemName = event.Value()
 		event.Env().UnlockRender()
 	}()
 }
 
 func (c *Bid) memberList() []string {
-	members:=[]string{""}
+	members := []string{""}
 	for _, v := range c.Owner.membership {
-		members=append(members, v.GetName())
+		members = append(members, v.GetName())
 	}
 	sort.Sort(byValueFold(members))
 	return members
@@ -89,11 +89,11 @@ func (c *Bid) updateBidder(event ui.ChangeEvent) {
 
 func (c *Bid) updateDKP(event vugu.DOMEvent) {
 	v, err := strconv.ParseFloat(event.PropString("target", "value"), 64)
-	if err==nil {
-		c.Bid=v
+	if err == nil {
+		c.Bid = v
 		event.JSEventTarget().Set("value", fmt.Sprintf("%.1f", c.Bid))
 	} else {
-		c.Error="Value must be a number"
+		c.Error = "Value must be a number"
 		event.JSEventTarget().Call("select")
 	}
 }

@@ -96,7 +96,7 @@ func (c *Userlist) Destroy(ctx vugu.DestroyCtx) {
 func (c *Userlist) ChangeState(event vugu.DOMEvent, userId string, newState profile.AdminState) {
 	event.PreventDefault()
 	go func() {
-		if !modal.Verify("Change Admin State", "Are you sure you want to update the admin state of this user?", "Change") {
+		if !modal.Verify("members", "Change Admin State", "Are you sure you want to update the admin state of this user?", "Change") {
 			return
 		}
 		err := restidl.GetProfile().UpdateAdmin(context.Background(), userId, newState)

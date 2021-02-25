@@ -17,10 +17,10 @@ import (
 )
 
 type RaidDump struct {
-	Owner *Root
-	Update *update.UpdateEntry
-	Error string
-	RaidName string
+	Owner     *Root
+	Update    *update.UpdateEntry
+	Error     string
+	RaidName  string
 	RaidValue float64
 
 	prevRaidNames []string
@@ -29,17 +29,17 @@ type RaidDump struct {
 func (c *RaidDump) Init(vCtx vugu.InitCtx) {
 	go func() {
 		raids, err := restidl.Raid.Fetch(context.Background())
-		if err!=nil {
+		if err != nil {
 			return
 		}
 		raidSet := make(map[string]string)
 		for _, raid := range raids {
-			raidSet[strings.ToUpper(raid.GetDescription())]=raid.GetDescription()
+			raidSet[strings.ToUpper(raid.GetDescription())] = raid.GetDescription()
 		}
 
 		vCtx.EventEnv().Lock()
 		for _, v := range raidSet {
-			c.prevRaidNames=append(c.prevRaidNames, v)
+			c.prevRaidNames = append(c.prevRaidNames, v)
 		}
 		sort.Sort(byValueFold(c.prevRaidNames))
 		vCtx.EventEnv().UnlockRender()
@@ -47,9 +47,10 @@ func (c *RaidDump) Init(vCtx vugu.InitCtx) {
 }
 
 type byValueFold []string
-func (b byValueFold) Len() int {return len(b)}
-func (b byValueFold) Less(i, j int) bool {return strings.ToUpper(b[i]) < strings.ToUpper(b[j])}
-func (b byValueFold) Swap(i, j int) {b[i], b[j] = b[j], b[i]}
+
+func (b byValueFold) Len() int           { return len(b) }
+func (b byValueFold) Less(i, j int) bool { return strings.ToUpper(b[i]) < strings.ToUpper(b[j]) }
+func (b byValueFold) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 
 func (c *RaidDump) suggest(event ui.SuggestionEvent) {
 	console.Log(event.Value())
@@ -66,18 +67,18 @@ func (c *RaidDump) suggest(event ui.SuggestionEvent) {
 func (c *RaidDump) updateDescription(event ui.ChangeEvent) {
 	go func() {
 		event.Env().Lock()
-		c.RaidName=event.Value()
+		c.RaidName = event.Value()
 		event.Env().UnlockRender()
 	}()
 }
 
 func (c *RaidDump) updateDKP(event vugu.DOMEvent) {
 	v, err := strconv.ParseFloat(event.PropString("target", "value"), 64)
-	if err==nil {
-		c.RaidValue=v
+	if err == nil {
+		c.RaidValue = v
 		event.JSEventTarget().Set("value", fmt.Sprintf("%.1f", c.RaidValue))
 	} else {
-		c.Error="Value must be a number"
+		c.Error = "Value must be a number"
 		event.JSEventTarget().Call("select")
 	}
 }
@@ -91,9 +92,9 @@ func (c *RaidDump) upload(event vugu.DOMEvent) {
 			Attendees:   c.Update.Attendees,
 			DKPValue:    c.RaidValue,
 		})
-		if err!=nil {
+		if err != nil {
 			event.EventEnv().Lock()
-			c.Error=err.Error()
+			c.Error = err.Error()
 			event.EventEnv().UnlockRender()
 		} else {
 			c.Owner.removeFromQueue(event.EventEnv(), c.Update)

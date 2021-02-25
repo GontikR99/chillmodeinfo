@@ -18,7 +18,7 @@ type SelectBox struct {
 	Change  ChangeHandler
 	Options []string
 
-	env vugu.EventEnv
+	env   vugu.EventEnv
 	idStr string
 }
 
@@ -28,10 +28,10 @@ func (c *SelectBox) optNodeId(idx int) string {
 
 func (c *SelectBox) Init(vCtx vugu.InitCtx) {
 	selectBoxIdGen++
-	c.idStr=fmt.Sprintf("selectbox-%d", selectBoxIdGen)
+	c.idStr = fmt.Sprintf("selectbox-%d", selectBoxIdGen)
 
-	activeSelectBoxes[c.idStr]=c
-	c.env=vCtx.EventEnv()
+	activeSelectBoxes[c.idStr] = c
+	c.env = vCtx.EventEnv()
 
 	c.InitBackground(vCtx, c)
 }
@@ -47,7 +47,7 @@ func (c *SelectBox) RunInBackground() {
 		case <-c.Rendered():
 			for idx, optVal := range c.Options {
 				optElt := vuguutil.GetElementByNodeId(c.optNodeId(idx))
-				if optElt==nil {
+				if optElt == nil {
 					continue
 				}
 				eltVal := optElt.GetAttribute("value")
@@ -63,13 +63,13 @@ func (c *SelectBox) RunInBackground() {
 
 type selectBoxChangeEvent struct {
 	value string
-	env vugu.EventEnv
-	box *SelectBox
+	env   vugu.EventEnv
+	box   *SelectBox
 }
 
-var activeSelectBoxes=make(map[string]*SelectBox)
+var activeSelectBoxes = make(map[string]*SelectBox)
 
-const sbChangeFunc="cmiUiSelectBoxChange"
+const sbChangeFunc = "cmiUiSelectBoxChange"
 
 func init() {
 	js.Global().Set(sbChangeFunc, js.FuncOf(func(this js.Value, args []js.Value) interface{} {
@@ -87,17 +87,17 @@ func init() {
 }
 
 func (c *SelectBox) onChangeHookText() string {
-	return sbChangeFunc+"(event, \""+c.idStr+"\")"
+	return sbChangeFunc + "(event, \"" + c.idStr + "\")"
 }
 
-func (s *selectBoxChangeEvent) Value() string {return s.value}
-func (s *selectBoxChangeEvent) Env() vugu.EventEnv {return s.box.env}
-func (s *selectBoxChangeEvent) SetValue(s2 string) {s.box.Value=s2}
+func (s *selectBoxChangeEvent) Value() string      { return s.value }
+func (s *selectBoxChangeEvent) Env() vugu.EventEnv { return s.box.env }
+func (s *selectBoxChangeEvent) SetValue(s2 string) { s.box.Value = s2 }
 
 func (c *SelectBox) onChange(event vugu.DOMEvent) {
 	oldValue := c.Value
 	c.Value = event.PropString("target", "value")
-	if c.Change!=nil && c.Value != oldValue {
+	if c.Change != nil && c.Value != oldValue {
 		c.Change.ChangeHandle(&selectBoxChangeEvent{
 			value: c.Value,
 			box:   c,

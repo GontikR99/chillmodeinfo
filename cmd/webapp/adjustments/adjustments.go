@@ -113,7 +113,7 @@ func (c *Adjustments) cancelEntry(event vugu.DOMEvent, entry record.DKPChangeEnt
 	event.PreventDefault()
 	event.StopPropagation()
 	go func() {
-		if !modal.Verify("Remove: "+entry.GetDescription(), "Are you sure you wish to remove this DKP change?", "Remove") {
+		if !modal.Verify("adjustments", "Remove: "+entry.GetDescription(), "Are you sure you wish to remove this DKP change?", "Remove") {
 			return
 		}
 		err := restidl.DKPLog.Remove(c.ctx, entry.GetEntryId())

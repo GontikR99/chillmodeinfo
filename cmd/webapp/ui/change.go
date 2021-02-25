@@ -9,4 +9,5 @@ type ChangeEvent interface {
 	SetValue(string)
 	Env() vugu.EventEnv
 }
+
 //vugugen:event Change

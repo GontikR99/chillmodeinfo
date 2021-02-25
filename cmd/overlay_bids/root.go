@@ -6,8 +6,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/GontikR99/chillmodeinfo/internal/comms/restidl"
-	"github.com/GontikR99/chillmodeinfo/internal/eqspec"
 	"github.com/GontikR99/chillmodeinfo/internal/comms/rpcidl"
+	"github.com/GontikR99/chillmodeinfo/internal/eqspec"
 	"github.com/GontikR99/chillmodeinfo/internal/record"
 	"github.com/GontikR99/chillmodeinfo/pkg/console"
 	"github.com/GontikR99/chillmodeinfo/pkg/electron/ipc/ipcrenderer"
@@ -22,10 +22,10 @@ import (
 )
 
 type Root struct {
-	ActiveBids []*Bid
-	RandBag    map[int]struct{}
+	ActiveBids    []*Bid
+	RandBag       map[int]struct{}
 	ItemAuctioned string
-	Members map[string]record.Member
+	Members       map[string]record.Member
 }
 
 type Bid struct {
@@ -35,18 +35,18 @@ type Bid struct {
 	Texts      []string
 }
 
-var bidSupport=rpcidl.BidSupport(ipcrenderer.Client)
+var bidSupport = rpcidl.BidSupport(ipcrenderer.Client)
 
 func (c *Root) Init(ctx vugu.InitCtx) {
 	rand.Seed(time.Now().UnixNano())
 	c.RandBag = make(map[int]struct{})
 	go func() {
 		members, err := restidl.Members.GetMembers(context.Background())
-		if err==nil {
+		if err == nil {
 			ctx.EventEnv().Lock()
-			c.Members=members
+			c.Members = members
 			ctx.EventEnv().UnlockRender()
-			if c.ActiveBids!=nil {
+			if c.ActiveBids != nil {
 				bidSupport.OfferBid(c.mainName(c.ActiveBids[0]), c.ItemAuctioned, float64(c.ActiveBids[0].Value))
 			}
 		}
@@ -54,15 +54,15 @@ func (c *Root) Init(ctx vugu.InitCtx) {
 	go func() {
 		for {
 			item, err := bidSupport.GetLastMentioned()
-			if err==nil && c.ItemAuctioned != item {
+			if err == nil && c.ItemAuctioned != item {
 				ctx.EventEnv().Lock()
 				c.ItemAuctioned = item
 				ctx.EventEnv().UnlockRender()
-				if c.ActiveBids!=nil {
+				if c.ActiveBids != nil {
 					bidSupport.OfferBid(c.mainName(c.ActiveBids[0]), c.ItemAuctioned, float64(c.ActiveBids[0].Value))
 				}
 			}
-			<-time.After(10*time.Millisecond)
+			<-time.After(10 * time.Millisecond)
 		}
 	}()
 
@@ -87,15 +87,20 @@ func (c *Root) Init(ctx vugu.InitCtx) {
 }
 
 func (c *Root) isAlt(bid *Bid) bool {
-	return c.mainName(bid)!=""
+	return c.mainName(bid) != bid.Name
 }
 
 func (c *Root) mainName(bid *Bid) string {
-	if c.Members==nil {return ""}
+	if c.Members == nil {
+		return ""
+	}
 	var m record.Member
 	var ok bool
-	if m, ok = c.Members[bid.Name]; !ok {}
-	if !m.IsAlt() {return m.GetName()}
+	if m, ok = c.Members[bid.Name]; !ok {
+	}
+	if !m.IsAlt() {
+		return m.GetName()
+	}
 	if m, ok = c.Members[m.GetOwner()]; !ok {
 		return ""
 	}
@@ -103,7 +108,7 @@ func (c *Root) mainName(bid *Bid) string {
 }
 
 func (c *Root) getDKP(bid *Bid) string {
-	if c.Members==nil {
+	if c.Members == nil {
 		return "???"
 	}
 	var m record.Member

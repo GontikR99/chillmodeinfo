@@ -10,6 +10,7 @@ import (
 	"github.com/GontikR99/chillmodeinfo/internal/eqspec"
 	"github.com/GontikR99/chillmodeinfo/internal/place"
 	"github.com/GontikR99/chillmodeinfo/internal/record"
+	"github.com/GontikR99/chillmodeinfo/pkg/modal"
 	"github.com/GontikR99/chillmodeinfo/pkg/toast"
 	"github.com/vugu/vugu"
 	"strconv"
@@ -75,6 +76,9 @@ func (c *Member) cancelEntry(event vugu.DOMEvent, entry record.DKPChangeEntry) {
 	event.StopPropagation()
 	event.PreventDefault()
 	go func() {
+		if !modal.Verify("Remove: "+entry.GetDescription(), "Are you sure you wish to remove this DKP change?", "Remove") {
+			return
+		}
 		err := restidl.DKPLog.Remove(c.ctx, entry.GetEntryId())
 		if err != nil {
 			toast.Error("member page", err)

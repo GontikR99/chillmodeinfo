@@ -24,7 +24,7 @@ func makeHTTPServer() *http.Server {
 		baseMux.Handle("/", http.FileServer(static.StaticFiles))
 		baseMux.Handle("/bin/", http.StripPrefix("/bin", http.FileServer(bin.BinFiles)))
 
-		muxWithGzip := gziphandler.GzipHandler(baseMux)
+		muxWithGzip := gziphandler.GzipHandler(NewCacheMangler(baseMux))
 
 	return makeServerFromMux(muxWithGzip)
 }

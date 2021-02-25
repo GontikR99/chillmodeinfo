@@ -130,7 +130,7 @@ func (c *AutoComplete) RunInBackground() {
 					if c.suggestionIdx >= len(c.proposedValues) {
 						c.suggestionIdx = len(c.proposedValues) - 1
 					}
-					if editBoxElt != nil {
+					if c.suggestionIdx>=0 && editBoxElt != nil {
 						editBoxElt.Set("value", c.proposedValues[c.suggestionIdx])
 					}
 				}()

@@ -40,6 +40,34 @@
             <button type="button" class="btn btn-primary" @click='c.CloseOverlay(event, "update")'>Close</button>
         </div>
     </div>
+    <div class="form-group">
+        <div class="row">
+            <label class="col-form-label col-sm-2">Use chillmode.info records to populate <code>HALF</code> and <code>ALL</code> bids</label>
+            <div class="col-sm-1"><input class="form-control" type="checkbox" @change="c.changeNamedBids(event)" .checked="c.allowNamed"></div>
+            <div class="col-sm-6 text-muted small">
+                When enabled, the bid sorting overlay will recognize a player's bid containing
+                <code>HALF</code>, <code>FULL</code>, or <code>ALL</code> , and populate her bid
+                based on chillmode.info's DKP records for her.  Text-only bids such as just saying <code>all in</code>
+                are preferred, but bids containing both text and a number (e.g. <code>220 half</code>) are also supported.
+            </div>
+        </div>
+    </div>
+    <div class="form-group" vg-if="c.allowNamed">
+        <div class="row">
+            <label class="col-form-label col-sm-2">Bad math allowance</label>
+            <div class="col-sm-6">
+                <vgform:Input type="text" class="form-control" :Value="c.BadMath"/>
+            </div>
+        </div>
+        <div class="row text-muted small">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-6">
+                If a player with 1000 DKP makes a bid such as <code>HALF 200</code> and the numeric part of his bid (<code>200</code>)
+                is really far from the text meaning of his bid (<code>HALF</code>=500), the bid sorter will
+                reject his bid as malformed.  How far is "really" far is controlled by the bad math allowance.
+            </div>
+        </div>
+    </div>
 </form>
 
 <script type="application/x-go">

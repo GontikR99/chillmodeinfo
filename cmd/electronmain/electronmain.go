@@ -26,6 +26,9 @@ func main() {
 		}
 	}()
 
+	settings.DefaultSetting(settings.AllowNamedBids, "false")
+	settings.DefaultSetting(settings.BadMathThreshold, "25")
+
 	if _, present, err := settings.LookupSetting(settings.ClientId); err==nil && !present {
 		clientId := make([]byte, 32)
 		rand.Read(clientId)

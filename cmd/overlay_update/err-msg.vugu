@@ -1,11 +1,13 @@
-<div class="container-fluid">
-    <div class="row">
-        <span class="col-10">
-            <span vg-content="c.Update.ErrorMessage"></span>
-        </span>
-        <span class="col-2">
-            <a href="#" title="Dismiss" @click="c.dismiss(event)">&#x274c;</a>
-        </span>
+<div class="card border-light bg-dark">
+    <h6 class="card-header">Error</h6>
+    <div class="card-body">
+        <div class="card-text">
+            <span class="col-10">
+                <span vg-content="c.Update.ErrorMessage"></span>
+            </span>
+            <span class="col-2">
+                <a href="#" title="Dismiss" @click="c.dismiss(event)">&#x274c;</a>
+            </span>
+        </div>
     </div>
-    <hr class="border-light"/>
 </div>

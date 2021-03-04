@@ -9,9 +9,11 @@ import (
 	"github.com/GontikR99/chillmodeinfo/internal/comms/rpcidl"
 	"github.com/GontikR99/chillmodeinfo/internal/eqspec"
 	"github.com/GontikR99/chillmodeinfo/internal/record"
+	"github.com/GontikR99/chillmodeinfo/internal/settings"
 	"github.com/GontikR99/chillmodeinfo/pkg/console"
 	"github.com/GontikR99/chillmodeinfo/pkg/electron/ipc/ipcrenderer"
 	"github.com/vugu/vugu"
+	"math"
 	"math/rand"
 	"regexp"
 	"sort"
@@ -26,6 +28,9 @@ type Root struct {
 	RandBag       map[int]struct{}
 	ItemAuctioned string
 	Members       map[string]record.Member
+
+	allowNamedBids bool
+	badMathThreshold float64
 }
 
 type Bid struct {
@@ -49,6 +54,18 @@ func (c *Root) Init(ctx vugu.InitCtx) {
 			if c.ActiveBids != nil {
 				bidSupport.OfferBid(c.mainName(c.ActiveBids[0]), c.ItemAuctioned, float64(c.ActiveBids[0].Value))
 			}
+		}
+	}()
+	go func() {
+		namedStr, present, err := rpcidl.LookupSetting(ipcrenderer.Client, settings.AllowNamedBids)
+		if present && err==nil {
+			if strings.EqualFold("true", namedStr) {
+				c.allowNamedBids=true
+			}
+		}
+		badMathStr, present, err := rpcidl.LookupSetting(ipcrenderer.Client, settings.BadMathThreshold)
+		if present && err==nil {
+			c.badMathThreshold, _ = strconv.ParseFloat(badMathStr, 64)
 		}
 	}()
 	go func() {
@@ -168,38 +185,38 @@ func (c *Root) parseForBid(env vugu.EventEnv, entry *eqspec.LogEntry) {
 	}
 	sender := tellMatch[1]
 	message := tellMatch[2]
-	//isHalfBid := strings.Contains(strings.ToUpper(message), "HALF")
-	//isFullBid := strings.Contains(strings.ToUpper(message), "FULL") || strings.Contains(strings.ToUpper(message), "ALL")
+	isHalfBid := strings.Contains(strings.ToUpper(message), "HALF")
+	isFullBid := strings.Contains(strings.ToUpper(message), "FULL") || strings.Contains(strings.ToUpper(message), "ALL")
 	ivals := extractNumbers(message)
 	updateOccurred := false
 
-	//memberDKP := float64(0)
-	//if dkp, err := strconv.ParseFloat(c.getDKP(sender), 64); err==nil {
-	//	memberDKP=dkp
-	//}
-	//halfDKP := int(math.Ceil(memberDKP/2))
+	memberDKP := float64(0)
+	if dkp, err := strconv.ParseFloat(c.getDKP(sender), 64); err==nil {
+		memberDKP=dkp
+	}
+	halfDKP := int(math.Ceil(memberDKP/2))
 	bidValue := -1
 	if len(ivals) == 1 {
 		bidValue=ivals[0]
 	}
-	//if isHalfBid {
-	//	if bidValue==-1 {
-	//		bidValue=halfDKP
-	//	} else if math.Abs(float64(bidValue-halfDKP))<25 {
-	//		bidValue=halfDKP
-	//	} else {
-	//		bidValue=0
-	//	}
-	//}
-	//if isFullBid {
-	//	if bidValue==-1 {
-	//		bidValue=int(memberDKP)
-	//	} else if math.Abs(float64(bidValue)-memberDKP)<25 {
-	//		bidValue=int(memberDKP)
-	//	} else {
-	//		bidValue=0
-	//	}
-	//}
+	if c.allowNamedBids && isHalfBid {
+		if bidValue==-1 {
+			bidValue=halfDKP
+		} else if math.Abs(float64(bidValue-halfDKP))<=c.badMathThreshold {
+			bidValue=halfDKP
+		} else {
+			bidValue=0
+		}
+	}
+	if c.allowNamedBids && isFullBid {
+		if bidValue==-1 {
+			bidValue=int(memberDKP)
+		} else if math.Abs(float64(bidValue)-memberDKP)<=c.badMathThreshold {
+			bidValue=int(memberDKP)
+		} else {
+			bidValue=0
+		}
+	}
 
 	for _, entry := range c.ActiveBids {
 		if entry.Name == sender {

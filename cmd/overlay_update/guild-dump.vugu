@@ -1,13 +1,17 @@
-<div>
-    <div>
-        <span class="col-10 text-nowrap" vg-content='fmt.Sprintf("Guild dump with %d members", len(c.Update.Members))'></span>
-        <span class="col-2 text-nowrap">
-            <a href="#" title="Upload" @click="c.upload(event)">&#x2714;</a>
-            <a href="#" title="Ignore" @click="c.dismiss(event)">&#x274c;</a>
-        </span>
+<div class="card border-light bg-dark">
+    <h6 class="card-header">Guild dump</h6>
+    <div class="card-body">
+        <div class="card-text">
+            <span class="col-10 text-nowrap" vg-content='fmt.Sprintf("%d members", len(c.Update.Members))'></span>
+            <div vg-if='c.Error!=""' class="col-12 text-warning" vg-content="c.Error"></div>
+        </div>
+        <div class="row">
+            <div class="col-12 text-center">
+                <a href="#" title="Upload" class="card-link" @click="c.upload(event)">&#x2714;</a>
+                <a href="#" title="Ignore" class="card-link" @click="c.dismiss(event)">&#x274c;</a>
+            </div>
+        </div>
     </div>
-    <div vg-if='c.Error!=""' class="col-12 text-warning" vg-content="c.Error"></div>
-    <hr class="border-light"/>
 </div>
 <script type="application/x-go">
 import "fmt"

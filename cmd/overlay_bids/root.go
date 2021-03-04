@@ -97,6 +97,7 @@ func (c *Root) mainName(bid *Bid) string {
 	var m record.Member
 	var ok bool
 	if m, ok = c.Members[bid.Name]; !ok {
+		return ""
 	}
 	if !m.IsAlt() {
 		return m.GetName()
@@ -107,13 +108,13 @@ func (c *Root) mainName(bid *Bid) string {
 	return m.GetName()
 }
 
-func (c *Root) getDKP(bid *Bid) string {
+func (c *Root) getDKP(bidder string) string {
 	if c.Members == nil {
 		return "???"
 	}
 	var m record.Member
 	var ok bool
-	if m, ok = c.Members[bid.Name]; !ok {
+	if m, ok = c.Members[bidder]; !ok {
 		return "???"
 	}
 	if m.IsAlt() {
@@ -167,13 +168,43 @@ func (c *Root) parseForBid(env vugu.EventEnv, entry *eqspec.LogEntry) {
 	}
 	sender := tellMatch[1]
 	message := tellMatch[2]
+	//isHalfBid := strings.Contains(strings.ToUpper(message), "HALF")
+	//isFullBid := strings.Contains(strings.ToUpper(message), "FULL") || strings.Contains(strings.ToUpper(message), "ALL")
 	ivals := extractNumbers(message)
 	updateOccurred := false
 
+	//memberDKP := float64(0)
+	//if dkp, err := strconv.ParseFloat(c.getDKP(sender), 64); err==nil {
+	//	memberDKP=dkp
+	//}
+	//halfDKP := int(math.Ceil(memberDKP/2))
+	bidValue := -1
+	if len(ivals) == 1 {
+		bidValue=ivals[0]
+	}
+	//if isHalfBid {
+	//	if bidValue==-1 {
+	//		bidValue=halfDKP
+	//	} else if math.Abs(float64(bidValue-halfDKP))<25 {
+	//		bidValue=halfDKP
+	//	} else {
+	//		bidValue=0
+	//	}
+	//}
+	//if isFullBid {
+	//	if bidValue==-1 {
+	//		bidValue=int(memberDKP)
+	//	} else if math.Abs(float64(bidValue)-memberDKP)<25 {
+	//		bidValue=int(memberDKP)
+	//	} else {
+	//		bidValue=0
+	//	}
+	//}
+
 	for _, entry := range c.ActiveBids {
 		if entry.Name == sender {
-			if len(ivals) == 1 {
-				entry.Value = ivals[0]
+			if bidValue>=0 {
+				entry.Value=bidValue
 			}
 			entry.Texts = append(entry.Texts, message)
 			updateOccurred = true
@@ -186,8 +217,8 @@ func (c *Root) parseForBid(env vugu.EventEnv, entry *eqspec.LogEntry) {
 			Tiebreaker: c.randomTiebreaker(),
 			Texts:      []string{message},
 		}
-		if len(ivals) == 1 {
-			bid.Value = ivals[0]
+		if bidValue>=0 {
+			bid.Value=bidValue
 		}
 		c.ActiveBids = append(c.ActiveBids, bid)
 	}

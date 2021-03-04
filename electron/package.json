@@ -1,6 +1,6 @@
 {
   "name": "chillmodeinfo",
-  "version": "0.0.10",
+  "version": "0.0.14",
   "description": "Chill Mode guild's DKP tracker and status web site",
   "main": "src/electronmain.js",
   "scripts": {
@@ -22,7 +22,9 @@
   "homepage": "https://github.com/GontikR99/chillmodeinfo#readme",
   "config": {
     "forge": {
-      "packagerConfig": {},
+      "packagerConfig": {
+         "icon":"./src/favicon.ico"
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",

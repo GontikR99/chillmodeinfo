@@ -1,5 +1,7 @@
 <div>
     <h1>Check your web browser</h1>
-    To appease The Google, logins must be done in a supported web browser.  I'm opening a tab in your web browser
-    to let you sign in to this site.  Please go there and sign in.
+    <p>To appease The Google, logins must be done in a supported web browser.  I'm opening a tab in your web browser
+        to let you sign in to this site.  Please go there and sign in.</p>
+    <p>If a new tab doesn't open in your web browser shortly, click <button type="button" class="btn btn-primary btn-sm" @click="clickEvent(event)">copy</button>
+        to copy this url to your clipboard: <input type="text" :value="loginLink()" node-id="login-link-text" readonly>, and then paste into your browser's address bar.</p>
 </div>

@@ -5,7 +5,7 @@
            :value="c.Value"
            @focus="c.onFocus(event)"
            @blur="c.onBlur(event)"
-           @keydown="c.onKeyDown(event)"
+           :onkeydown="c.onKeyDownHookText()"
     />
     <div style="position:absolute; display: none;" :node-id="c.suggestIdStr">
         <div class="text-nowrap overflow-hidden"

@@ -43,3 +43,7 @@ func CreateElement(tag string) dom.Element {
 func CreateTextNode(content string) dom.Element {
 	return dom.WrapElement(doc.Call("createTextNode", content))
 }
+
+func ExecCommand(command string) {
+	doc.Call("execCommand", command)
+}

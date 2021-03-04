@@ -8,13 +8,24 @@ import (
 	"github.com/GontikR99/chillmodeinfo/internal/dao"
 	"github.com/GontikR99/chillmodeinfo/internal/dao/db"
 	"github.com/GontikR99/chillmodeinfo/internal/record"
+	"github.com/GontikR99/chillmodeinfo/internal/util"
 	"github.com/timshannon/bolthold"
 	"go.etcd.io/bbolt"
 	"log"
 	"time"
+	"unicode"
 )
 
 type serverRaidStub struct{}
+
+func isValidCharacter(charname string) bool {
+	for _, c := range charname {
+		if !unicode.Is(unicode.Latin, c) {
+			return false
+		}
+	}
+	return charname!=""
+}
 
 func (s serverRaidStub) Fetch(ctx context.Context) ([]record.Raid, error) {
 	raidsHolder := new([]record.Raid)
@@ -73,6 +84,7 @@ func (s serverRaidStub) Add(ctx context.Context, raid record.Raid) error {
 		seenMembers := make(map[string]struct{})
 		for _, attendeeTmp := range raid.GetAttendees() {
 			attendee := initialCap(attendeeTmp)
+			if !isValidCharacter(attendee) {continue}
 			if _, present := seenMembers[attendee]; present {
 				continue
 			}
@@ -176,7 +188,14 @@ func (s serverRaidStub) Update(ctx context.Context, raid record.Raid) (record.Ra
 		newRaid := record.NewBasicRaid(oldRaid)
 		newRaid.Description = raid.GetDescription()
 		newRaid.DKPValue = raid.GetDKPValue()
-		newRaid.Attendees = raid.GetAttendees()
+		newRaid.Attendees = nil
+		for _, a := range raid.GetAttendees() {
+			if isValidCharacter(a) {
+				newRaid.Attendees = append(newRaid.Attendees, initialCap(a))
+			}
+		}
+		newRaid.Attendees = util.Deduplicate(newRaid.Attendees)
+		newRaid.Credited = nil
 
 		err = dao.TxUpsertRaid(tx, newRaid)
 		if err != nil {
@@ -212,8 +231,9 @@ func (s serverRaidStub) Update(ctx context.Context, raid record.Raid) (record.Ra
 
 		// create new changes
 		seenMembers := make(map[string]struct{})
-		for _, attendeeTmp := range raid.GetAttendees() {
+		for _, attendeeTmp := range util.Deduplicate(raid.GetAttendees()) {
 			attendee := initialCap(attendeeTmp)
+			if !isValidCharacter(attendee) {continue}
 			if _, present := seenMembers[attendee]; present {
 				continue
 			}
@@ -252,6 +272,8 @@ func (s serverRaidStub) Update(ctx context.Context, raid record.Raid) (record.Ra
 			if err != nil {
 				return err
 			}
+
+			newRaid.Credited = append(newRaid.Credited, attendee)
 		}
 		return nil
 	})

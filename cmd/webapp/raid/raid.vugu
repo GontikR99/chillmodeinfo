@@ -46,26 +46,36 @@
                 <td vg-if="!tableEntry.mainLine" colspan="5">
                     <div>
                         <b>Credited:</b>
-                        <span>
-                            <div vg-for="i:=0;i<len(tableEntry.credited);i+=8">
-                                <vg-template vg-for="j:=i;j<len(tableEntry.credited) && j<i+8;j++">
+                        <div class="container-fluid">
+                            <div class="row" vg-for="i:=0;i<len(tableEntry.credited);i+=6">
+                                <div class="col-sm-2" vg-for="j:=i;j<len(tableEntry.credited) && j<i+6;j++">
                                     <a :href='"#member:"+tableEntry.credited[j]'
                                    vg-content="tableEntry.credited[j]"></a>
-                                    <span> </span>
-                                </vg-template>
+                                    <a vg-if="localprofile.IsAdmin()" href="#" @click="c.removeAttendee(event, tableEntry.raid, tableEntry.credited[j])">&#x274c;</a>
+                                </div>
                             </div>
-                        </span>
+                        </div>
                     </div>
                     <div>
                         <b>Uncredited:</b>
-                        <span>
-                            <div vg-for="i:=0;i<len(tableEntry.uncredited);i+=8">
-                                <vg-template vg-for="j:=i;j<len(tableEntry.uncredited) && j<i+8;j++">
+                        <div class="container-fluid">
+                            <div class="row" vg-for="i:=0;i<len(tableEntry.uncredited);i+=6">
+                                <div class="col-sm-2" vg-for="j:=i;j<len(tableEntry.uncredited) && j<i+6;j++">
                                     <span vg-content="tableEntry.uncredited[j]"></span>
-                                    <span> </span>
-                                </vg-template>
+                                    <a vg-if="localprofile.IsAdmin()" href="#" @click="c.removeAttendee(event, tableEntry.raid, tableEntry.uncredited[j])">&#x274c;</a>
+                                </div>
                             </div>
-                        </span>
+                        </div>
+                    </div>
+                    <div class="row" vg-if="localprofile.IsAdmin()">
+                        <label class="col-form-label col-1">Add:</label>
+                        <ui:AutoComplete class="col-10"
+                                         EditStyle="width:100%;"
+                                         :Value="c.proposedAddition(tableEntry.raid)"
+                                         @Suggestion="c.suggestMembers(event)"
+                                         @Change="c.updateProposedAddition(tableEntry.raid, event)">
+                        </ui:AutoComplete>
+                        <a href="#" class="col-1" title="Add" @click="c.addAttendee(event, tableEntry.raid)">&#x2795;</a>
                     </div>
                 </td>
             </tr>

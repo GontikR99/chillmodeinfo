@@ -21,6 +21,61 @@ type Raid struct {
 	raidOpen map[uint64]struct{}
 	ctx      context.Context
 	ctxDone  context.CancelFunc
+
+	memberList []string
+	proposedAdditions map[uint64]string
+}
+
+func (c *Raid) addAttendee(event vugu.DOMEvent, raid record.Raid) {
+	event.PreventDefault()
+	event.StopPropagation()
+	go func() {
+		name, ok := c.proposedAdditions[raid.GetRaidId()]
+		if !ok || name=="" {
+			toast.Error("raids", errors.New("Enter a name before clicking add"))
+			return
+		}
+		newRaid := record.NewBasicRaid(raid)
+		newRaid.Attendees=append(newRaid.Attendees, name)
+
+		replacerRaid, err := restidl.Raid.Update(c.ctx, newRaid)
+		if err!=nil {
+			toast.Error("raid", err)
+			return
+		}
+		delete(c.proposedAdditions, replacerRaid.GetRaidId())
+
+		for idx, raid := range c.Raids {
+			if raid.GetRaidId() == replacerRaid.GetRaidId() {
+				event.EventEnv().Lock()
+				c.Raids[idx]=replacerRaid
+				event.EventEnv().UnlockRender()
+				return
+			}
+		}
+	}()
+}
+
+func (c *Raid) suggestMembers(evt ui.SuggestionEvent) {
+	start := sort.Search(len(c.memberList), func(i int) bool {
+		return evt.Value()<=c.memberList[i]
+	})
+	end := sort.Search(len(c.memberList), func(i int) bool {
+		return evt.Value()+"\uffff"<=c.memberList[i]
+	})
+	evt.Propose(c.memberList[start:end])
+}
+
+func (c *Raid) updateProposedAddition(r record.Raid, evt ui.ChangeEvent) {
+	c.proposedAdditions[r.GetRaidId()]=evt.Value()
+}
+
+func (c *Raid) proposedAddition(r record.Raid) string {
+	if name, ok := c.proposedAdditions[r.GetRaidId()]; ok {
+		return name
+	} else {
+		return ""
+	}
 }
 
 type raidTableEntry struct {
@@ -159,9 +214,38 @@ func (c *Raid) deleteRaid(event vugu.DOMEvent, raid record.Raid) {
 	}()
 }
 
+func (c *Raid) removeAttendee(event vugu.DOMEvent, raid record.Raid, remover string) {
+	event.StopPropagation()
+	event.PreventDefault()
+	go func() {
+		newRaid := record.NewBasicRaid(raid)
+		var attendees []string
+		for _, at := range newRaid.Attendees {
+			if at != remover {
+				attendees=append(attendees, at)
+			}
+		}
+		newRaid.Attendees = attendees
+		replacerRaid, err := restidl.Raid.Update(c.ctx, newRaid)
+		if err!=nil {
+			toast.Error("raid", err)
+			return
+		}
+		for idx, raid := range c.Raids {
+			if raid.GetRaidId() == replacerRaid.GetRaidId() {
+				event.EventEnv().Lock()
+				c.Raids[idx]=replacerRaid
+				event.EventEnv().UnlockRender()
+				return
+			}
+		}
+	}()
+}
+
 func (c *Raid) Init(vCtx vugu.InitCtx) {
 	c.ctx, c.ctxDone = context.WithCancel(context.Background())
 	c.raidOpen = make(map[uint64]struct{})
+	c.proposedAdditions= make(map[uint64]string)
 	go func() {
 		for {
 			c.refreshRaids(vCtx.EventEnv())
@@ -171,6 +255,21 @@ func (c *Raid) Init(vCtx vugu.InitCtx) {
 			case <-time.After(60 * time.Second):
 			}
 		}
+	}()
+	go func() {
+		ms, err := restidl.Members.GetMembers(c.ctx)
+		if err!=nil {
+			toast.Error("raids", err)
+			return
+		}
+		var ml []string
+		for member, _ := range ms {
+			ml = append(ml, member)
+		}
+		sort.Sort(byValue(ml))
+		vCtx.EventEnv().Lock()
+		c.memberList=ml
+		vCtx.EventEnv().UnlockRender()
 	}()
 }
 

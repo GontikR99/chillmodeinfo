@@ -16,6 +16,7 @@ import (
 type Leaderboard struct {
 	Cards   []*ClassCard
 	Members map[string]record.Member
+	RecruitmentTargets []record.RecruitmentTarget
 
 	hideInactive bool
 	hideAlts     bool
@@ -49,6 +50,23 @@ func (c *Leaderboard) Init(vCtx vugu.InitCtx) {
 			}
 			vCtx.EventEnv().Lock()
 			c.Members = members
+			vCtx.EventEnv().UnlockRender()
+			select {
+			case <-c.ctx.Done():
+				return
+			case <-time.After(60 * time.Second):
+			}
+		}
+	}()
+	go func() {
+		for {
+			targets, err := restidl.Recruit.Fetch(c.ctx)
+			if err!=nil {
+				toast.Error("leaderboard", err)
+				return
+			}
+			vCtx.EventEnv().Lock()
+			c.RecruitmentTargets=targets
 			vCtx.EventEnv().UnlockRender()
 			select {
 			case <-c.ctx.Done():

@@ -1,12 +1,36 @@
 <div class="card">
-    <div class="card-header" vg-content="c.Class"></div>
-    <div class="card-body">
-        <div class="row" vg-for="_, member := range c.filteredMembers()" vg-key="member.GetName()">
-            <div class="col col-6">
-                <b><a href="#"  vg-content="member.GetName()" @click="c.jumpToMember(event, member)"></a></b>
+    <div class="card-header p-1">
+        <div class="d-flex">
+            <h6 class="m-0">
+                <img :src='"assets/class/"+eqspec.ClassMap[c.Class].Trigraph+".png"' width="20em;" height="20em;"/>
+                <span vg-content="c.Class"></span>
+            </h6>
+            <div vg-if="!localprofile.IsAdmin()" class="ml-auto">
+                    <span class="badge badge-pill badge-success"
+                          vg-content='fmt.Sprintf("Need %d", c.desiredCount()-c.activeCount())'
+                          vg-if="c.desiredCount() - c.activeCount() >= 2"></span>
+                    <span class="badge badge-pill badge-warning"
+                          vg-content='fmt.Sprintf("Need %d", c.desiredCount()-c.activeCount())'
+                          vg-if="c.desiredCount() - c.activeCount() > 0 && c.desiredCount()-c.activeCount()<2"></span>
             </div>
+            <div class="small ml-auto" vg-if="localprofile.IsAdmin()">
+                <div class="text-right text-nowrap" vg-content='fmt.Sprintf("%d active",c.activeCount())'></div>
+                <div class="text-right text-nowrap">
+                    <ui:EditLabel
+                        EditStyle="width:3rem;"
+                        :Value='fmt.Sprint(c.desiredCount())'
+                        :Editable="true"
+                        @Submit="c.updateRecruitmentTarget(event)"
+                    ></ui:EditLabel>&nbsp;desired
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-2">
+        <div class="d-flex flex-row" vg-for="_, member := range c.filteredMembers()" vg-key="member.GetName()">
+            <b><a href="#"  vg-content="member.GetName()" @click="c.jumpToMember(event, member)"></a></b>
             <ui:EditLabel
-                class="col col-6 text-right"
+                class="ml-auto"
                 EditStyle="width: 4rem;"
                 :Value='fmt.Sprintf("%.1f", member.GetDKP())'
                 :Editable='localprofile.IsAdmin()'
@@ -17,6 +41,7 @@
 <script type="application/x-go">
 import (
     "fmt"
+"github.com/GontikR99/chillmodeinfo/internal/eqspec"
     "github.com/GontikR99/chillmodeinfo/internal/profile/localprofile"
     "github.com/GontikR99/chillmodeinfo/cmd/webapp/ui"
 )

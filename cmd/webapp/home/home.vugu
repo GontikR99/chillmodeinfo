@@ -1,17 +1,53 @@
-<div style="max-width: 40rem;">
-    <h5>About Chill Mode</h5>
-    <p>First thing's first... Who are we? Summed up: We are a chill group of adults who enjoy killing pixels at an efficient pace without taking ourselves too seriously.&nbsp; We plan to clear content as we see fit and as our capabilities reach that level.&nbsp; We live by a few simple guidelines, the number one being that we will always do what is best for the guild, in any situation.&nbsp; If you ask yourself that question often, you'll do amazing here.<br><br>Our goal is to make a non-judgmental, fun place to hang out for casual players, boxers, raiders, and any other label you can put on someone.&nbsp; We pride ourselves in doing things simply... no drama, no need.</p>
+<div class="d-flex">
+    <div style="max-width: 40rem;">
+        <h5>About Chill Mode</h5>
+        <p>First thing's first... Who are we? Summed up: We are a chill group of adults who enjoy killing pixels at an efficient pace without taking ourselves too seriously.&nbsp; We plan to clear content as we see fit and as our capabilities reach that level.&nbsp; We live by a few simple guidelines, the number one being that we will always do what is best for the guild, in any situation.&nbsp; If you ask yourself that question often, you'll do amazing here.<br><br>Our goal is to make a non-judgmental, fun place to hang out for casual players, boxers, raiders, and any other label you can put on someone.&nbsp; We pride ourselves in doing things simply... no drama, no need.</p>
 
-    <h6>What kind of people is Chill Mode looking to recruit?</h6>
-    <p>We highly value all our members, even those who do not raid with us.&nbsp; This guild is a HOME, and we take pride in that.&nbsp; We want players who wish to develop friendships and invest themselves in the guild, while still smashing bosses at a reasonable pace.</p>
+        <h6>What kind of people is Chill Mode looking to recruit?</h6>
+        <p>We highly value all our members, even those who do not raid with us.&nbsp; This guild is a HOME, and we take pride in that.&nbsp; We want players who wish to develop friendships and invest themselves in the guild, while still smashing bosses at a reasonable pace.</p>
 
-    <h6>Loot</h6>
-    <p>Loot is DKP based, silent DKP bidding.</p>
+        <h6>Loot</h6>
+        <p>Loot is DKP based, silent DKP bidding.</p>
 
-    <h6>Communication</h6>
-    <p>We use Discord for voice communication during raids and it is mandatory.&nbsp; You do not need a microphone, you only need to be able to hear raid instructions.</p>
-    <p>We utilize Discord text channels for non raid communication and guild information.</p>
+        <h6>Communication</h6>
+        <p>We use Discord for voice communication during raids and it is mandatory.&nbsp; You do not need a microphone, you only need to be able to hear raid instructions.</p>
+        <p>We utilize Discord text channels for non raid communication and guild information.</p>
 
-    <h6>Do you have to raid to be a part of the family?</h6>
-    <p>Absolutely not!&nbsp; We pride ourselves on being a good place for good people to hang out at.&nbsp; No drama, no stress... kinda "Chill", I would say.</p>
+        <h6>Do you have to raid to be a part of the family?</h6>
+        <p>Absolutely not!&nbsp; We pride ourselves on being a good place for good people to hang out at.&nbsp; No drama, no stress... kinda "Chill", I would say.</p>
+    </div>
+    <div class="float-right ml-auto">
+        <div class="card" style="width:13rem;">
+            <h6 class="card-header p-1">Recruiting</h6>
+            <div class="card-body m-1 p-0 text-nowrap">
+                <div class="d-flex flex-row" vg-for='_, rTarget := range c.recruitmentTargets()'>
+                    <strong>
+                        <img :src='"assets/class/"+eqspec.ClassMap[rTarget.Class].Trigraph+".png"' width="18em;" height="18em;"/>
+                        <span vg-content="rTarget.Class"></span>
+                    </strong>
+                    <div class="ml-auto">
+                        <span class="badge badge-pill badge-success"
+                              vg-content='fmt.Sprintf("Need %d", rTarget.Target)'
+                              vg-if="rTarget.Target >= 2"></span>
+                        <span class="badge badge-pill badge-warning"
+                              vg-content='fmt.Sprintf("Need %d", rTarget.Target)'
+                              vg-if="rTarget.Target > 0 && rTarget.Target<2"></span>
+                        <span class="badge badge-pill badge-danger"
+                              vg-if="rTarget.Target == 0">
+                            Full
+                        </span>
+                        <span class="badge badge-pill badge-danger"
+                              vg-content='fmt.Sprintf("Overfull %d", -rTarget.Target)'
+                              vg-if="rTarget.Target < 0" ></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+<script type="application/x-go">
+import (
+    "fmt"
+    "github.com/GontikR99/chillmodeinfo/internal/eqspec"
+)
+</script>

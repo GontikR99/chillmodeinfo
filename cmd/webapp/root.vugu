@@ -1,6 +1,9 @@
 <div>
     <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
-        <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#" @click='event.PreventDefault(); place.NavigateTo(event.EventEnv(), "")'>Chill Mode</a>
+        <a class="navbar-brand col-sm-3 col-lg-2 mr-0 px-3" href="#">Chill Mode</a>
+        <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
         <ul class="navbar-nav px-3">
             <li class="nav-item text-nowrap">
                 <login:Login/>
@@ -10,8 +13,8 @@
 
     <div class="container-fluid">
         <div class="row">
-            <nav class="col-md-2 d-none d-md-block bg-light sidebar">
-                <div class="sidebar-sticky">
+            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+                <div class="sidebar-sticky pt-3">
                     <ul class="nav flex-column">
                         <vg-template vg-for='_, route := range routes'>
                             <vg-template vg-if='route.ShowInNav()'>
@@ -30,6 +33,5 @@
 </div>
 
 <script type="application/x-go">
-    import "github.com/GontikR99/chillmodeinfo/internal/place"
     import "github.com/GontikR99/chillmodeinfo/cmd/webapp/login"
 </script>

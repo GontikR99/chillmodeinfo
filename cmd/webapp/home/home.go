@@ -48,7 +48,6 @@ func (c *Home) RunInBackground() {
 		select {
 		case <-c.Done():
 			return
-		case <-c.Rendered():
 		case <-time.After(60*time.Second):
 			c.refreshStats()
 		}

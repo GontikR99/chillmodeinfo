@@ -8,30 +8,56 @@ import (
 	"time"
 )
 
-type BackgroundLooper interface {
-	vugu.Builder
-	RunInBackground()
-}
-
+// Inherited type for Vugu components we wish to run with a background loop.
+//
+// To use, declare your Vugu component as:
+//
+// type NameHere struct {
+//     vuguutil.BackgroundComponent
+// }
+//
+// func (c *NameHere) Init(vCtx vugu.InitCtx) {
+//    c.InitBackground(vCtx, c)
+// }
+//
+// func (c *NameHere) RunInBackground() {
+//    for {
+//      select {
+//        case <-c.Done():
+//            return
+//        // other events here, e.g.:
+//        case <-time.After(10*time.Second):
+//            pollSomething()
+//      }
+//    }
+// }
 type BackgroundComponent struct {
 	Ctx context.Context
 	env vugu.EventEnv
-	renderChan <-chan struct{}
+	renderChan chan struct{}
 	renderCallbackHandle CallbackHandle
 	cancelFunc context.CancelFunc
+}
+
+type BackgroundLooper interface {
+	vugu.Builder
+	RunInBackground()
 }
 
 func (c *BackgroundComponent) InitBackground(vCtx vugu.InitCtx, bg BackgroundLooper) {
 	c.Ctx, c.cancelFunc = context.WithCancel(context.Background())
 	c.env = vCtx.EventEnv()
 	rChan := make(chan struct{})
-	c.renderCallbackHandle=OnRender(func() {
-		rChan<-struct{}{}
-	})
 	c.renderChan=rChan
 	go func() {
 		bg.RunInBackground()
 	}()
+}
+
+func (c *BackgroundComponent) ListenForRender() {
+	c.renderCallbackHandle=OnRender(func() {
+		c.renderChan<-struct{}{}
+	})
 }
 
 func (c *BackgroundComponent) Rendered() <-chan struct{} {

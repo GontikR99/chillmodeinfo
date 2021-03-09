@@ -48,6 +48,7 @@ func (c *AutoComplete) Init(vCtx vugu.InitCtx) {
 	c.keyDowned = make(chan vugu.DOMEvent)
 
 	c.InitBackground(vCtx, c)
+	c.ListenForRender()
 }
 
 func (c *AutoComplete) editorText() string {

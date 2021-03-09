@@ -102,8 +102,20 @@ body {
     box-shadow: 0 0 0 3px rgba(255, 255, 255, .25);
 }
 
-@media(min-width: 1024px) {
+@media(min-width: 1000px) {
     .card-columns {
         column-count: 4;
+    }
+}
+
+@media(min-width:1400px) {
+    .card-columns {
+        column-count: 5;
+    }
+}
+
+@media(min-width:1800px) {
+    .card-columns {
+        column-count: 6;
     }
 }

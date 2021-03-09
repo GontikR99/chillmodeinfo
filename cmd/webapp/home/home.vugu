@@ -18,7 +18,7 @@
     </div>
     <div class="float-right ml-auto">
         <div class="card" style="width:13rem;">
-            <h6 class="card-header p-1">Recruiting</h6>
+            <h6 class="card-header p-1">Raiding Needs</h6>
             <div class="card-body m-1 p-0 text-nowrap">
                 <div class="d-flex flex-row" vg-for='_, rTarget := range c.recruitmentTargets()'>
                     <strong>

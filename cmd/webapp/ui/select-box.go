@@ -34,6 +34,7 @@ func (c *SelectBox) Init(vCtx vugu.InitCtx) {
 	c.env = vCtx.EventEnv()
 
 	c.InitBackground(vCtx, c)
+	c.ListenForRender()
 }
 
 func (c *SelectBox) RunInBackground() {

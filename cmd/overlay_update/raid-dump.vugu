@@ -17,7 +17,7 @@
         </div>
         <div class="row">
             <div class="col-12 text-center">
-                <a href="#" title="Upload" vg-if='c.RaidName!="" && c.RaidValue>0' @click="c.upload(event)">&#x2714;</a>
+                <a href="#" title="Upload" vg-if='c.RaidName!=""' @click="c.upload(event)">&#x2714;</a>
                 <a href="#" title="Ignore" @click="c.dismiss(event)">&#x274c;</a>
             </div>
         </div>

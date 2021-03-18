@@ -18,7 +18,8 @@ reparse_items: bin/itemscvt.exe data/items.txt.gz
 	bin/itemscvt.exe trie data/items.txt.gz >internal/eqspec/parsed_trie.go
 
 deploy: bin/chillmodeinfo.linux bin/cmidb.linux
-	rsync -vh bin/chillmodeinfo.linux bin/cmidb.linux sawalk4@chillmode.info:.
+	chmod 755 bin/chillmodeinfo.linux bin/cmidb.linux
+	rsync -avh bin/chillmodeinfo.linux bin/cmidb.linux sawalk4@chillmode.info:.
 	ssh sawalk4@chillmode.info
 
 WASMS=bin/webapp.wasm bin/overlay_position.wasm bin/overlay_bids.wasm bin/overlay_update.wasm

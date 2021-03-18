@@ -1,6 +1,6 @@
 {
   "name": "chillmodeinfo",
-  "version": "0.1.0-RC2",
+  "version": "1.0.0",
   "description": "Chill Mode guild's DKP tracker and status web site",
   "main": "src/electronmain.js",
   "scripts": {

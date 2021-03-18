@@ -1,0 +1,11 @@
+[Unit]
+Description=Chillmode.info Web Site
+
+[Service]
+Type=simple
+ExecStart=/home/sawalk4/chillmodeinfo.linux
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+

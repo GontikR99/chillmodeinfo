@@ -13,9 +13,11 @@ type DKPLogHandler interface {
 	Retrieve(ctx context.Context, target string) ([]record.DKPChangeEntry, error)
 	Update(ctx context.Context, entry record.DKPChangeEntry) (record.DKPChangeEntry, error)
 	Remove(ctx context.Context, entryId uint64) error
+	Sync(ctx context.Context) (string, error)
 }
 
 const endpointDKPLog = "/rest/v0/dkp"
+const endpointDKPSync = "/rest/v0/dkpSync"
 
 type dkpLogHandlerClient struct{}
 
@@ -80,6 +82,18 @@ func (c *dkpLogHandlerClient) Update(ctx context.Context, newEntry record.DKPCha
 	}
 }
 
+type dkpLogSyncRequestV0 struct {}
+type dkpLogSyncResponseV0 struct {
+	Message string
+}
+
+func (c *dkpLogHandlerClient) Sync(ctx context.Context) (string, error) {
+	req := new(dkpLogSyncRequestV0)
+	res := new(dkpLogSyncResponseV0)
+	err := call(http.MethodPost, endpointDKPSync, req, res)
+	return res.Message, err
+}
+
 var DKPLog = &dkpLogHandlerClient{}
 
 func HandleDKPLog(handler DKPLogHandler) func(mux *http.ServeMux) {
@@ -113,6 +127,14 @@ func HandleDKPLog(handler DKPLogHandler) func(mux *http.ServeMux) {
 				update, err := handler.Update(ctx, &req.NewEntry)
 				res.UpdatedEntry = *record.NewBasicDKPChangeEntry(update)
 				return res, err
+			} else {
+				return nil, httputil.UnsupportedMethod(method)
+			}
+		})
+		serve(mux, endpointDKPSync, func(ctx context.Context, method string, request *Request) (interface{}, error) {
+			if strings.EqualFold(http.MethodPost, method) {
+				msg, err := handler.Sync(ctx)
+				return &dkpLogSyncResponseV0{Message: msg}, err
 			} else {
 				return nil, httputil.UnsupportedMethod(method)
 			}

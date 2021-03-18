@@ -29,7 +29,21 @@
         <p>Your request to become a site admin has been submitted.  Please await approval by an existing site admin</p>
     </vg-template>
     <vg-template vg-if="localprofile.GetProfile()!=nil && localprofile.GetProfile().GetAdminState()==profile.StateAdminApproved">
-        <admin:Userlist />
+        <admin:Userlist></admin:Userlist>
+        <div class="form-group row">
+            <button type="button" class="btn btn-danger col-2" @click="c.syncDKP(event)" vg-attr="vugu.VGAttributeListerFunc(c.syncDKPAttrs)">
+                <vg-template vg-if="!c.SyncPending">Sync DKP from Gamerlaunch</vg-template>
+                <img vg-if="c.SyncPending" src="external/loader.gif" width="20rem;" height="20rem;" />
+            </button>
+            <div class="col-10 text-muted small" vg-if='c.SyncResultText==""'>
+                <p>Populate base character DKP values from Gamerlaunch's leaderboard.  Any adjustments (raid, loot, etc) made
+                on this site will still be applied, so if you want all DKP to match Gamerlaunch values, be sure you set
+                all other recorded DKP values to 0 on the <a href="#log">Adjustments</a> and <a href="#raid">Raids</a>
+                    pages.</p>
+                <p>This is intended only as a stopgap convenience pending full adoption of this site.</p>
+            </div>
+            <div class="col-10" vg-if='c.SyncResultText!=""' vg-content="c.SyncResultText"></div>
+        </div>
     </vg-template>
     <vg-template vg-if="localprofile.GetProfile()!=nil && localprofile.GetProfile().GetAdminState()>=profile.StateAdminDenied">
         <h1>You heathen!</h1>

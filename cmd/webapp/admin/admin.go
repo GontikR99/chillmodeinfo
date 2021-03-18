@@ -6,6 +6,7 @@ import (
 	"context"
 	"github.com/GontikR99/chillmodeinfo/internal/comms/restidl"
 	"github.com/GontikR99/chillmodeinfo/internal/profile/localprofile"
+	"github.com/GontikR99/chillmodeinfo/pkg/modal"
 	"github.com/GontikR99/chillmodeinfo/pkg/toast"
 	"github.com/vugu/vugu"
 	"strings"
@@ -14,6 +15,9 @@ import (
 
 type Admin struct {
 	DisplayName *FormTextInput
+
+	SyncResultText string
+	SyncPending bool
 }
 
 func (c *Admin) Init(ctx vugu.InitCtx) {
@@ -54,4 +58,33 @@ func (f *FormTextInput) SetStringValue(s string) {
 		f.Env.Lock()
 		f.Env.UnlockRender()
 	}()
+}
+
+func (c *Admin) syncDKP(event vugu.DOMEvent) {
+	c.SyncPending=true
+	go func() {
+		if !modal.Verify("dkpsync", "Sync from Gamerlaunch", "Are you sure you wish to sync with Gamerlaunch now?", "Sync") {
+			event.EventEnv().Lock()
+			c.SyncPending=false
+			event.EventEnv().UnlockRender()
+			return
+		}
+		msg, err := restidl.DKPLog.Sync(context.Background())
+		event.EventEnv().Lock()
+		if err!=nil {
+			c.SyncResultText=err.Error()
+		} else {
+			c.SyncResultText=msg
+		}
+		c.SyncPending=false
+		event.EventEnv().UnlockRender()
+	}()
+}
+
+func (c *Admin) syncDKPAttrs() []vugu.VGAttribute {
+	if c.SyncPending {
+		return []vugu.VGAttribute{{"", "disabled", "disabled"}}
+	} else {
+		return nil
+	}
 }

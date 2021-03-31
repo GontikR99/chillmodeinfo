@@ -16,17 +16,20 @@ import (
 	"strings"
 )
 
+const defaultPostDateHours=6
+
 type RaidDump struct {
 	Owner     *Root
 	Update    *update.UpdateEntry
 	Error     string
 	RaidName  string
 	RaidValue float64
-
+	PostDateHours  int
 	prevRaidNames []string
 }
 
 func (c *RaidDump) Init(vCtx vugu.InitCtx) {
+	c.PostDateHours = defaultPostDateHours
 	go func() {
 		raids, err := restidl.Raid.Fetch(context.Background())
 		if err != nil {
@@ -83,6 +86,17 @@ func (c *RaidDump) updateDKP(event vugu.DOMEvent) {
 	}
 }
 
+func (c *RaidDump) updatePostDate(event vugu.DOMEvent) {
+	v, err := strconv.ParseInt(event.PropString("target", "value"), 10, 32)
+	if err == nil {
+		c.PostDateHours = int(v)
+		event.JSEventTarget().Set("value", fmt.Sprint(c.PostDateHours))
+	} else {
+		c.Error = "Value must be a number"
+		event.JSEventTarget().Call("select")
+	}
+}
+
 func (c *RaidDump) upload(event vugu.DOMEvent) {
 	event.StopPropagation()
 	event.PreventDefault()
@@ -91,7 +105,7 @@ func (c *RaidDump) upload(event vugu.DOMEvent) {
 			Description: c.RaidName,
 			Attendees:   c.Update.Attendees,
 			DKPValue:    c.RaidValue,
-		})
+		}, c.PostDateHours)
 		if err != nil {
 			event.EventEnv().Lock()
 			c.Error = err.Error()

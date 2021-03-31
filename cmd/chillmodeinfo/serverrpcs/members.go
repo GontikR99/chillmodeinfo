@@ -34,8 +34,11 @@ func (s serverMembersHandler) GetMember(ctx context.Context, name string) (recor
 		}
 		sum := float64(0)
 		lastAttend := time.Time{}
+		nowTime := time.Now()
 		for _, log := range logs {
-			sum += log.GetDelta()
+			if !log.GetTimestamp().After(nowTime) {
+				sum += log.GetDelta()
+			}
 			if lastAttend.Before(log.GetTimestamp()) {
 				lastAttend = log.GetTimestamp()
 			}
@@ -62,12 +65,15 @@ func (s serverMembersHandler) GetMembers(ctx context.Context) (map[string]record
 		}
 		totals := make(map[string]float64)
 		dates := make(map[string]time.Time)
+		nowTime := time.Now()
 		for _, delta := range logs {
 			if _, ok := totals[delta.GetTarget()]; !ok {
 				totals[delta.GetTarget()] = 0.0
 				dates[delta.GetTarget()] = time.Time{}
 			}
-			totals[delta.GetTarget()] += delta.GetDelta()
+			if !delta.GetTimestamp().After(nowTime) {
+				totals[delta.GetTarget()] += delta.GetDelta()
+			}
 			if dates[delta.GetTarget()].Before(delta.GetTimestamp()) {
 				dates[delta.GetTarget()] = delta.GetTimestamp()
 			}

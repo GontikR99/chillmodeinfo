@@ -13,6 +13,13 @@
                     <input type="text" style="width:4rem;" :value='fmt.Sprintf("%.1f", c.RaidValue)' @change="c.updateDKP(event)">
                 </span>
             </div>
+            <div class="row">
+                <span class="text-nowrap col-3">
+                    Pending for:
+                    <input type="text" style="width:4rem;" :value='fmt.Sprint(c.PostDateHours)' @change="c.updatePostDate(event)">
+                    hr
+                </span>
+            </div>
             <div vg-if='c.Error!=""' class="row text-warning" vg-content="c.Error"></div>
         </div>
         <div class="row">

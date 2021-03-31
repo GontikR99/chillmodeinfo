@@ -64,7 +64,7 @@ func (s serverRaidStub) Fetch(ctx context.Context) ([]record.Raid, error) {
 	return *raidsHolder, err
 }
 
-func (s serverRaidStub) Add(ctx context.Context, raid record.Raid) error {
+func (s serverRaidStub) Add(ctx context.Context, raid record.Raid, postDateHours int) error {
 	log.Println("Starting add")
 	selfProfile, err := requiresAdmin(ctx)
 	if err != nil {
@@ -74,7 +74,8 @@ func (s serverRaidStub) Add(ctx context.Context, raid record.Raid) error {
 	return db.MakeUpdate([]db.TableName{dao.TableMembers, dao.TableDKPLog, dao.TableRaid}, func(tx *bbolt.Tx) error {
 		newRaid := record.NewBasicRaid(raid)
 		newRaid.RaidId = 0
-		newRaid.Timestamp = time.Now()
+		nowTime := time.Now()
+		newRaid.Timestamp = nowTime.Add(time.Duration(postDateHours)*time.Hour)
 
 		raidId, err := dao.TxInsertRaid(tx, newRaid)
 		if err != nil {
@@ -100,8 +101,8 @@ func (s serverRaidStub) Add(ctx context.Context, raid record.Raid) error {
 			}
 
 			newMember := record.NewBasicMember(member)
-			if newMember.LastActive.Before(newRaid.Timestamp) {
-				newMember.LastActive = newRaid.Timestamp
+			if newMember.LastActive.Before(nowTime) {
+				newMember.LastActive = nowTime
 			}
 			newMember.DKP += raid.GetDKPValue()
 			err = dao.TxUpsertMember(tx, newMember)
@@ -180,6 +181,11 @@ func (s serverRaidStub) Update(ctx context.Context, raid record.Raid) (record.Ra
 
 	newRaidHolder := new(record.Raid)
 	err = db.MakeUpdate([]db.TableName{dao.TableMembers, dao.TableDKPLog, dao.TableRaid}, func(tx *bbolt.Tx) error {
+		activeTime := raid.GetTimestamp()
+		nowTime := time.Now()
+		if activeTime.After(nowTime) {
+			activeTime = nowTime
+		}
 		oldRaid, err := dao.TxGetRaid(tx, raid.GetRaidId())
 		if err != nil {
 			return err
@@ -249,8 +255,8 @@ func (s serverRaidStub) Update(ctx context.Context, raid record.Raid) (record.Ra
 			}
 
 			newMember := record.NewBasicMember(member)
-			if newMember.LastActive.Before(newRaid.GetTimestamp()) {
-				newMember.LastActive = newRaid.GetTimestamp()
+			if newMember.LastActive.Before(activeTime) {
+				newMember.LastActive = activeTime
 			}
 			newMember.DKP += raid.GetDKPValue()
 			err = dao.TxUpsertMember(tx, newMember)

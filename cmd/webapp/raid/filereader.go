@@ -126,7 +126,7 @@ func (c *uploadReady) Commit(f func(err error)) {
 			Description: c.description,
 			Attendees:   c.attendees,
 			DKPValue:    c.dkp,
-		})
+		}, 0)
 		f(err)
 	}()
 }

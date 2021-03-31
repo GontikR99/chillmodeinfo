@@ -15,17 +15,20 @@ type raidClientStub struct{}
 var Raid = &raidClientStub{}
 
 type RaidHandler interface {
-	Add(ctx context.Context, raid record.Raid) error
+	Add(ctx context.Context, raid record.Raid, postDateHours int) error
 	Fetch(ctx context.Context) ([]record.Raid, error)
 	Delete(ctx context.Context, raidId uint64) error
 	Update(ctx context.Context, raid record.Raid) (record.Raid, error)
 }
 
-type addRaidRequestV0 struct{ Raid *record.BasicRaid }
+type addRaidRequestV0 struct{
+	Raid *record.BasicRaid
+	PostDateHours int
+}
 type addRaidResponseV0 struct{}
 
-func (r raidClientStub) Add(ctx context.Context, raid record.Raid) error {
-	req := &addRaidRequestV0{record.NewBasicRaid(raid)}
+func (r raidClientStub) Add(ctx context.Context, raid record.Raid, postDateHours int) error {
+	req := &addRaidRequestV0{record.NewBasicRaid(raid), postDateHours}
 	res := new(addRaidResponseV0)
 	return call(http.MethodPut, endpointRaidV0, req, res)
 }
@@ -80,7 +83,7 @@ func HandleRaid(handler RaidHandler) func(mux *http.ServeMux) {
 				var req addRaidRequestV0
 				request.ReadTo(&req)
 				res := new(addRaidRequestV0)
-				err := handler.Add(ctx, req.Raid)
+				err := handler.Add(ctx, req.Raid, req.PostDateHours)
 				return res, err
 			} else if strings.EqualFold(http.MethodDelete, method) {
 				var req deleteRaidRequestV0

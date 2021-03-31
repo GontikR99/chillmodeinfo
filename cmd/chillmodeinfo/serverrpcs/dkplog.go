@@ -4,19 +4,15 @@ package serverrpcs
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"github.com/GontikR99/chillmodeinfo/internal/comms/httputil"
 	"github.com/GontikR99/chillmodeinfo/internal/comms/restidl"
 	"github.com/GontikR99/chillmodeinfo/internal/dao"
 	"github.com/GontikR99/chillmodeinfo/internal/dao/db"
 	"github.com/GontikR99/chillmodeinfo/internal/record"
-	"github.com/GontikR99/chillmodeinfo/internal/sitedef"
 	"go.etcd.io/bbolt"
-	"io/ioutil"
 	"net/http"
 	"regexp"
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -143,113 +139,114 @@ const syncAuth="Gamerlaunch"
 var gamerlaunchScrapeRe=regexp.MustCompile("<tr><td[^>]*><a href='/users[^>]*>([A-Za-z]*)</a></td><td[^>]*><span class='dkp_current'>([0-9.,]*)</span></td></tr>")
 
 func (s serverDKPLogHandler) Sync(ctx context.Context) (string, error) {
-	_, err := requiresAdmin(ctx)
-	if err!=nil {
-		return "", err
-	}
-
-	appends := 0
-	updates := 0
-	resp, err := http.Get(sitedef.GamerlaunchSyncURL)
-	if err!=nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	if err!=nil {
-		panic(err)
-	}
-	bodyText := string(bodyBytes)
-	matches := gamerlaunchScrapeRe.FindAllStringSubmatch(bodyText, -1)
-	syncDKP := make(map[string]float64)
-	for _, m := range matches {
-		dkpString := strings.ReplaceAll(m[2], ",", "")
-		dkpValue, err := strconv.ParseFloat(dkpString, 64)
-		if err!=nil {
-			panic(err)
-		}
-		syncDKP[m[1]]=dkpValue
-	}
-
-	err = db.MakeUpdate([]db.TableName{dao.TableDKPLog, dao.TableMembers}, func(tx *bbolt.Tx) error {
-		members, err := dao.TxGetMembers(tx)
-		if err!=nil {
-			return err
-		}
-		logs, err := dao.TxGetDKPChanges(tx)
-		if err!=nil {
-			return err
-		}
-		// Update old sync entries
-		for _, logEntry := range logs {
-			if _, present := syncDKP[logEntry.GetTarget()]; !present {
-				continue
-			}
-			if _, present := members[logEntry.GetTarget()]; !present {
-				continue
-			}
-			if logEntry.GetDescription()==syncText && logEntry.GetAuthority()==syncAuth {
-				updateEntry := record.NewBasicDKPChangeEntry(logEntry)
-				change := syncDKP[logEntry.GetTarget()] - logEntry.GetDelta()
-				delete(syncDKP, logEntry.GetTarget())
-				if change==0 {
-					continue
-				}
-				updateEntry.Delta += change
-				err = dao.TxUpsertDKPChange(tx, updateEntry)
-				if err!=nil {
-					return err
-				}
-
-				updateMember := record.NewBasicMember(members[logEntry.GetTarget()])
-				if updateMember.LastActive.Before(updateEntry.Timestamp) {
-					updateMember.LastActive = updateEntry.Timestamp
-				}
-				updateMember.DKP += change
-				err = dao.TxUpsertMember(tx, updateMember)
-				if err!=nil {
-					return err
-				}
-				updates++
-			}
-		}
-
-		// Insert new sync entries
-		for memberName, gamerlaunchDKP := range syncDKP {
-			if _, present := members[memberName]; !present {
-				continue
-			}
-			newEntry := &record.BasicDKPChangeEntry{
-				EntryId:     0,
-				Timestamp:   time.Now(),
-				Target:      memberName,
-				Delta:       gamerlaunchDKP,
-				Description: syncText,
-				RaidId:      0,
-				Authority:   syncAuth,
-			}
-			err = dao.TxAppendDKPChange(tx, newEntry)
-			if err!=nil {
-				return err
-			}
-
-			updateMember := record.NewBasicMember(members[memberName])
-			if updateMember.LastActive.Before(newEntry.Timestamp) {
-				updateMember.LastActive=newEntry.Timestamp
-			}
-			updateMember.DKP += gamerlaunchDKP
-			err = dao.TxUpsertMember(tx, updateMember)
-			if err!=nil {
-				return err
-			}
-			appends++
-		}
-		return nil
-	})
-	if err!=nil {
-		return "", err
-	}
-	return fmt.Sprintf("%d new sync entries created.  %d old sync entries updated.\n", appends, updates), nil
+	return "", errors.New("No longer supported")
+	//_, err := requiresAdmin(ctx)
+	//if err!=nil {
+	//	return "", err
+	//}
+	//
+	//appends := 0
+	//updates := 0
+	//resp, err := http.Get(sitedef.GamerlaunchSyncURL)
+	//if err!=nil {
+	//	panic(err)
+	//}
+	//defer resp.Body.Close()
+	//bodyBytes, err := ioutil.ReadAll(resp.Body)
+	//if err!=nil {
+	//	panic(err)
+	//}
+	//bodyText := string(bodyBytes)
+	//matches := gamerlaunchScrapeRe.FindAllStringSubmatch(bodyText, -1)
+	//syncDKP := make(map[string]float64)
+	//for _, m := range matches {
+	//	dkpString := strings.ReplaceAll(m[2], ",", "")
+	//	dkpValue, err := strconv.ParseFloat(dkpString, 64)
+	//	if err!=nil {
+	//		panic(err)
+	//	}
+	//	syncDKP[m[1]]=dkpValue
+	//}
+	//
+	//err = db.MakeUpdate([]db.TableName{dao.TableDKPLog, dao.TableMembers}, func(tx *bbolt.Tx) error {
+	//	members, err := dao.TxGetMembers(tx)
+	//	if err!=nil {
+	//		return err
+	//	}
+	//	logs, err := dao.TxGetDKPChanges(tx)
+	//	if err!=nil {
+	//		return err
+	//	}
+	//	// Update old sync entries
+	//	for _, logEntry := range logs {
+	//		if _, present := syncDKP[logEntry.GetTarget()]; !present {
+	//			continue
+	//		}
+	//		if _, present := members[logEntry.GetTarget()]; !present {
+	//			continue
+	//		}
+	//		if logEntry.GetDescription()==syncText && logEntry.GetAuthority()==syncAuth {
+	//			updateEntry := record.NewBasicDKPChangeEntry(logEntry)
+	//			change := syncDKP[logEntry.GetTarget()] - logEntry.GetDelta()
+	//			delete(syncDKP, logEntry.GetTarget())
+	//			if change==0 {
+	//				continue
+	//			}
+	//			updateEntry.Delta += change
+	//			err = dao.TxUpsertDKPChange(tx, updateEntry)
+	//			if err!=nil {
+	//				return err
+	//			}
+	//
+	//			updateMember := record.NewBasicMember(members[logEntry.GetTarget()])
+	//			if updateMember.LastActive.Before(updateEntry.Timestamp) {
+	//				updateMember.LastActive = updateEntry.Timestamp
+	//			}
+	//			updateMember.DKP += change
+	//			err = dao.TxUpsertMember(tx, updateMember)
+	//			if err!=nil {
+	//				return err
+	//			}
+	//			updates++
+	//		}
+	//	}
+	//
+	//	// Insert new sync entries
+	//	for memberName, gamerlaunchDKP := range syncDKP {
+	//		if _, present := members[memberName]; !present {
+	//			continue
+	//		}
+	//		newEntry := &record.BasicDKPChangeEntry{
+	//			EntryId:     0,
+	//			Timestamp:   time.Now(),
+	//			Target:      memberName,
+	//			Delta:       gamerlaunchDKP,
+	//			Description: syncText,
+	//			RaidId:      0,
+	//			Authority:   syncAuth,
+	//		}
+	//		err = dao.TxAppendDKPChange(tx, newEntry)
+	//		if err!=nil {
+	//			return err
+	//		}
+	//
+	//		updateMember := record.NewBasicMember(members[memberName])
+	//		if updateMember.LastActive.Before(newEntry.Timestamp) {
+	//			updateMember.LastActive=newEntry.Timestamp
+	//		}
+	//		updateMember.DKP += gamerlaunchDKP
+	//		err = dao.TxUpsertMember(tx, updateMember)
+	//		if err!=nil {
+	//			return err
+	//		}
+	//		appends++
+	//	}
+	//	return nil
+	//})
+	//if err!=nil {
+	//	return "", err
+	//}
+	//return fmt.Sprintf("%d new sync entries created.  %d old sync entries updated.\n", appends, updates), nil
 }
 
 func init() {

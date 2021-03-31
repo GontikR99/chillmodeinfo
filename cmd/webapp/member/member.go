@@ -13,14 +13,18 @@ import (
 	"github.com/GontikR99/chillmodeinfo/pkg/modal"
 	"github.com/GontikR99/chillmodeinfo/pkg/toast"
 	"github.com/vugu/vugu"
+	"math"
 	"strconv"
 	"strings"
 	"time"
 )
 
+const pageLength=25
+
 type Member struct {
 	Member     record.Member
 	LogEntries []record.DKPChangeEntry
+	MaxDisplay int
 	ctx        context.Context
 	ctxDone    context.CancelFunc
 }
@@ -111,7 +115,22 @@ func (c *Member) reloadLogs(env vugu.EventEnv) {
 	}
 }
 
+func (c *Member) showMore(event vugu.DOMEvent) {
+	event.StopPropagation()
+	event.PreventDefault()
+	if c.MaxDisplay!=math.MaxInt32 {
+		c.MaxDisplay += pageLength
+	}
+}
+
+func (c *Member) showAll(event vugu.DOMEvent) {
+	event.StopPropagation()
+	event.PreventDefault()
+	c.MaxDisplay = math.MaxInt32
+}
+
 func (c *Member) Init(vCtx vugu.InitCtx) {
+	c.MaxDisplay = pageLength
 	placeParts := strings.Split(place.GetPlace(), ":")
 	if len(placeParts) >= 1 {
 		c.Member = &record.BasicMember{

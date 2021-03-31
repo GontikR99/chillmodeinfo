@@ -11,13 +11,17 @@ import (
 	"github.com/GontikR99/chillmodeinfo/pkg/modal"
 	"github.com/GontikR99/chillmodeinfo/pkg/toast"
 	"github.com/vugu/vugu"
+	"math"
 	"sort"
 	"strconv"
 	"time"
 )
 
+const pageLength=25
+
 type Raid struct {
 	Raids    []record.Raid
+	MaxDisplay int
 	raidOpen map[uint64]struct{}
 	ctx      context.Context
 	ctxDone  context.CancelFunc
@@ -107,6 +111,9 @@ func (c *Raid) generateTableEntries() []raidTableEntry {
 			sort.Sort(byValue(credited))
 			sort.Sort(byValue(uncredited))
 			entries = append(entries, raidTableEntry{idx, raid, false, credited, uncredited})
+		}
+		if idx>=c.MaxDisplay {
+			break
 		}
 	}
 	return entries
@@ -242,8 +249,24 @@ func (c *Raid) removeAttendee(event vugu.DOMEvent, raid record.Raid, remover str
 	}()
 }
 
+func (c *Raid) showMore(event vugu.DOMEvent) {
+	event.StopPropagation()
+	event.PreventDefault()
+	if c.MaxDisplay!=math.MaxInt32 {
+		c.MaxDisplay += pageLength
+	}
+}
+
+func (c *Raid) showAll(event vugu.DOMEvent) {
+	event.StopPropagation()
+	event.PreventDefault()
+	c.MaxDisplay = math.MaxInt32
+}
+
+
 func (c *Raid) Init(vCtx vugu.InitCtx) {
 	c.ctx, c.ctxDone = context.WithCancel(context.Background())
+	c.MaxDisplay = pageLength
 	c.raidOpen = make(map[uint64]struct{})
 	c.proposedAdditions= make(map[uint64]string)
 	go func() {

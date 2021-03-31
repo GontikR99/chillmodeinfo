@@ -1,4 +1,4 @@
-<div>
+<div class="container-fluid">
     <raid:DumpTarget @DumpPosted="go c.refreshRaids(event.Env)" :Raids="c.Raids"></raid:DumpTarget>
     <h5>Raids</h5>
     <table class="table">
@@ -81,6 +81,10 @@
             </tr>
         </tbody>
     </table>
+    <div class="row" vg-if='c.MaxDisplay<len(c.Raids)'>
+        <a href="#" class="ml-auto" @click="c.showMore(event)">Show more</a>
+        <a href="#" class="ml-4 mr-5" @click="c.showAll(event)">Show all</a>
+    </div>
 </div>
 <script type="application/x-go">
 import (

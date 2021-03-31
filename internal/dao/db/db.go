@@ -3,6 +3,7 @@
 package db
 
 import (
+	"compress/gzip"
 	"github.com/timshannon/bolthold"
 	"go.etcd.io/bbolt"
 	"os"
@@ -26,12 +27,14 @@ func init() {
 				continue
 			}
 			database.Bolt().View(func(tx *bbolt.Tx) error {
-				out, err := os.Create("chillmodeinfo-"+time.Now().Format("2006-01-02T15:04")+".db")
+				out, err := os.Create("chillmodeinfo-"+time.Now().Format("2006-01-02T15:04")+".db.gz")
 				if err!=nil {
 					return err
 				}
 				defer out.Close()
-				_, err = tx.WriteTo(out)
+				outzip := gzip.NewWriter(out)
+				defer outzip.Close()
+				_, err = tx.WriteTo(outzip)
 				return err
 			})
 		}

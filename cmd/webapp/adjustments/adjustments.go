@@ -13,13 +13,17 @@ import (
 	"github.com/GontikR99/chillmodeinfo/pkg/modal"
 	"github.com/GontikR99/chillmodeinfo/pkg/toast"
 	"github.com/vugu/vugu"
+	"math"
 	"sort"
 	"strconv"
 	"time"
 )
 
+const pageLength=25
+
 type Adjustments struct {
 	Logs []record.DKPChangeEntry
+	MaxDisplay int
 
 	ctx     context.Context
 	ctxDone context.CancelFunc
@@ -175,8 +179,23 @@ func (c *Adjustments) reloadLog(env vugu.EventEnv) {
 	env.UnlockRender()
 }
 
+func (c *Adjustments) showMore(event vugu.DOMEvent) {
+	event.StopPropagation()
+	event.PreventDefault()
+	if c.MaxDisplay!=math.MaxInt32 {
+		c.MaxDisplay += pageLength
+	}
+}
+
+func (c *Adjustments) showAll(event vugu.DOMEvent) {
+	event.StopPropagation()
+	event.PreventDefault()
+	c.MaxDisplay = math.MaxInt32
+}
+
 func (c *Adjustments) Init(vCtx vugu.InitCtx) {
 	c.ctx, c.ctxDone = context.WithCancel(context.Background())
+	c.MaxDisplay = pageLength
 	go func() {
 		members, err := restidl.Members.GetMembers(c.ctx)
 		if err != nil {

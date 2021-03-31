@@ -1,4 +1,4 @@
-<div>
+<div class="container-fluid">
     <h5>Adjustments</h5>
     <table class="table table-striped">
         <thead class="thead-dark">
@@ -20,31 +20,35 @@
             <td vg-content="localprofile.GetProfile().GetDisplayName()"></td>
             <td><a href="#" title="Add" @click="c.addEntry(event)">&#x2795;</a></td>
         </tr>
-        <tr vg-for="_, entry := range c.Logs" vg-key="entry.GetEntryId()">
-            <td class="text-nowrap" vg-content="util.FormatTimestamp(entry.GetTimestamp())"></td>
-            <td style="width:10rem;"><a :href='"#member:"+entry.GetTarget()' vg-content="entry.GetTarget()"></a></td>
+        <tr vg-for="eIdx:=0; eIdx<c.MaxDisplay && eIdx<len(c.Logs); eIdx++" vg-key="c.Logs[eIdx].GetEntryId()">
+            <td class="text-nowrap" vg-content="util.FormatTimestamp(c.Logs[eIdx].GetTimestamp())"></td>
+            <td style="width:10rem;"><a :href='"#member:"+c.Logs[eIdx].GetTarget()' vg-content="c.Logs[eIdx].GetTarget()"></a></td>
             <td class="text-right" style="width:6rem;">
                 <ui:EditLabel
-                        :Value='fmt.Sprintf("%.1f", entry.GetDelta())'
-                        :Editable="localprofile.IsAdmin() && entry.GetRaidId()==0"
+                        :Value='fmt.Sprintf("%.1f", c.Logs[eIdx].GetDelta())'
+                        :Editable="localprofile.IsAdmin() && c.Logs[eIdx].GetRaidId()==0"
                         EditStyle="width: 4rem;"
-                        @Submit="c.updateDelta(event, entry)"
+                        @Submit="c.updateDelta(event, c.Logs[eIdx])"
                 />
             </td>
             <td>
                 <ui:EditLabel
-                    :Value="entry.GetDescription()"
-                    :Editable="localprofile.IsAdmin() && entry.GetRaidId()==0"
-                    :TextStyle="descriptionStyle(entry)"
-                    @Submit="c.updateDescription(event, entry)"/>
+                    :Value="c.Logs[eIdx].GetDescription()"
+                    :Editable="localprofile.IsAdmin() && c.Logs[eIdx].GetRaidId()==0"
+                    :TextStyle="descriptionStyle(c.Logs[eIdx])"
+                    @Submit="c.updateDescription(event, c.Logs[eIdx])"/>
             </td>
-            <td vg-content="entry.GetAuthority()"></td>
-            <td vg-if="localprofile.IsAdmin() && entry.GetRaidId()==0">
-                <a href="#" title="Remove" @click="c.cancelEntry(event, entry)">&#x1F5D1;</a>
+            <td vg-content="c.Logs[eIdx].GetAuthority()"></td>
+            <td vg-if="localprofile.IsAdmin() && c.Logs[eIdx].GetRaidId()==0">
+                <a href="#" title="Remove" @click="c.cancelEntry(event, c.Logs[eIdx])">&#x1F5D1;</a>
             </td>
         </tr>
         </tbody>
     </table>
+    <div class="row" vg-if='c.MaxDisplay<len(c.Logs)'>
+        <a href="#" class="ml-auto" @click="c.showMore(event)">Show more</a>
+        <a href="#" class="ml-4 mr-5" @click="c.showAll(event)">Show all</a>
+    </div>
 </div>
 <script type="application/x-go">
 import (
